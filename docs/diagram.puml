@@ -1,0 +1,523 @@
+@startuml ChatZam_Class_Diagram
+!define RECTANGLE class
+
+Title ChatZam App - Complete Class Diagram
+
+Package "Authentication" {
+    class AuthenticationManager {
+        -firebaseAuth: FirebaseAuth
+        -currentUser: FirebaseUser
+        -authStateListener: AuthStateListener
+        +registerUser(email: String, password: String): Task<AuthResult>
+        +loginUser(email: String, password: String): Task<AuthResult>
+        +logoutUser(): void
+        +getCurrentUser(): FirebaseUser
+        +isUserLoggedIn(): boolean
+        +addAuthStateListener(listener: AuthStateListener): void
+        +removeAuthStateListener(): void
+    }
+
+    Class UserProfile {
+        -userId: String
+        -email: String
+        -displayName: String
+        -profileImageUrl: String
+        -isOnline: boolean
+        -lastSeen: Date
+        -status: UserStatus
+        +getUserId(): String
+        +getEmail(): String
+        +getDisplayName(): String
+        +setDisplayName(name: String): void
+        +getProfileImageUrl(): String
+        +setProfileImageUrl(url: String): void
+        +setOnlineStatus(isOnline: boolean): void
+        +getLastSeen(): Date
+        +updateLastSeen(): void
+    }
+
+    Enum UserStatus {
+        ONLINE
+        OFFLINE
+        AWAY
+        BUSY
+    }
+}
+
+Package "Messaging" {
+    class Message {
+        -messageId: String
+        -senderId: String
+        -receiverId: String
+        -chatId: String
+        -content: String
+        -encryptedContent: String
+        -messageType: MessageType
+        -timestamp: Date
+        -isDelivered: boolean
+        -isRead: boolean
+        -mediaUrl: String
+        +getMessageId(): String
+        +getSenderId(): String
+        +getReceiverId(): String
+        +getChatId(): String
+        +getContent(): String
+        +setContent(content: String): void
+        +getMessageType(): MessageType
+        +setMessageType(type: MessageType): void
+        +getTimestamp(): Date
+        +isDelivered(): boolean
+        +setDelivered(delivered: boolean): void
+        +isRead(): boolean
+        +setRead(read: boolean): void
+        +getMediaUrl(): String
+        +setMediaUrl(url: String): void
+    }
+
+    Enum MessageType {
+        TEXT
+        IMAGE
+        VIDEO
+        AUDIO
+        DOCUMENT
+    }
+
+    Class Chat {
+        -chatId: String
+        -participants: List<String>
+        -chatType: ChatType
+        -lastMessage: Message
+        -lastMessageTimestamp: Date
+        -unreadCount: int
+        -isGroup: boolean
+        -groupName: String
+        -groupImageUrl: String
+        -createdBy: String
+        -createdAt: Date
+        +getChatId(): String
+        +getParticipants(): List<String>
+        +addParticipant(userId: String): void
+        +removeParticipant(userId: String): void
+        +getChatType(): ChatType
+        +getLastMessage(): Message
+        +setLastMessage(message: Message): void
+        +getUnreadCount(): int
+        +incrementUnreadCount(): void
+        +resetUnreadCount(): void
+        +isGroup(): boolean
+        +getGroupName(): String
+        +setGroupName(name: String): void
+    }
+
+    Enum ChatType {
+        INDIVIDUAL
+        GROUP
+    }
+
+    Class MessageRepository {
+        -firestore: FirebaseFirestore
+        -encryptionService: EncryptionService
+        -storageService: FirebaseStorageService
+        +sendMessage(message: Message): Task<DocumentReference>
+        +getMessages(chatId: String): LiveData<List<Message>>
+        +markMessageAsRead(messageId: String): Task<Void>
+        +markMessageAsDelivered(messageId: String): Task<Void>
+        +deleteMessage(messageId: String): Task<Void>
+        +uploadMedia(uri: Uri, messageType: MessageType): Task<String>
+    }
+
+    Class ChatRepository {
+        -firestore: FirebaseFirestore
+        -currentUserId: String
+        +getChats(userId: String): LiveData<List<Chat>>
+        +createChat(participants: List<String>, isGroup: boolean): Task<String>
+        +updateLastMessage(chatId: String, message: Message): Task<Void>
+        +getChatById(chatId: String): Task<Chat>
+        +updateChatInfo(chat: Chat): Task<Void>
+        +deleteChat(chatId: String): Task<Void>
+    }
+}
+
+Package "Group Management" {
+    class GroupChat extends Chat {
+        -adminUsers: List<String>
+        -groupDescription: String
+        -maxParticipants: int
+        +getAdminUsers(): List<String>
+        +addAdmin(userId: String): void
+        +removeAdmin(userId: String): void
+        +isAdmin(userId: String): boolean
+        +getGroupDescription(): String
+        +setGroupDescription(description: String): void
+        +getMaxParticipants(): int
+        +setMaxParticipants(max: int): void
+    }
+
+    Class GroupManager {
+        -chatRepository: ChatRepository
+        -userRepository: UserRepository
+        +createGroup(name: String, description: String, participants: List<String>): Task<String>
+        +addParticipant(groupId: String, userId: String): Task<Void>
+        +removeParticipant(groupId: String, userId: String): Task<Void>
+        +updateGroupInfo(groupId: String, name: String, description: String): Task<Void>
+        +getGroupMembers(groupId: String): Task<List<UserProfile>>
+        +leaveGroup(groupId: String): Task<Void>
+        +deleteGroup(groupId: String): Task<Void>
+    }
+}
+
+Package "Firebase Integration" {
+    class FirebaseManager {
+        -firebaseApp: FirebaseApp
+        -firestore: FirebaseFirestore
+        -storage: FirebaseStorage
+        -messaging: FirebaseMessaging
+        +initialize(): void
+        +getFirestore(): FirebaseFirestore
+        +getStorage(): FirebaseStorage
+        +getMessaging(): FirebaseMessaging
+    }
+
+    Class FirebaseStorageService {
+        -storage: FirebaseStorage
+        -storageRef: StorageReference
+        +uploadImage(uri: Uri, fileName: String): Task<String>
+        +uploadVideo(uri: Uri, fileName: String): Task<String>
+        +downloadFile(url: String): Task<byte[]>
+        +deleteFile(url: String): Task<Void>
+        +getDownloadUrl(path: String): Task<Uri>
+    }
+
+    Class FirestoreService {
+        -firestore: FirebaseFirestore
+        +addDocument(collection: String, data: Map<String, Object>): Task<DocumentReference>
+        +getDocument(collection: String, documentId: String): Task<DocumentSnapshot>
+        +updateDocument(collection: String, documentId: String, data: Map<String, Object>): Task<Void>
+        +deleteDocument(collection: String, documentId: String): Task<Void>
+        +getCollectionRealtime(collection: String): LiveData<QuerySnapshot>
+        +addSnapshotListener(collection: String, listener: EventListener<QuerySnapshot>): ListenerRegistration
+    }
+}
+
+Package "User Management" {
+    class UserRepository {
+        -firestore: FirebaseFirestore
+        -authManager: AuthenticationManager
+        +createUserProfile(userProfile: UserProfile): Task<Void>
+        +getUserProfile(userId: String): Task<UserProfile>
+        +updateUserProfile(userProfile: UserProfile): Task<Void>
+        +searchUsers(query: String): Task<List<UserProfile>>
+        +getFriends(userId: String): LiveData<List<UserProfile>>
+        +addFriend(userId: String, friendId: String): Task<Void>
+        +removeFriend(userId: String, friendId: String): Task<Void>
+    }
+
+    Class PresenceManager {
+        -firestore: FirebaseFirestore
+        -databaseRef: DatabaseReference
+        +updateUserPresence(userId: String, isOnline: boolean): Task<Void>
+        +getUserPresence(userId: String): LiveData<UserStatus>
+        +setupPresenceListener(userId: String): void
+        +updateLastSeen(userId: String): Task<Void>
+        +getOnlineUsers(): LiveData<List<String>>
+    }
+
+    Class ContactManager {
+        -userRepository: UserRepository
+        -authManager: AuthenticationManager
+        +getContacts(): LiveData<List<UserProfile>>
+        +addContact(userProfile: UserProfile): Task<Void>
+        +removeContact(userId: String): Task<Void>
+        +searchContacts(query: String): Task<List<UserProfile>>
+        +blockUser(userId: String): Task<Void>
+        +unblockUser(userId: String): Task<Void>
+        +getBlockedUsers(): Task<List<String>>
+    }
+}
+
+Package "Encryption" {
+    class EncryptionService {
+        -keyPair: KeyPair
+        -cipher: Cipher
+        +generateKeyPair(): KeyPair
+        +encryptMessage(plainText: String, publicKey: PublicKey): String
+        +decryptMessage(encryptedText: String, privateKey: PrivateKey): String
+        +encryptData(data: byte[], key: SecretKey): byte[]
+        +decryptData(encryptedData: byte[], key: SecretKey): byte[]
+        +generateSecretKey(): SecretKey
+        +hashPassword(password: String): String
+    }
+
+    Class KeyManager {
+        -sharedPreferences: SharedPreferences
+        -keyStore: KeyStore
+        +storePrivateKey(userId: String, privateKey: PrivateKey): void
+        +getPrivateKey(userId: String): PrivateKey
+        +storePublicKey(userId: String, publicKey: PublicKey): void
+        +getPublicKey(userId: String): PublicKey
+        +generateAndStoreKeys(userId: String): KeyPair
+        +deleteKeys(userId: String): void
+    }
+}
+
+Package "Notifications" {
+    class NotificationManager {
+        -context: Context
+        -notificationManager: android.app.NotificationManager
+        -channelId: String
+        +createNotificationChannel(): void
+        +showMessageNotification(message: Message, senderName: String): void
+        +showGroupMessageNotification(message: Message, groupName: String, senderName: String): void
+        +clearNotification(notificationId: int): void
+        +clearAllNotifications(): void
+    }
+
+    Class FCMService extends FirebaseMessagingService {
+        -notificationManager: NotificationManager
+        -messageRepository: MessageRepository
+        +onMessageReceived(remoteMessage: RemoteMessage): void
+        +onNewToken(token: String): void
+        -handleDataPayload(data: Map<String, String>): void
+        -updateTokenInDatabase(token: String): void
+    }
+
+    Class PushNotificationManager {
+        -messaging: FirebaseMessaging
+        -tokenRepository: TokenRepository
+        +subscribeToTopic(topic: String): Task<Void>
+        +unsubscribeFromTopic(topic: String): Task<Void>
+        +sendNotificationToUser(userId: String, title: String, body: String): Task<Void>
+        +sendNotificationToGroup(groupId: String, title: String, body: String): Task<Void>
+        +getToken(): Task<String>
+        +updateToken(userId: String, token: String): Task<Void>
+    }
+
+    Class TokenRepository {
+        -firestore: FirebaseFirestore
+        +saveToken(userId: String, token: String): Task<Void>
+        +getToken(userId: String): Task<String>
+        +deleteToken(userId: String): Task<Void>
+        +getTokensForUsers(userIds: List<String>): Task<List<String>>
+    }
+}
+
+Package "UI Layer" {
+    class MainActivity extends AppCompatActivity {
+        -binding: ActivityMainBinding
+        -authManager: AuthenticationManager
+        -drawerLayout: DrawerLayout
+        -navigationView: NavigationView
+        #onCreate(savedInstanceState: Bundle): void
+        #onStart(): void
+        #onStop(): void
+        -setupNavigationDrawer(): void
+        -handleNavigationItemSelection(item: MenuItem): void
+    }
+
+    Class ChatListFragment extends Fragment {
+        -binding: FragmentChatListBinding
+        -chatViewModel: ChatListViewModel
+        -chatAdapter: ChatListAdapter
+        -recyclerView: RecyclerView
+        +onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View
+        +onViewCreated(view: View, savedInstanceState: Bundle): void
+        -setupRecyclerView(): void
+        -observeChats(): void
+        -navigateToChat(chat: Chat): void
+    }
+
+    Class ChatFragment extends Fragment {
+        -binding: FragmentChatBinding
+        -messageViewModel: MessageViewModel
+        -messageAdapter: MessageAdapter
+        -recyclerView: RecyclerView
+        -chatId: String
+        +onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View
+        +onViewCreated(view: View, savedInstanceState: Bundle): void
+        -setupRecyclerView(): void
+        -observeMessages(): void
+        -sendMessage(): void
+        -selectImage(): void
+        -onImageSelected(uri: Uri): void
+    }
+
+    Class AuthenticationFragment extends Fragment {
+        -binding: FragmentAuthenticationBinding
+        -authViewModel: AuthenticationViewModel
+        +onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View
+        +onViewCreated(view: View, savedInstanceState: Bundle): void
+        -setupClickListeners(): void
+        -performLogin(): void
+        -performRegistration(): void
+        -navigateToMain(): void
+    }
+
+    Class GroupManagementFragment extends Fragment {
+        -binding: FragmentGroupManagementBinding
+        -groupViewModel: GroupViewModel
+        -memberAdapter: GroupMemberAdapter
+        +onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View
+        +onViewCreated(view: View, savedInstanceState: Bundle): void
+        -setupRecyclerView(): void
+        -createGroup(): void
+        -addMember(): void
+        -removeMember(userId: String): void
+    }
+}
+
+Package "ViewModels" {
+    class ChatListViewModel extends ViewModel {
+        -chatRepository: ChatRepository
+        -authManager: AuthenticationManager
+        -chats: LiveData<List<Chat>>
+        +getChats(): LiveData<List<Chat>>
+        +refreshChats(): void
+        +deleteChat(chatId: String): void
+    }
+
+    Class MessageViewModel extends ViewModel {
+        -messageRepository: MessageRepository
+        -authManager: AuthenticationManager
+        -messages: LiveData<List<Message>>
+        +getMessages(chatId: String): LiveData<List<Message>>
+        +sendMessage(content: String, chatId: String, messageType: MessageType): void
+        +sendImageMessage(uri: Uri, chatId: String): void
+        +markAsRead(messageId: String): void
+        +deleteMessage(messageId: String): void
+    }
+
+    Class AuthenticationViewModel extends ViewModel {
+        -authManager: AuthenticationManager
+        -userRepository: UserRepository
+        -loginResult: MutableLiveData<Result<FirebaseUser>>
+        -registrationResult: MutableLiveData<Result<FirebaseUser>>
+        +login(email: String, password: String): void
+        +register(email: String, password: String, displayName: String): void
+        +getLoginResult(): LiveData<Result<FirebaseUser>>
+        +getRegistrationResult(): LiveData<Result<FirebaseUser>>
+    }
+
+    Class GroupViewModel extends ViewModel {
+        -groupManager: GroupManager
+        -userRepository: UserRepository
+        -groupMembers: LiveData<List<UserProfile>>
+        +getGroupMembers(groupId: String): LiveData<List<UserProfile>>
+        +createGroup(name: String, description: String, participants: List<String>): void
+        +addMember(groupId: String, userId: String): void
+        +removeMember(groupId: String, userId: String): void
+        +updateGroupInfo(groupId: String, name: String, description: String): void
+    }
+}
+
+Package "Adapters" {
+    class ChatListAdapter extends RecyclerView.Adapter {
+        -chats: List<Chat>
+        -clickListener: OnChatClickListener
+        +onCreateViewHolder(parent: ViewGroup, viewType: int): ChatViewHolder
+        +onBindViewHolder(holder: ChatViewHolder, position: int): void
+        +getItemCount(): int
+        +updateChats(newChats: List<Chat>): void
+    }
+
+    Class MessageAdapter extends RecyclerView.Adapter {
+        -messages: List<Message>
+        -currentUserId: String
+        +onCreateViewHolder(parent: ViewGroup, viewType: int): MessageViewHolder
+        +onBindViewHolder(holder: MessageViewHolder, position: int): void
+        +getItemCount(): int
+        +getItemViewType(position: int): int
+        +updateMessages(newMessages: List<Message>): void
+    }
+
+    Class GroupMemberAdapter extends RecyclerView.Adapter {
+        -members: List<UserProfile>
+        -onMemberClickListener: OnMemberClickListener
+        +onCreateViewHolder(parent: ViewGroup, viewType: int): MemberViewHolder
+        +onBindViewHolder(holder: MemberViewHolder, position: int): void
+        +getItemCount(): int
+        +updateMembers(newMembers: List<UserProfile>): void
+    }
+}
+
+Package "Utilities" {
+    class NetworkUtils {
+        +isNetworkAvailable(context: Context): boolean
+        +isWifiConnected(context: Context): boolean
+        +isMobileDataConnected(context: Context): boolean
+    }
+
+    Class DateTimeUtils {
+        +formatTimestamp(timestamp: Date): String
+        +getRelativeTimeString(timestamp: Date): String
+        +isToday(date: Date): boolean
+        +isYesterday(date: Date): boolean
+    }
+
+    Class ImageUtils {
+        +loadImage(imageView: ImageView, url: String): void
+        +compressImage(uri: Uri, context: Context): Uri
+        +resizeImage(bitmap: Bitmap, maxWidth: int, maxHeight: int): Bitmap
+    }
+
+    Class PermissionUtils {
+        +checkPermission(context: Context, permission: String): boolean
+        +requestPermissions(activity: Activity, permissions: String[], requestCode: int): void
+        +hasStoragePermission(context: Context): boolean
+        +hasCameraPermission(context: Context): boolean
+    }
+}
+
+' Relationships
+AuthenticationManager --> UserProfile
+AuthenticationManager --> UserStatus
+
+Message --> MessageType
+Chat --> ChatType
+Chat --> Message
+GroupChat --|> Chat
+
+MessageRepository --> Message
+MessageRepository --> EncryptionService
+MessageRepository --> FirebaseStorageService
+ChatRepository --> Chat
+
+GroupManager --> GroupChat
+GroupManager --> ChatRepository
+GroupManager --> UserRepository
+
+FirebaseManager --> FirestoreService
+FirebaseManager --> FirebaseStorageService
+
+UserRepository --> UserProfile
+UserRepository --> AuthenticationManager
+PresenceManager --> UserStatus
+ContactManager --> UserProfile
+
+EncryptionService --> KeyManager
+
+NotificationManager --> Message
+FCMService --|> FirebaseMessagingService
+FCMService --> NotificationManager
+FCMService --> MessageRepository
+PushNotificationManager --> TokenRepository
+
+MainActivity --> AuthenticationManager
+ChatListFragment --> ChatListViewModel
+ChatFragment --> MessageViewModel
+AuthenticationFragment --> AuthenticationViewModel
+GroupManagementFragment --> GroupViewModel
+
+ChatListViewModel --> ChatRepository
+ChatListViewModel --> AuthenticationManager
+MessageViewModel --> MessageRepository
+MessageViewModel --> AuthenticationManager
+AuthenticationViewModel --> AuthenticationManager
+AuthenticationViewModel --> UserRepository
+GroupViewModel --> GroupManager
+GroupViewModel --> UserRepository
+
+ChatListAdapter --> Chat
+MessageAdapter --> Message
+GroupMemberAdapter --> UserProfile
+
+@enduml
