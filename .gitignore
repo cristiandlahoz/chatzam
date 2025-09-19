@@ -20,3 +20,5 @@ local.properties
 app/.classpath
 app/.project
 app/.settings/
+.idea/deviceManager.xml 
+.idea/aws.xml
