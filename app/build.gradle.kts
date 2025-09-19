@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.annotationProcessor
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -32,7 +34,8 @@ android {
 }
 
 dependencies {
-
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
