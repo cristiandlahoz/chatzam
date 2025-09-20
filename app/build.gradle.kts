@@ -43,6 +43,14 @@ dependencies {
     annotationProcessor(libs.hilt.compiler)
     implementation(libs.hilt.navigation.fragment)
     
+    // Firebase Dependencies (using BoM for version management)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.database)
+    
     // AndroidX Dependencies
     implementation(libs.appcompat)
     implementation(libs.material)

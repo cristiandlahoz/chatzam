@@ -13,6 +13,7 @@ navigationFragment = "2.6.0"
 navigationUi = "2.6.0"
 hilt = "2.57.1"
 hiltNavigationFragment = "1.2.0"
+firebaseBom = "33.7.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -30,6 +31,13 @@ navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-navigation-fragment = { group = "androidx.hilt", name = "hilt-navigation-fragment", version.ref = "hiltNavigationFragment" }
+
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
