@@ -2,6 +2,7 @@ import org.gradle.kotlin.dsl.annotationProcessor
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -36,6 +37,13 @@ android {
 dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
+    
+    // Hilt Dependencies
+    implementation(libs.hilt.android)
+    annotationProcessor(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.fragment)
+    
+    // AndroidX Dependencies
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -43,6 +51,8 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    
+    // Testing Dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
