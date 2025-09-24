@@ -14,4 +14,11 @@ public interface ChatRepository {
     Task<Chat> getChatById(String chatId);
     Task<Void> updateChatInfo(Chat chat);
     Task<Void> deleteChat(String chatId);
+    
+    Task<String> createGroupChat(String groupName, List<String> participants, String createdBy);
+    Task<Void> addMembersToGroup(String chatId, List<String> newMembers);
+    Task<Void> removeMemberFromGroup(String chatId, String memberId);
+    Task<Void> updateGroupInfo(String chatId, String groupName, String groupImageUrl);
+    Task<Void> leaveGroup(String chatId, String userId);
+    Task<List<String>> getGroupMembers(String chatId);
 }

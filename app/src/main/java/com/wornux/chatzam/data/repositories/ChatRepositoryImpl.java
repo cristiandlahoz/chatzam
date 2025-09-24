@@ -108,6 +108,94 @@ public class ChatRepositoryImpl implements ChatRepository {
         return firestoreService.deleteDocument(CHATS_COLLECTION, chatId);
     }
     
+    @Override
+    public Task<String> createGroupChat(String groupName, List<String> participants, String createdBy) {
+        String chatId = UUID.randomUUID().toString();
+        
+        Chat groupChat = Chat.builder()
+                .chatId(chatId)
+                .participants(participants)
+                .chatType(ChatType.GROUP)
+                .isGroup(true)
+                .groupName(groupName)
+                .createdBy(createdBy)
+                .createdAt(new java.util.Date())
+                .unreadCount(0)
+                .build();
+        
+        Map<String, Object> chatData = chatToMap(groupChat);
+        
+        return firestoreService.addDocument(CHATS_COLLECTION, chatData)
+                .continueWith(task -> chatId);
+    }
+    
+    @Override
+    public Task<Void> addMembersToGroup(String chatId, List<String> newMembers) {
+        return getChatById(chatId).continueWithTask(task -> {
+            Chat chat = task.getResult();
+            if (chat != null && chat.isGroup()) {
+                List<String> updatedParticipants = new ArrayList<>(chat.getParticipants());
+                for (String member : newMembers) {
+                    if (!updatedParticipants.contains(member)) {
+                        updatedParticipants.add(member);
+                    }
+                }
+                
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("participants", updatedParticipants);
+                
+                return firestoreService.updateDocument(CHATS_COLLECTION, chatId, updates);
+            }
+            throw new IllegalArgumentException("Chat not found or not a group chat");
+        });
+    }
+    
+    @Override
+    public Task<Void> removeMemberFromGroup(String chatId, String memberId) {
+        return getChatById(chatId).continueWithTask(task -> {
+            Chat chat = task.getResult();
+            if (chat != null && chat.isGroup()) {
+                List<String> updatedParticipants = new ArrayList<>(chat.getParticipants());
+                updatedParticipants.remove(memberId);
+                
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("participants", updatedParticipants);
+                
+                return firestoreService.updateDocument(CHATS_COLLECTION, chatId, updates);
+            }
+            throw new IllegalArgumentException("Chat not found or not a group chat");
+        });
+    }
+    
+    @Override
+    public Task<Void> updateGroupInfo(String chatId, String groupName, String groupImageUrl) {
+        Map<String, Object> updates = new HashMap<>();
+        if (groupName != null) {
+            updates.put("groupName", groupName);
+        }
+        if (groupImageUrl != null) {
+            updates.put("groupImageUrl", groupImageUrl);
+        }
+        
+        return firestoreService.updateDocument(CHATS_COLLECTION, chatId, updates);
+    }
+    
+    @Override
+    public Task<Void> leaveGroup(String chatId, String userId) {
+        return removeMemberFromGroup(chatId, userId);
+    }
+    
+    @Override
+    public Task<List<String>> getGroupMembers(String chatId) {
+        return getChatById(chatId).continueWith(task -> {
+            Chat chat = task.getResult();
+            if (chat != null && chat.isGroup()) {
+                return chat.getParticipants();
+            }
+            return new ArrayList<>();
+        });
+    }
+    
     private Map<String, Object> chatToMap(Chat chat) {
         Map<String, Object> data = new HashMap<>();
         data.put("chatId", chat.getChatId());

@@ -14,7 +14,7 @@ public class AuthenticationManager {
     
     @Inject
     public AuthenticationManager(FirebaseManager firebaseManager) {
-        this.firebaseAuth = firebaseManager.getAuth();
+        this.firebaseAuth = firebaseManager.getFirebaseAuth();
     }
     
     public Task<AuthResult> registerUser(String email, String password) {

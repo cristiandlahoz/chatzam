@@ -1,5 +1,6 @@
 package com.wornux.chatzam.domain.repositories;
 
+import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import com.google.android.gms.tasks.Task;
 import com.wornux.chatzam.domain.entities.UserProfile;
@@ -14,4 +15,8 @@ public interface UserRepository {
     LiveData<List<UserProfile>> getFriends(String userId);
     Task<Void> addFriend(String userId, String friendId);
     Task<Void> removeFriend(String userId, String friendId);
+    
+    Task<String> uploadProfileImage(String userId, Uri imageUri);
+    Task<Void> updateProfileImage(String userId, String imageUrl);
+    LiveData<UserProfile> getCurrentUserProfile();
 }

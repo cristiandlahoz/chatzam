@@ -1,5 +1,6 @@
 package com.wornux.chatzam.data.repositories;
 
+import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
@@ -7,6 +8,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.wornux.chatzam.data.services.AuthenticationManager;
+import com.wornux.chatzam.data.services.FirebaseStorageService;
 import com.wornux.chatzam.data.services.FirestoreService;
 import com.wornux.chatzam.domain.entities.UserProfile;
 import com.wornux.chatzam.domain.repositories.UserRepository;
@@ -25,11 +27,15 @@ public class UserRepositoryImpl implements UserRepository {
     private static final String FRIENDS_COLLECTION = "friends";
     
     private final FirestoreService firestoreService;
+    private final FirebaseStorageService storageService;
     private final AuthenticationManager authManager;
     
     @Inject
-    public UserRepositoryImpl(FirestoreService firestoreService, AuthenticationManager authManager) {
+    public UserRepositoryImpl(FirestoreService firestoreService, 
+                             FirebaseStorageService storageService,
+                             AuthenticationManager authManager) {
         this.firestoreService = firestoreService;
+        this.storageService = storageService;
         this.authManager = authManager;
     }
     
@@ -113,6 +119,47 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Task<Void> removeFriend(String userId, String friendId) {
         return firestoreService.deleteDocument(FRIENDS_COLLECTION + "/" + userId + "/friends", friendId);
+    }
+    
+    @Override
+    public Task<String> uploadProfileImage(String userId, Uri imageUri) {
+        String fileName = "profile_" + userId + "_" + System.currentTimeMillis();
+        return storageService.uploadImage(imageUri, fileName)
+                .continueWith(task -> {
+                    Uri downloadUrl = task.getResult();
+                    return downloadUrl.toString();
+                });
+    }
+    
+    @Override
+    public Task<Void> updateProfileImage(String userId, String imageUrl) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("profileImageUrl", imageUrl);
+        return firestoreService.updateDocument(USERS_COLLECTION, userId, updates);
+    }
+    
+    @Override
+    public LiveData<UserProfile> getCurrentUserProfile() {
+        MutableLiveData<UserProfile> profileLiveData = new MutableLiveData<>();
+        
+        String currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            firestoreService.getFirestore().collection(USERS_COLLECTION)
+                    .document(currentUserId)
+                    .addSnapshotListener((documentSnapshot, error) -> {
+                        if (error == null && documentSnapshot != null && documentSnapshot.exists()) {
+                            UserProfile profile = documentToUserProfile(documentSnapshot);
+                            profileLiveData.setValue(profile);
+                        }
+                    });
+        }
+        
+        return profileLiveData;
+    }
+    
+    private String getCurrentUserId() {
+        return authManager.getCurrentUser() != null ? 
+               authManager.getCurrentUser().getUid() : null;
     }
     
     private Map<String, Object> userProfileToMap(UserProfile userProfile) {
