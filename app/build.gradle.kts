@@ -60,6 +60,9 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     
+    // UI Dependencies
+    implementation(libs.circle.imageview)
+    
     // Testing Dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
