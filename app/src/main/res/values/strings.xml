@@ -1,13 +1,17 @@
 <resources>
-    <string name="app_name">chatzam</string>
+    <string name="app_name" translatable="false">chatzam</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Chatzam</string>
+    <string name="nav_header_subtitle">app@wornux.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
+    <string name="type_a_message">Type a message...</string>
+    <string name="button_to_start_a_new_chat">Button to start a new chat</string>
 </resources>
