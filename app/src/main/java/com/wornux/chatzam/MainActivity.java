@@ -3,6 +3,7 @@ package com.wornux.chatzam;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
+import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 import androidx.navigation.NavController;
@@ -19,63 +20,72 @@ import javax.inject.Inject;
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration mAppBarConfiguration;
-    private ActivityMainBinding binding;
-    
-    @Inject
-    AuthenticationManager authManager;
+  private AppBarConfiguration mAppBarConfiguration;
+  private ActivityMainBinding binding;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  @Inject AuthenticationManager authManager;
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        checkAuthenticationState();
-        setupNavigation();
+    binding = ActivityMainBinding.inflate(getLayoutInflater());
+    setContentView(binding.getRoot());
+
+    checkAuthenticationState();
+    setupNavigation();
+  }
+
+  private void checkAuthenticationState() {
+    if (!authManager.isUserLoggedIn()) {
+      // TODO: Navigate to authentication fragment when we create it
+      // For now, we'll continue with the app
     }
-    
-    private void checkAuthenticationState() {
-        if (!authManager.isUserLoggedIn()) {
-            // TODO: Navigate to authentication fragment when we create it
-            // For now, we'll continue with the app
-        }
-    }
-    
-    private void setupNavigation() {
-        setSupportActionBar(binding.appBarMain.toolbar);
-        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Create new chat", Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.fab).show();
-            }
+  }
+
+  private void setupNavigation() {
+    setSupportActionBar(binding.appBarMain.toolbar);
+    binding.appBarMain.fab.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View view) {
+            Snackbar.make(view, "Create new chat", Snackbar.LENGTH_LONG)
+                .setAnchorView(R.id.fab)
+                .show();
+          }
         });
-        
-        DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
-        
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
-                .setOpenableLayout(drawer)
-                .build();
-                
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+    DrawerLayout drawer = binding.drawerLayout;
+    NavigationView navigationView = binding.navView;
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration) || super.onSupportNavigateUp();
+    mAppBarConfiguration =
+        new AppBarConfiguration.Builder(R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+            .setOpenableLayout(drawer)
+            .build();
+
+    NavHostFragment navHostFragment =
+        (NavHostFragment)
+            getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_main);
+
+    if (navHostFragment != null) {
+      NavController navController = navHostFragment.getNavController();
+      NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+      NavigationUI.setupWithNavController(navigationView, navController);
     }
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.main, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onSupportNavigateUp() {
+    NavController navController =
+        Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+    return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+        || super.onSupportNavigateUp();
+  }
 }

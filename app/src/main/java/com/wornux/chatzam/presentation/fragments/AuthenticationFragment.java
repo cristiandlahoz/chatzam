@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentAuthenticationBinding;
 import com.wornux.chatzam.presentation.base.BaseFragment;
 import com.wornux.chatzam.presentation.viewmodels.AuthenticationViewModel;

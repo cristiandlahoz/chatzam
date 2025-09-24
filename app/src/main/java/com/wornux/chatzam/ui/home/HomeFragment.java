@@ -8,29 +8,31 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.wornux.chatzam.databinding.FragmentChatListBinding;
+import com.wornux.chatzam.databinding.FragmentHomeBinding;
 import com.wornux.chatzam.domain.entities.Chat;
 import com.wornux.chatzam.presentation.adapters.ChatListAdapter;
 import com.wornux.chatzam.presentation.base.BaseFragment;
 import com.wornux.chatzam.presentation.viewmodels.ChatListViewModel;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class HomeFragment extends BaseFragment implements ChatListAdapter.OnChatClickListener {
 
-    private FragmentChatListBinding binding;
+    private FragmentHomeBinding binding;
     private ChatListViewModel viewModel;
     private ChatListAdapter adapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentChatListBinding.inflate(inflater, container, false);
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ChatListViewModel.class);
         setupRecyclerView();
+        super.onViewCreated(view, savedInstanceState);
     }
 
     private void setupRecyclerView() {
@@ -67,13 +69,16 @@ public class HomeFragment extends BaseFragment implements ChatListAdapter.OnChat
 
     @Override
     protected void setupClickListeners() {
-        // Click listeners are handled by the adapter
+        binding.createGroupFab.setOnClickListener(v -> {
+            getNavController().navigate(com.wornux.chatzam.R.id.action_nav_home_to_nav_group_creation);
+        });
     }
 
     @Override
     public void onChatClick(Chat chat) {
-        // TODO: Navigate to chat fragment when we implement it
-        showSnackbar("Opening chat: " + (chat.isGroup() ? chat.getGroupName() : "Private Chat"));
+        Bundle args = new Bundle();
+        args.putString("chat_id", chat.getChatId());
+        getNavController().navigate(com.wornux.chatzam.R.id.action_nav_home_to_nav_chat, args);
     }
 
     @Override
