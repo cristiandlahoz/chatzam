@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "296721014477",
+    "project_id": "chatzam-9be3b",
+    "storage_bucket": "chatzam-9be3b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296721014477:android:0e554510253d4a17521384",
+        "android_client_info": {
+          "package_name": "com.wornux.chatzam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGPqQ00UHqGQziAOYrgIi4M8GJzEcet58"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
