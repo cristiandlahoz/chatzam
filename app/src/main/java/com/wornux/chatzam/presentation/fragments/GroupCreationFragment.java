@@ -15,6 +15,7 @@ import com.wornux.chatzam.domain.entities.UserProfile;
 import com.wornux.chatzam.presentation.adapters.SelectedUsersAdapter;
 import com.wornux.chatzam.presentation.adapters.UserSelectionAdapter;
 import com.wornux.chatzam.presentation.base.BaseFragment;
+import com.wornux.chatzam.presentation.viewmodels.ChatListViewModel;
 import com.wornux.chatzam.presentation.viewmodels.GroupChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -25,7 +26,7 @@ public class GroupCreationFragment extends BaseFragment {
     private GroupChatViewModel viewModel;
     private UserSelectionAdapter userSelectionAdapter;
     private SelectedUsersAdapter selectedUsersAdapter;
-    
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -35,12 +36,10 @@ public class GroupCreationFragment extends BaseFragment {
     
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        
         viewModel = new ViewModelProvider(this).get(GroupChatViewModel.class);
-        
         setupRecyclerViews();
         setupSearchListener();
+        super.onViewCreated(view, savedInstanceState);
     }
     
     private void setupRecyclerViews() {
