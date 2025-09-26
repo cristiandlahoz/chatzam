@@ -14,6 +14,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import com.wornux.chatzam.databinding.ActivityMainBinding;
 import com.wornux.chatzam.data.services.AuthenticationManager;
+import com.wornux.chatzam.presentation.fragments.GroupCreationFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 import javax.inject.Inject;
 
@@ -45,14 +46,29 @@ public class MainActivity extends AppCompatActivity {
 
   private void setupNavigation() {
     setSupportActionBar(binding.appBarMain.toolbar);
-    binding.appBarMain.fab.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {
-            Snackbar.make(view, "Create new chat", Snackbar.LENGTH_LONG)
-                .setAnchorView(R.id.fab)
-                .show();
-          }
+    binding.appBarMain.fab.setOnClickListener( view -> {
+              android.widget.PopupMenu popup = new android.widget.PopupMenu(MainActivity.this, view);
+              popup.getMenuInflater().inflate(R.menu.fab_options_menu, popup.getMenu());
+              popup.setOnMenuItemClickListener(item -> {
+                  int id = item.getItemId();
+                  if (id == R.id.action_new_group_chat) {
+                      GroupCreationFragment groupCreationFragment = new GroupCreationFragment();
+                      getSupportFragmentManager()
+                              .beginTransaction()
+                              .replace(R.id.nav_host_fragment_content_main, groupCreationFragment)
+                              .addToBackStack(null)
+                              .commit();
+                      return true;
+                  } else if (id == R.id.action_new_one_to_one_chat) {
+                      // Handle new one-to-one chat
+                      return true;
+                  } else if (id == R.id.action_add_contact) {
+                      // Handle add contact
+                      return true;
+                  }
+                  return false;
+              });
+              popup.show();
         });
 
     DrawerLayout drawer = binding.drawerLayout;
