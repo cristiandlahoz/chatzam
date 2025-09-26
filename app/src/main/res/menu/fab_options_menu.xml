@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_new_group_chat"
+        android:title="Nuevo Chat Grupal" />
+    <item
+        android:id="@+id/action_new_one_to_one_chat"
+        android:title="Nuevo Chat" />
+    <item
+        android:id="@+id/action_add_contact"
+        android:title="Agregar Contacto" />
+</menu>
