@@ -52,4 +52,8 @@ public class Chat {
     public void resetUnreadCount() {
         this.unreadCount = 0;
     }
+
+    public String getLastMessageContent() {
+        return lastMessage != null ? lastMessage.getContent() : null;
+    }
 }

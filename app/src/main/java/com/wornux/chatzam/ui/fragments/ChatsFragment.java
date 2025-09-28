@@ -52,7 +52,7 @@ public class ChatsFragment extends BaseFragment implements ChatListAdapter.OnCha
             getViewLifecycleOwner(),
             chats -> {
               if (chats != null) {
-                adapter.updateChats(chats);
+                adapter.submitList(chats);
               }
             });
 

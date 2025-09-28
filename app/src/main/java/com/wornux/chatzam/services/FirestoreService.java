@@ -7,12 +7,14 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
+import lombok.Getter;
+
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+@Getter
 @Singleton
 public class FirestoreService {
     
@@ -52,15 +54,12 @@ public class FirestoreService {
         return liveData;
     }
     
-    public ListenerRegistration addSnapshotListener(String collection, EventListener<QuerySnapshot> listener) {
-        return firestore.collection(collection).addSnapshotListener(listener);
+    public void addSnapshotListener(String collection, EventListener<QuerySnapshot> listener) {
+        firestore.collection(collection).addSnapshotListener(listener);
     }
     
     public Task<QuerySnapshot> getCollection(String collection) {
         return firestore.collection(collection).get();
     }
-    
-    public FirebaseFirestore getFirestore() {
-        return firestore;
-    }
+
 }

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import com.google.android.material.textfield.TextInputEditText;
 import com.wornux.chatzam.databinding.FragmentAuthenticationBinding;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.AuthenticationViewModel;
@@ -27,27 +28,30 @@ public class AuthenticationFragment extends BaseFragment {
     
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(AuthenticationViewModel.class);
+        super.onViewCreated(view, savedInstanceState);
     }
     
     @Override
     protected void setupObservers() {
-        viewModel.getLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            binding.loginButton.setEnabled(!isLoading);
-            binding.registerButton.setEnabled(!isLoading);
-        });
-        
+    viewModel
+        .getLoading()
+        .observe(
+            getViewLifecycleOwner(),
+            isLoading -> {
+              binding.progressBar.setVisibility(
+                  Boolean.TRUE.equals(isLoading) ? View.VISIBLE : View.GONE);
+              binding.loginButton.setEnabled(!isLoading);
+              binding.registerButton.setEnabled(!isLoading);
+            });
+
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 showError(error);
             }
         });
         
-        viewModel.getIsLoginMode().observe(getViewLifecycleOwner(), isLoginMode -> {
-            updateUIMode(isLoginMode);
-        });
+        viewModel.getIsLoginMode().observe(getViewLifecycleOwner(), this::updateUIMode);
         
         viewModel.getLoginResult().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
@@ -106,7 +110,7 @@ public class AuthenticationFragment extends BaseFragment {
         requireActivity().finish();
     }
     
-    private String getTextFromEditText(com.google.android.material.textfield.TextInputEditText editText) {
+    private String getTextFromEditText(TextInputEditText editText) {
         return editText.getText() != null ? editText.getText().toString().trim() : "";
     }
     
