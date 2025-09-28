@@ -1,10 +1,9 @@
-package com.wornux.chatzam.data.services;
+package com.wornux.chatzam.services;
 
 import android.net.Uri;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Singleton;

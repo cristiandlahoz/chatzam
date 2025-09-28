@@ -1,17 +1,16 @@
-package com.wornux.chatzam.data.services;
+package com.wornux.chatzam.services;
 
 import android.content.Context;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.database.FirebaseDatabase;
 import dagger.hilt.android.qualifiers.ApplicationContext;
-import lombok.Getter;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.Getter;
 
 @Singleton
 @Getter

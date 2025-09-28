@@ -1,4 +1,4 @@
-package com.wornux.chatzam.data.services;
+package com.wornux.chatzam.services;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

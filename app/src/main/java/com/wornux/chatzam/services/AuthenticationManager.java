@@ -1,4 +1,4 @@
-package com.wornux.chatzam.data.services;
+package com.wornux.chatzam.services;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;

@@ -1,13 +1,13 @@
-package com.wornux.chatzam.presentation.viewmodels;
+package com.wornux.chatzam.ui.viewmodels;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
-import com.wornux.chatzam.data.services.AuthenticationManager;
-import com.wornux.chatzam.domain.entities.Message;
-import com.wornux.chatzam.domain.enums.MessageType;
-import com.wornux.chatzam.domain.repositories.MessageRepository;
-import com.wornux.chatzam.presentation.base.BaseViewModel;
+import com.wornux.chatzam.services.AuthenticationManager;
+import com.wornux.chatzam.data.entities.Message;
+import com.wornux.chatzam.data.enums.MessageType;
+import com.wornux.chatzam.data.repositories.MessageRepository;
+import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 import java.util.Date;
