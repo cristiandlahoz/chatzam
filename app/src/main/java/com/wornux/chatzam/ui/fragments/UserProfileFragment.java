@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.fragments;
+package com.wornux.chatzam.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,10 +14,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import com.wornux.chatzam.databinding.FragmentUserProfileBinding;
-import com.wornux.chatzam.domain.entities.UserProfile;
-import com.wornux.chatzam.domain.enums.UserStatus;
-import com.wornux.chatzam.presentation.base.BaseFragment;
-import com.wornux.chatzam.presentation.viewmodels.UserProfileViewModel;
+import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.enums.UserStatus;
+import com.wornux.chatzam.ui.base.BaseFragment;
+import com.wornux.chatzam.ui.viewmodels.UserProfileViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 import java.text.SimpleDateFormat;

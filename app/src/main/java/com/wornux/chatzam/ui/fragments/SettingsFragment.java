@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.fragments;
+package com.wornux.chatzam.ui.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.wornux.chatzam.databinding.FragmentSettingsBinding;
-import com.wornux.chatzam.presentation.base.BaseFragment;
+import com.wornux.chatzam.ui.base.BaseFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint

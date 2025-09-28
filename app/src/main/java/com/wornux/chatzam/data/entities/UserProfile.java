@@ -1,6 +1,6 @@
-package com.wornux.chatzam.domain.entities;
+package com.wornux.chatzam.data.entities;
 
-import com.wornux.chatzam.domain.enums.UserStatus;
+import com.wornux.chatzam.data.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

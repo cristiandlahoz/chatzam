@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.adapters;
+package com.wornux.chatzam.ui.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.databinding.ItemChatBinding;
-import com.wornux.chatzam.domain.entities.Chat;
+import com.wornux.chatzam.data.entities.Chat;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.base;
+package com.wornux.chatzam.ui.base;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

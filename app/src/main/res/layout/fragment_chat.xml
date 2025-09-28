@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    tools:context=".presentation.fragments.ChatFragment">
+    tools:context=".ui.fragments.ChatFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/messagesRecyclerView"
@@ -27,9 +27,9 @@
         android:id="@+id/messageInputContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="@drawable/unread_badge_background"
-        android:elevation="4dp"
+        android:layout_margin="0dp"
+        android:background="@color/material_dynamic_neutral20"
+        android:elevation="0dp"
         android:orientation="horizontal"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -58,9 +58,9 @@
             android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Send message"
+            android:contentDescription="@string/send_message"
             android:src="@android:drawable/ic_menu_send"
-            app:tint="@color/design_default_color_primary" />
+            app:tint="@color/white" />
 
     </LinearLayout>
 

@@ -1,4 +1,4 @@
-package com.wornux.chatzam.domain.entities;
+package com.wornux.chatzam.data.entities;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

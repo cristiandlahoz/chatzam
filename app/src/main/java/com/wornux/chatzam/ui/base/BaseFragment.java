@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.base;
+package com.wornux.chatzam.ui.base;
 
 import android.os.Bundle;
 import android.view.View;

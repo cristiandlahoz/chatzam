@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.fragments;
+package com.wornux.chatzam.ui.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,8 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import com.wornux.chatzam.databinding.FragmentAuthenticationBinding;
-import com.wornux.chatzam.presentation.base.BaseFragment;
-import com.wornux.chatzam.presentation.viewmodels.AuthenticationViewModel;
+import com.wornux.chatzam.ui.base.BaseFragment;
+import com.wornux.chatzam.ui.viewmodels.AuthenticationViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint

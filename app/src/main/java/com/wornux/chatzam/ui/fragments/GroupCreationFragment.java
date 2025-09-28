@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.fragments;
+package com.wornux.chatzam.ui.fragments;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,12 +11,11 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentGroupCreationBinding;
-import com.wornux.chatzam.domain.entities.UserProfile;
-import com.wornux.chatzam.presentation.adapters.SelectedUsersAdapter;
-import com.wornux.chatzam.presentation.adapters.UserSelectionAdapter;
-import com.wornux.chatzam.presentation.base.BaseFragment;
-import com.wornux.chatzam.presentation.viewmodels.ChatListViewModel;
-import com.wornux.chatzam.presentation.viewmodels.GroupChatViewModel;
+import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.ui.adapters.SelectedUsersAdapter;
+import com.wornux.chatzam.ui.adapters.UserSelectionAdapter;
+import com.wornux.chatzam.ui.base.BaseFragment;
+import com.wornux.chatzam.ui.viewmodels.GroupChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint

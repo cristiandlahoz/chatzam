@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.fragments;
+package com.wornux.chatzam.ui.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,10 +9,10 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentChatsBinding;
-import com.wornux.chatzam.domain.entities.Chat;
-import com.wornux.chatzam.presentation.adapters.ChatListAdapter;
-import com.wornux.chatzam.presentation.base.BaseFragment;
-import com.wornux.chatzam.presentation.viewmodels.ChatListViewModel;
+import com.wornux.chatzam.data.entities.Chat;
+import com.wornux.chatzam.ui.adapters.ChatListAdapter;
+import com.wornux.chatzam.ui.base.BaseFragment;
+import com.wornux.chatzam.ui.viewmodels.ChatListViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint

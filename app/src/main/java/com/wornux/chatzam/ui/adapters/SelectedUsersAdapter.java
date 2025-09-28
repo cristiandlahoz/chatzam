@@ -1,4 +1,4 @@
-package com.wornux.chatzam.presentation.adapters;
+package com.wornux.chatzam.ui.adapters;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.databinding.ItemSelectedUserBinding;
-import com.wornux.chatzam.domain.entities.UserProfile;
+import com.wornux.chatzam.data.entities.UserProfile;
 
 import java.util.ArrayList;
 import java.util.List;

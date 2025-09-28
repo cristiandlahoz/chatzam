@@ -1,22 +1,18 @@
-package com.wornux.chatzam.presentation.fragments;
+package com.wornux.chatzam.ui.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentChatBinding;
-import com.wornux.chatzam.domain.entities.Message;
-import com.wornux.chatzam.presentation.adapters.MessageAdapter;
-import com.wornux.chatzam.presentation.base.BaseFragment;
-import com.wornux.chatzam.presentation.viewmodels.ChatViewModel;
+import com.wornux.chatzam.data.entities.Message;
+import com.wornux.chatzam.ui.adapters.MessageAdapter;
+import com.wornux.chatzam.ui.base.BaseFragment;
+import com.wornux.chatzam.ui.viewmodels.ChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
