@@ -5,8 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.textfield.TextInputEditText;
 import com.wornux.chatzam.databinding.FragmentAuthenticationBinding;
 import com.wornux.chatzam.ui.base.BaseFragment;
@@ -14,22 +12,15 @@ import com.wornux.chatzam.ui.viewmodels.AuthenticationViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class AuthenticationFragment extends BaseFragment {
+public class AuthenticationFragment extends BaseFragment<AuthenticationViewModel> {
     
     private FragmentAuthenticationBinding binding;
-    private AuthenticationViewModel viewModel;
-    
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentAuthenticationBinding.inflate(inflater, container, false);
         return binding.getRoot();
-    }
-    
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(AuthenticationViewModel.class);
-        super.onViewCreated(view, savedInstanceState);
     }
     
     @Override
@@ -74,7 +65,12 @@ public class AuthenticationFragment extends BaseFragment {
         binding.registerButton.setOnClickListener(v -> performRegistration());
         binding.switchModeText.setOnClickListener(v -> viewModel.switchMode());
     }
-    
+
+    @Override
+    protected Class<AuthenticationViewModel> getViewModelClass() {
+        return AuthenticationViewModel.class;
+    }
+
     private void performLogin() {
         String email = getTextFromEditText(binding.emailEditText);
         String password = getTextFromEditText(binding.passwordEditText);

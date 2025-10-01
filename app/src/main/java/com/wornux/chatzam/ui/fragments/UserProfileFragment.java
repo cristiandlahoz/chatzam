@@ -12,7 +12,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.wornux.chatzam.databinding.FragmentUserProfileBinding;
 import com.wornux.chatzam.data.entities.UserProfile;
 import com.wornux.chatzam.data.enums.UserStatus;
@@ -24,10 +23,9 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 @AndroidEntryPoint
-public class UserProfileFragment extends BaseFragment {
+public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
     
     private FragmentUserProfileBinding binding;
-    private UserProfileViewModel viewModel;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
     
@@ -52,13 +50,6 @@ public class UserProfileFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         binding = FragmentUserProfileBinding.inflate(inflater, container, false);
         return binding.getRoot();
-    }
-    
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        
-        viewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
     }
     
     @Override
@@ -99,7 +90,12 @@ public class UserProfileFragment extends BaseFragment {
         
         binding.saveButton.setOnClickListener(v -> saveProfile());
     }
-    
+
+    @Override
+    protected Class<UserProfileViewModel> getViewModelClass() {
+        return UserProfileViewModel.class;
+    }
+
     private void populateProfileData(UserProfile profile) {
         if (binding.displayNameEditText.getText() == null || 
             binding.displayNameEditText.getText().toString().isEmpty()) {

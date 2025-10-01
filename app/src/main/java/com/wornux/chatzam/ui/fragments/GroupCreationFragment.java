@@ -19,10 +19,9 @@ import com.wornux.chatzam.ui.viewmodels.GroupChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class GroupCreationFragment extends BaseFragment {
+public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
     
     private FragmentGroupCreationBinding binding;
-    private GroupChatViewModel viewModel;
     private UserSelectionAdapter userSelectionAdapter;
     private SelectedUsersAdapter selectedUsersAdapter;
 
@@ -35,7 +34,6 @@ public class GroupCreationFragment extends BaseFragment {
     
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(GroupChatViewModel.class);
         setupRecyclerViews();
         setupSearchListener();
         super.onViewCreated(view, savedInstanceState);
@@ -132,7 +130,12 @@ public class GroupCreationFragment extends BaseFragment {
             showSnackbar("Image selection coming soon!");
         });
     }
-    
+
+    @Override
+    protected Class<GroupChatViewModel> getViewModelClass() {
+        return GroupChatViewModel.class;
+    }
+
     private void createGroup() {
         String groupName = binding.groupNameEditText.getText() != null ? 
                           binding.groupNameEditText.getText().toString().trim() : "";

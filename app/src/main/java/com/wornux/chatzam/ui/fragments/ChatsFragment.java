@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentChatsBinding;
 import com.wornux.chatzam.data.entities.Chat;
@@ -16,10 +15,9 @@ import com.wornux.chatzam.ui.viewmodels.ChatListViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class ChatsFragment extends BaseFragment implements ChatListAdapter.OnChatClickListener {
+public class ChatsFragment extends BaseFragment<ChatListViewModel> implements ChatListAdapter.OnChatClickListener {
 
   private FragmentChatsBinding binding;
-  private ChatListViewModel viewModel;
   private ChatListAdapter adapter;
 
   @Override
@@ -31,7 +29,6 @@ public class ChatsFragment extends BaseFragment implements ChatListAdapter.OnCha
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-    viewModel = new ViewModelProvider(this).get(ChatListViewModel.class);
     setupRecyclerView();
     super.onViewCreated(view, savedInstanceState);
   }
@@ -92,7 +89,12 @@ public class ChatsFragment extends BaseFragment implements ChatListAdapter.OnCha
                 .navigate(com.wornux.chatzam.R.id.action_nav_home_to_nav_group_creation));
   }
 
-  @Override
+    @Override
+    protected Class<ChatListViewModel> getViewModelClass() {
+      return ChatListViewModel.class;
+    }
+
+    @Override
   public void onChatClick(Chat chat) {
     Bundle args = new Bundle();
     args.putString("chat_id", chat.getChatId());

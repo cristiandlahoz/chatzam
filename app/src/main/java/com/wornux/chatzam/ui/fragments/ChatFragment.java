@@ -16,10 +16,9 @@ import com.wornux.chatzam.ui.viewmodels.ChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class ChatFragment extends BaseFragment {
+public class ChatFragment extends BaseFragment<ChatViewModel> {
     
     private FragmentChatBinding binding;
-    private ChatViewModel viewModel;
     private MessageAdapter messageAdapter;
     
     private static final String ARG_CHAT_ID = "chat_id";
@@ -113,7 +112,12 @@ public class ChatFragment extends BaseFragment {
             return true;
         });
     }
-    
+
+    @Override
+    protected Class<ChatViewModel> getViewModelClass() {
+        return ChatViewModel.class;
+    }
+
     private void sendMessage() {
         String message = binding.messageEditText.getText().toString().trim();
         if (!message.isEmpty()) {
