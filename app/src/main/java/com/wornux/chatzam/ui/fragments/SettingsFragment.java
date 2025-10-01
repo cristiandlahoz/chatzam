@@ -1,22 +1,22 @@
 package com.wornux.chatzam.ui.fragments;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentSettingsBinding;
 import com.wornux.chatzam.ui.base.BaseFragment;
+import com.wornux.chatzam.ui.viewmodels.SettingsViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SettingsFragment extends BaseFragment {
+public class SettingsFragment extends BaseFragment<SettingsViewModel> {
     
     private FragmentSettingsBinding binding;
-    private SharedPreferences preferences;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -26,65 +26,55 @@ public class SettingsFragment extends BaseFragment {
     }
     
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        
-        preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        loadSettings();
+    protected Class<SettingsViewModel> getViewModelClass() {
+        return SettingsViewModel.class;
     }
     
-    private void loadSettings() {
-        binding.pushNotificationsSwitch.setChecked(
-            preferences.getBoolean("push_notifications", true));
-        binding.messageSoundsSwitch.setChecked(
-            preferences.getBoolean("message_sounds", true));
-        binding.onlineStatusSwitch.setChecked(
-            preferences.getBoolean("show_online_status", true));
-        binding.readReceiptsSwitch.setChecked(
-            preferences.getBoolean("read_receipts", true));
-    }
-    
-    private void saveSettings() {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("push_notifications", binding.pushNotificationsSwitch.isChecked());
-        editor.putBoolean("message_sounds", binding.messageSoundsSwitch.isChecked());
-        editor.putBoolean("show_online_status", binding.onlineStatusSwitch.isChecked());
-        editor.putBoolean("read_receipts", binding.readReceiptsSwitch.isChecked());
-        editor.apply();
-    }
+
     
     @Override
     protected void setupObservers() {
+        viewModel.getPushNotifications().observe(getViewLifecycleOwner(), enabled -> 
+            binding.pushNotificationsSwitch.setChecked(enabled));
+        
+        viewModel.getMessageSounds().observe(getViewLifecycleOwner(), enabled -> 
+            binding.messageSoundsSwitch.setChecked(enabled));
+        
+        viewModel.getShowOnlineStatus().observe(getViewLifecycleOwner(), enabled -> 
+            binding.onlineStatusSwitch.setChecked(enabled));
+        
+        viewModel.getReadReceipts().observe(getViewLifecycleOwner(), enabled -> 
+            binding.readReceiptsSwitch.setChecked(enabled));
     }
     
     @Override
     protected void setupClickListeners() {
         binding.pushNotificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            saveSettings();
-            showSnackbar("Notification settings updated");
+            viewModel.updatePushNotifications(isChecked);
+            showSnackbar(getString(R.string.notification_settings_updated));
         });
         
         binding.messageSoundsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            saveSettings();
-            showSnackbar("Sound settings updated");
+            viewModel.updateMessageSounds(isChecked);
+            showSnackbar(getString(R.string.sound_settings_updated));
         });
         
         binding.onlineStatusSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            saveSettings();
-            showSnackbar("Privacy settings updated");
+            viewModel.updateShowOnlineStatus(isChecked);
+            showSnackbar(getString(R.string.privacy_settings_updated));
         });
         
         binding.readReceiptsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            saveSettings();
-            showSnackbar("Privacy settings updated");
+            viewModel.updateReadReceipts(isChecked);
+            showSnackbar(getString(R.string.privacy_settings_updated));
         });
         
         binding.logoutButton.setOnClickListener(v -> {
-            showSnackbar("Logout functionality coming soon!");
+            showSnackbar(getString(R.string.logout_functionality_coming_soon));
         });
         
         binding.deleteAccountButton.setOnClickListener(v -> {
-            showSnackbar("Account deletion functionality coming soon!");
+            showSnackbar(getString(R.string.account_deletion_functionality_coming_soon));
         });
     }
     

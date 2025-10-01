@@ -29,4 +29,18 @@
     <string name="don_t_have_an_account_register_here">Don\'t have an account? Register here</string>
     <string name="private_chat">Private Chat</string>
     <string name="group_chat">Group Chat</string>
+    <string name="message_sounds">Message Sounds</string>
+    <string name="push_notifications">Push Notifications</string>
+    <string name="notifications">Notifications</string>
+    <string name="settings_fragment_title">Settings</string>
+    <string name="privacy">Privacy</string>
+    <string name="show_online_status">Show Online Status</string>
+    <string name="read_receipts">Read Receipts</string>
+    <string name="notification_settings_updated">Notification settings updated</string>
+    <string name="sound_settings_updated">Sound settings updated</string>
+    <string name="privacy_settings_updated">Privacy settings updated</string>
+    <string name="logout_functionality_coming_soon">Logout functionality coming soon!</string>
+    <string name="account_deletion_functionality_coming_soon">Account deletion functionality coming soon!</string>
+    <string name="logout">Logout</string>
+    <string name="delete_account">Delete Account</string>
 </resources>
