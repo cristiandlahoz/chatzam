@@ -14,15 +14,20 @@ import com.google.android.material.snackbar.Snackbar;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment<VM extends ViewModel> extends Fragment {
+
+  protected VM viewModel;
 
   protected abstract void setupObservers();
 
   protected abstract void setupClickListeners();
 
+  protected abstract Class<VM> getViewModelClass();
+
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    viewModel = new ViewModelProvider(this).get(getViewModelClass());
     setupObservers();
     setupClickListeners();
   }
