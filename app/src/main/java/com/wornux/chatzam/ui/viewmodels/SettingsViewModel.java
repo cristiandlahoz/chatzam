@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import com.wornux.chatzam.data.repositories.SettingsRepository;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import com.wornux.chatzam.utils.PreferenceConstants;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -14,7 +15,7 @@ import javax.inject.Inject;
 @HiltViewModel
 public class SettingsViewModel extends BaseViewModel {
     
-    private final SharedPreferences preferences;
+    private final SettingsRepository repository;
     
     private final MutableLiveData<Boolean> pushNotifications = new MutableLiveData<>();
     private final MutableLiveData<Boolean> messageSounds = new MutableLiveData<>();
@@ -22,11 +23,8 @@ public class SettingsViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> readReceipts = new MutableLiveData<>();
     
     @Inject
-    public SettingsViewModel(@ApplicationContext Context context) {
-        preferences = context.getSharedPreferences(
-            PreferenceConstants.PREFERENCE_FILE_NAME, 
-            Context.MODE_PRIVATE
-        );
+    public SettingsViewModel(SettingsRepository repository) {
+        this.repository = repository;
         loadSettings();
     }
     
@@ -47,46 +45,41 @@ public class SettingsViewModel extends BaseViewModel {
     }
     
     private void loadSettings() {
-        pushNotifications.setValue(preferences.getBoolean(
+        pushNotifications.setValue(repository.getBoolean(
             PreferenceConstants.KEY_PUSH_NOTIFICATIONS, 
             PreferenceConstants.DEFAULT_PUSH_NOTIFICATIONS));
         
-        messageSounds.setValue(preferences.getBoolean(
+        messageSounds.setValue(repository.getBoolean(
             PreferenceConstants.KEY_MESSAGE_SOUNDS, 
             PreferenceConstants.DEFAULT_MESSAGE_SOUNDS));
         
-        showOnlineStatus.setValue(preferences.getBoolean(
+        showOnlineStatus.setValue(repository.getBoolean(
             PreferenceConstants.KEY_SHOW_ONLINE_STATUS, 
             PreferenceConstants.DEFAULT_SHOW_ONLINE_STATUS));
         
-        readReceipts.setValue(preferences.getBoolean(
+        readReceipts.setValue(repository.getBoolean(
             PreferenceConstants.KEY_READ_RECEIPTS, 
             PreferenceConstants.DEFAULT_READ_RECEIPTS));
     }
     
     public void updatePushNotifications(boolean enabled) {
         pushNotifications.setValue(enabled);
-        savePreference(PreferenceConstants.KEY_PUSH_NOTIFICATIONS, enabled);
+        repository.saveBoolean(PreferenceConstants.KEY_PUSH_NOTIFICATIONS, enabled);
     }
     
     public void updateMessageSounds(boolean enabled) {
         messageSounds.setValue(enabled);
-        savePreference(PreferenceConstants.KEY_MESSAGE_SOUNDS, enabled);
+        repository.saveBoolean(PreferenceConstants.KEY_MESSAGE_SOUNDS, enabled);
     }
     
     public void updateShowOnlineStatus(boolean enabled) {
         showOnlineStatus.setValue(enabled);
-        savePreference(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, enabled);
+        repository.saveBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, enabled);
     }
     
     public void updateReadReceipts(boolean enabled) {
         readReceipts.setValue(enabled);
-        savePreference(PreferenceConstants.KEY_READ_RECEIPTS, enabled);
+        repository.saveBoolean(PreferenceConstants.KEY_READ_RECEIPTS, enabled);
     }
     
-    private void savePreference(String key, boolean value) {
-        preferences.edit()
-                .putBoolean(key, value)
-                .apply();
-    }
 }

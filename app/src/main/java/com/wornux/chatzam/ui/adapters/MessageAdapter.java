@@ -19,9 +19,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int VIEW_TYPE_SENT = 1;
     private static final int VIEW_TYPE_RECEIVED = 2;
     
-    private List<Message> messages = new ArrayList<>();
-    private String currentUserId;
-    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+    private final List<Message> messages = new ArrayList<>();
+    private final String currentUserId;
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private OnMessageClickListener clickListener;
     
     public interface OnMessageClickListener {
@@ -142,7 +142,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         }
     }
-    
+
     private static class MessageDiffCallback extends DiffUtil.Callback {
         private final List<Message> oldList;
         private final List<Message> newList;

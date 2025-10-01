@@ -8,6 +8,7 @@ import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.data.repositories.ChatRepository;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import lombok.Getter;
 
 import java.util.List;
 import javax.inject.Inject;
@@ -17,6 +18,7 @@ public class ChatListViewModel extends BaseViewModel {
     
     private final ChatRepository chatRepository;
     private final AuthenticationManager authManager;
+    @Getter
     private final LiveData<List<Chat>> chats;
     
     @Inject
@@ -33,11 +35,7 @@ public class ChatListViewModel extends BaseViewModel {
             this.chats = new MutableLiveData<>();
         }
     }
-    
-    public LiveData<List<Chat>> getChats() {
-        return chats;
-    }
-    
+
     public LiveData<Boolean> isEmpty() {
         return Transformations.map(chats, chatList -> 
             chatList == null || chatList.isEmpty());

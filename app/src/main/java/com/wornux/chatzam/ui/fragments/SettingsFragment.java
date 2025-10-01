@@ -30,8 +30,6 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
         return SettingsViewModel.class;
     }
     
-
-    
     @Override
     protected void setupObservers() {
         viewModel.getPushNotifications().observe(getViewLifecycleOwner(), enabled -> 
