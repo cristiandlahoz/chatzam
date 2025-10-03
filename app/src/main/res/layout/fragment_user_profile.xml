@@ -80,55 +80,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Status"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <RadioGroup
-                android:id="@+id/statusRadioGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:orientation="vertical">
-
-                <RadioButton
-                    android:id="@+id/onlineRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="🟢 Online"
-                    android:textSize="16sp" />
-
-                <RadioButton
-                    android:id="@+id/awayRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="🟡 Away"
-                    android:textSize="16sp" />
-
-                <RadioButton
-                    android:id="@+id/busyRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="🔴 Busy"
-                    android:textSize="16sp" />
-
-                <RadioButton
-                    android:id="@+id/offlineRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⚫ Offline"
-                    android:textSize="16sp" />
-
-            </RadioGroup>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:text="Account Information"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"

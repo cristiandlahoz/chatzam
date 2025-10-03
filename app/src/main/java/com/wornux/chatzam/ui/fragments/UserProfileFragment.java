@@ -110,50 +110,9 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
             binding.lastSeenText.setText("Never");
         }
         
-        setStatusRadioButton(profile.getStatus());
     }
     
-    private void setStatusRadioButton(UserStatus status) {
-        if (status == null) {
-            binding.onlineRadioButton.setChecked(true);
-            return;
-        }
-        
-        switch (status) {
-            case ONLINE:
-                binding.onlineRadioButton.setChecked(true);
-                break;
-            case AWAY:
-                binding.awayRadioButton.setChecked(true);
-                break;
-            case BUSY:
-                binding.busyRadioButton.setChecked(true);
-                break;
-            case OFFLINE:
-                binding.offlineRadioButton.setChecked(true);
-                break;
-            default:
-                binding.onlineRadioButton.setChecked(true);
-                break;
-        }
-    }
-    
-    private UserStatus getSelectedStatus() {
-        int selectedId = binding.statusRadioGroup.getCheckedRadioButtonId();
-        
-        if (selectedId == binding.onlineRadioButton.getId()) {
-            return UserStatus.ONLINE;
-        } else if (selectedId == binding.awayRadioButton.getId()) {
-            return UserStatus.AWAY;
-        } else if (selectedId == binding.busyRadioButton.getId()) {
-            return UserStatus.BUSY;
-        } else if (selectedId == binding.offlineRadioButton.getId()) {
-            return UserStatus.OFFLINE;
-        }
-        
-        return UserStatus.ONLINE;
-    }
-    
+
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         imagePickerLauncher.launch(intent);
@@ -162,9 +121,8 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
     private void saveProfile() {
         String displayName = binding.displayNameEditText.getText() != null ? 
                             binding.displayNameEditText.getText().toString().trim() : "";
-        UserStatus status = getSelectedStatus();
-        
-        viewModel.updateProfile(displayName, status);
+
+        viewModel.updateProfile(displayName, UserStatus.ONLINE);
     }
     
     @Override

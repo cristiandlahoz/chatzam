@@ -6,26 +6,26 @@ import androidx.lifecycle.ViewModel;
 
 public abstract class BaseViewModel extends ViewModel {
     
-    protected final MutableLiveData<Boolean> _loading = new MutableLiveData<>(false);
-    protected final MutableLiveData<String> _error = new MutableLiveData<>();
+    protected final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
+    protected final MutableLiveData<String> error = new MutableLiveData<>();
     
     public LiveData<Boolean> getLoading() {
-        return _loading;
+        return loading;
     }
     
     public LiveData<String> getError() {
-        return _error;
+        return error;
     }
     
     protected void setLoading(boolean loading) {
-        _loading.setValue(loading);
+        this.loading.setValue(loading);
     }
     
     protected void setError(String error) {
-        _error.setValue(error);
+        this.error.setValue(error);
     }
     
     protected void clearError() {
-        _error.setValue(null);
+        error.setValue(null);
     }
 }

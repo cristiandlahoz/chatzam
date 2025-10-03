@@ -11,9 +11,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
-import dagger.hilt.android.AndroidEntryPoint;
 
-@AndroidEntryPoint
 public abstract class BaseFragment<VM extends ViewModel> extends Fragment {
 
   protected VM viewModel;
