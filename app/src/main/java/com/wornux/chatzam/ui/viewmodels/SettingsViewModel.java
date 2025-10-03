@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.wornux.chatzam.data.repositories.SettingsRepository;
+import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import com.wornux.chatzam.utils.PreferenceConstants;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -16,15 +17,17 @@ import javax.inject.Inject;
 public class SettingsViewModel extends BaseViewModel {
     
     private final SettingsRepository repository;
-    
+
+    private final AuthenticationManager authManager;
     private final MutableLiveData<Boolean> pushNotifications = new MutableLiveData<>();
     private final MutableLiveData<Boolean> messageSounds = new MutableLiveData<>();
     private final MutableLiveData<Boolean> showOnlineStatus = new MutableLiveData<>();
     private final MutableLiveData<Boolean> readReceipts = new MutableLiveData<>();
     
     @Inject
-    public SettingsViewModel(SettingsRepository repository) {
+    public SettingsViewModel(SettingsRepository repository, AuthenticationManager authManager) {
         this.repository = repository;
+        this.authManager = authManager;
         loadSettings();
     }
     
@@ -80,6 +83,10 @@ public class SettingsViewModel extends BaseViewModel {
     public void updateReadReceipts(boolean enabled) {
         readReceipts.setValue(enabled);
         repository.saveBoolean(PreferenceConstants.KEY_READ_RECEIPTS, enabled);
+    }
+
+    public void logout(){
+
     }
     
 }

@@ -67,13 +67,9 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
             showSnackbar(getString(R.string.privacy_settings_updated));
         });
         
-        binding.logoutButton.setOnClickListener(v -> {
-            showSnackbar(getString(R.string.logout_functionality_coming_soon));
-        });
+        binding.logoutButton.setOnClickListener(v -> showSnackbar(getString(R.string.logout_functionality_coming_soon)));
         
-        binding.deleteAccountButton.setOnClickListener(v -> {
-            showSnackbar(getString(R.string.account_deletion_functionality_coming_soon));
-        });
+        binding.deleteAccountButton.setOnClickListener(v -> showSnackbar(getString(R.string.account_deletion_functionality_coming_soon)));
     }
     
     @Override
