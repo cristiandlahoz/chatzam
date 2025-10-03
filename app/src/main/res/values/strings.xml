@@ -49,6 +49,9 @@
     <string name="account_deletion_functionality_coming_soon">Account deletion functionality coming soon!</string>
     <string name="logout">Logout</string>
     <string name="delete_account">Delete Account</string>
+    <string name="logout_confirmation_title">Logout?</string>
+    <string name="logout_confirmation_message">Are you sure you want to logout?</string>
+    <string name="cancel">Cancel</string>
     <string name="group_name">Group name</string>
     <string name="chat_name">Chat name</string>
     <string name="add_members">Add members</string>

@@ -27,8 +27,7 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
     
     private FragmentUserProfileBinding binding;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
-    
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,15 +100,6 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
             binding.displayNameEditText.getText().toString().isEmpty()) {
             binding.displayNameEditText.setText(profile.getDisplayName());
         }
-        
-        binding.emailEditText.setText(profile.getEmail());
-        
-        if (profile.getLastSeen() != null) {
-            binding.lastSeenText.setText(dateFormat.format(profile.getLastSeen()));
-        } else {
-            binding.lastSeenText.setText("Never");
-        }
-        
     }
     
 
