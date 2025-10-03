@@ -43,7 +43,6 @@
     <string name="notification_settings_updated">Notification settings updated</string>
     <string name="sound_settings_updated">Sound settings updated</string>
     <string name="privacy_settings_updated">Privacy settings updated</string>
-    <string name="logout_functionality_coming_soon">Logout functionality coming soon!</string>
     <string name="account_deletion_functionality_coming_soon">Account deletion functionality coming soon!</string>
     <string name="logout">Logout</string>
     <string name="delete_account">Delete Account</string>

@@ -9,14 +9,18 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentSettingsBinding;
+import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.SettingsViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
+
+import javax.inject.Inject;
 
 @AndroidEntryPoint
 public class SettingsFragment extends BaseFragment<SettingsViewModel> {
     
     private FragmentSettingsBinding binding;
+    @Inject AuthenticationManager authmanager;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -67,7 +71,7 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
             showSnackbar(getString(R.string.privacy_settings_updated));
         });
         
-        binding.logoutButton.setOnClickListener(v -> showSnackbar(getString(R.string.logout_functionality_coming_soon)));
+        binding.logoutButton.setOnClickListener(v -> authmanager.logoutUser());
         
         binding.deleteAccountButton.setOnClickListener(v -> showSnackbar(getString(R.string.account_deletion_functionality_coming_soon)));
     }

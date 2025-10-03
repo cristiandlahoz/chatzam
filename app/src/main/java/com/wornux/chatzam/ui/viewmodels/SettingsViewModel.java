@@ -18,16 +18,14 @@ public class SettingsViewModel extends BaseViewModel {
     
     private final SettingsRepository repository;
 
-    private final AuthenticationManager authManager;
     private final MutableLiveData<Boolean> pushNotifications = new MutableLiveData<>();
     private final MutableLiveData<Boolean> messageSounds = new MutableLiveData<>();
     private final MutableLiveData<Boolean> showOnlineStatus = new MutableLiveData<>();
     private final MutableLiveData<Boolean> readReceipts = new MutableLiveData<>();
     
     @Inject
-    public SettingsViewModel(SettingsRepository repository, AuthenticationManager authManager) {
+    public SettingsViewModel(SettingsRepository repository) {
         this.repository = repository;
-        this.authManager = authManager;
         loadSettings();
     }
     
