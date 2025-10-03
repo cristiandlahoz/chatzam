@@ -31,6 +31,9 @@
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="don_t_have_an_account_register_here">Don\'t have an account? Register here</string>
+    <string name="already_have_an_account_login_here">Already have an account? Login here</string>
+    <string name="login_succesful">Login successful!</string>
+    <string name="registration_succesful">Registration successful!</string>
     <string name="private_chat">Private Chat</string>
     <string name="group_chat">Group Chat</string>
     <string name="message_sounds">Message Sounds</string>

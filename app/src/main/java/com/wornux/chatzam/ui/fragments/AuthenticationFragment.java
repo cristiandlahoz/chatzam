@@ -15,18 +15,18 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class AuthenticationFragment extends BaseFragment<AuthenticationViewModel> {
-    
-    private FragmentAuthenticationBinding binding;
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentAuthenticationBinding.inflate(inflater, container, false);
-        return binding.getRoot();
-    }
-    
-    @Override
-    protected void setupObservers() {
+  private FragmentAuthenticationBinding binding;
+
+  @Override
+  public View onCreateView(
+      @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    binding = FragmentAuthenticationBinding.inflate(inflater, container, false);
+    return binding.getRoot();
+  }
+
+  @Override
+  protected void setupObservers() {
     viewModel
         .getLoading()
         .observe(
@@ -38,84 +38,95 @@ public class AuthenticationFragment extends BaseFragment<AuthenticationViewModel
               binding.registerButton.setEnabled(!isLoading);
             });
 
-        viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
+    viewModel
+        .getError()
+        .observe(
+            getViewLifecycleOwner(),
+            error -> {
+              if (error != null) {
                 showError(error);
-            }
-        });
-        
-        viewModel.getIsLoginMode().observe(getViewLifecycleOwner(), this::updateUIMode);
-        
-        viewModel.getLoginResult().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                showSnackbar("Login successful!");
-                navigateToMain();
-            }
-        });
-        
-        viewModel.getRegistrationResult().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                showSnackbar("Registration successful!");
-                navigateToMain();
-            }
-        });
-    }
-    
-    @Override
-    protected void setupClickListeners() {
-        binding.loginButton.setOnClickListener(v -> performLogin());
-        binding.registerButton.setOnClickListener(v -> performRegistration());
-        binding.switchModeText.setOnClickListener(v -> viewModel.switchMode());
-    }
+              }
+            });
 
-    @Override
-    protected Class<AuthenticationViewModel> getViewModelClass() {
-        return AuthenticationViewModel.class;
-    }
+    viewModel.getIsLoginMode().observe(getViewLifecycleOwner(), this::updateUIMode);
 
-    private void performLogin() {
-        String email = getTextFromEditText(binding.emailEditText);
-        String password = getTextFromEditText(binding.passwordEditText);
-        
-        viewModel.login(email, password);
+    viewModel
+        .getLoginResult()
+        .observe(
+            getViewLifecycleOwner(),
+            user -> {
+              if (user != null) {
+                showSnackbar(getString(R.string.login_succesful));
+                navigateToMain();
+              }
+            });
+
+    viewModel
+        .getRegistrationResult()
+        .observe(
+            getViewLifecycleOwner(),
+            user -> {
+              if (user != null) {
+                showSnackbar(getString(R.string.registration_succesful));
+                navigateToMain();
+              }
+            });
+  }
+
+  @Override
+  protected void setupClickListeners() {
+    binding.loginButton.setOnClickListener(v -> performLogin());
+    binding.registerButton.setOnClickListener(v -> performRegistration());
+    binding.switchModeText.setOnClickListener(v -> viewModel.switchMode());
+  }
+
+  @Override
+  protected Class<AuthenticationViewModel> getViewModelClass() {
+    return AuthenticationViewModel.class;
+  }
+
+  private void performLogin() {
+    String email = getTextFromEditText(binding.emailEditText);
+    String password = getTextFromEditText(binding.passwordEditText);
+
+    viewModel.login(email, password);
+  }
+
+  private void performRegistration() {
+    String email = getTextFromEditText(binding.emailEditText);
+    String password = getTextFromEditText(binding.passwordEditText);
+    String displayName = getTextFromEditText(binding.displayNameEditText);
+
+    viewModel.register(email, password, displayName);
+  }
+
+  private void updateUIMode(boolean isLoginMode) {
+    if (isLoginMode) {
+      binding.displayNameInputLayout.setVisibility(View.GONE);
+      binding.loginButton.setVisibility(View.VISIBLE);
+      binding.registerButton.setVisibility(View.GONE);
+      binding.switchModeText.setText(getString(R.string.don_t_have_an_account_register_here));
+    } else {
+      binding.displayNameInputLayout.setVisibility(View.VISIBLE);
+      binding.loginButton.setVisibility(View.GONE);
+      binding.registerButton.setVisibility(View.VISIBLE);
+      binding.switchModeText.setText(getString(R.string.already_have_an_account_login_here));
     }
-    
-    private void performRegistration() {
-        String email = getTextFromEditText(binding.emailEditText);
-        String password = getTextFromEditText(binding.passwordEditText);
-        String displayName = getTextFromEditText(binding.displayNameEditText);
-        
-        viewModel.register(email, password, displayName);
-    }
-    
-    private void updateUIMode(boolean isLoginMode) {
-        if (isLoginMode) {
-            binding.displayNameInputLayout.setVisibility(View.GONE);
-            binding.loginButton.setVisibility(View.VISIBLE);
-            binding.registerButton.setVisibility(View.GONE);
-            binding.switchModeText.setText("Don't have an account? Register here");
-        } else {
-            binding.displayNameInputLayout.setVisibility(View.VISIBLE);
-            binding.loginButton.setVisibility(View.GONE);
-            binding.registerButton.setVisibility(View.VISIBLE);
-            binding.switchModeText.setText("Already have an account? Login here");
-        }
-    }
-    
-    private void navigateToMain() {
-        NavOptions navOptions = new NavOptions.Builder()
-            .setPopUpTo(R.id.authenticationFragment, true)
-            .build();
-        getNavController().navigate(R.id.nav_home, null, navOptions);
-    }
-    
-    private String getTextFromEditText(TextInputEditText editText) {
-        return editText.getText() != null ? editText.getText().toString().trim() : "";
-    }
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
+  }
+
+  private void navigateToMain() {
+    NavOptions navOptions =
+        new NavOptions.Builder().setPopUpTo(R.id.authenticationFragment, true).build();
+    getNavController().navigate(R.id.nav_home, null, navOptions);
+  }
+
+  private String getTextFromEditText(TextInputEditText editText) {
+    return editText.getText() != null ? editText.getText().toString().trim() : "";
+  }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
 }
