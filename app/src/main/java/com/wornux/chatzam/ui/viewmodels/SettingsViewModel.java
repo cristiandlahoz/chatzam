@@ -1,15 +1,11 @@
 package com.wornux.chatzam.ui.viewmodels;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.wornux.chatzam.data.repositories.SettingsRepository;
-import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import com.wornux.chatzam.utils.PreferenceConstants;
 import dagger.hilt.android.lifecycle.HiltViewModel;
-import dagger.hilt.android.qualifiers.ApplicationContext;
 
 import javax.inject.Inject;
 
