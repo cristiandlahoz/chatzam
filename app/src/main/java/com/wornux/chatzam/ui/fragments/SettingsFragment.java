@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentSettingsBinding;
 import com.wornux.chatzam.services.AuthenticationManager;
@@ -18,67 +20,97 @@ import javax.inject.Inject;
 
 @AndroidEntryPoint
 public class SettingsFragment extends BaseFragment<SettingsViewModel> {
-    
-    private FragmentSettingsBinding binding;
-    @Inject AuthenticationManager authmanager;
-    
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentSettingsBinding.inflate(inflater, container, false);
-        return binding.getRoot();
-    }
-    
-    @Override
-    protected Class<SettingsViewModel> getViewModelClass() {
-        return SettingsViewModel.class;
-    }
-    
-    @Override
-    protected void setupObservers() {
-        viewModel.getPushNotifications().observe(getViewLifecycleOwner(), enabled -> 
-            binding.pushNotificationsSwitch.setChecked(enabled));
-        
-        viewModel.getMessageSounds().observe(getViewLifecycleOwner(), enabled -> 
-            binding.messageSoundsSwitch.setChecked(enabled));
-        
-        viewModel.getShowOnlineStatus().observe(getViewLifecycleOwner(), enabled -> 
-            binding.onlineStatusSwitch.setChecked(enabled));
-        
-        viewModel.getReadReceipts().observe(getViewLifecycleOwner(), enabled -> 
-            binding.readReceiptsSwitch.setChecked(enabled));
-    }
-    
-    @Override
-    protected void setupClickListeners() {
-        binding.pushNotificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            viewModel.updatePushNotifications(isChecked);
-            showSnackbar(getString(R.string.notification_settings_updated));
+
+  private FragmentSettingsBinding binding;
+  @Inject AuthenticationManager authmanager;
+
+  @Override
+  public View onCreateView(
+      @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    binding = FragmentSettingsBinding.inflate(inflater, container, false);
+    return binding.getRoot();
+  }
+
+  @Override
+  protected Class<SettingsViewModel> getViewModelClass() {
+    return SettingsViewModel.class;
+  }
+
+  @Override
+  protected void setupObservers() {
+    viewModel
+        .getPushNotifications()
+        .observe(
+            getViewLifecycleOwner(),
+            enabled -> binding.pushNotificationsSwitch.setChecked(enabled));
+
+    viewModel
+        .getMessageSounds()
+        .observe(
+            getViewLifecycleOwner(), enabled -> binding.messageSoundsSwitch.setChecked(enabled));
+
+    viewModel
+        .getShowOnlineStatus()
+        .observe(
+            getViewLifecycleOwner(), enabled -> binding.onlineStatusSwitch.setChecked(enabled));
+
+    viewModel
+        .getReadReceipts()
+        .observe(
+            getViewLifecycleOwner(), enabled -> binding.readReceiptsSwitch.setChecked(enabled));
+  }
+
+  @Override
+  protected void setupClickListeners() {
+    binding.pushNotificationsSwitch.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          viewModel.updatePushNotifications(isChecked);
+          showSnackbar(getString(R.string.notification_settings_updated));
         });
-        
-        binding.messageSoundsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            viewModel.updateMessageSounds(isChecked);
-            showSnackbar(getString(R.string.sound_settings_updated));
+
+    binding.messageSoundsSwitch.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          viewModel.updateMessageSounds(isChecked);
+          showSnackbar(getString(R.string.sound_settings_updated));
         });
-        
-        binding.onlineStatusSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            viewModel.updateShowOnlineStatus(isChecked);
-            showSnackbar(getString(R.string.privacy_settings_updated));
+
+    binding.onlineStatusSwitch.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          viewModel.updateShowOnlineStatus(isChecked);
+          showSnackbar(getString(R.string.privacy_settings_updated));
         });
-        
-        binding.readReceiptsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            viewModel.updateReadReceipts(isChecked);
-            showSnackbar(getString(R.string.privacy_settings_updated));
+
+    binding.readReceiptsSwitch.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          viewModel.updateReadReceipts(isChecked);
+          showSnackbar(getString(R.string.privacy_settings_updated));
         });
-        
-        binding.logoutButton.setOnClickListener(v -> authmanager.logoutUser());
-        
-        binding.deleteAccountButton.setOnClickListener(v -> showSnackbar(getString(R.string.account_deletion_functionality_coming_soon)));
-    }
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
+
+    binding.logoutButton.setOnClickListener(v -> logout());
+
+    binding.deleteAccountButton.setOnClickListener(
+        v -> showSnackbar(getString(R.string.account_deletion_functionality_coming_soon)));
+  }
+
+  private void logout() {
+    new MaterialAlertDialogBuilder(requireContext())
+        .setTitle(R.string.logout_confirmation_title)
+        .setMessage(R.string.logout_confirmation_message)
+        .setPositiveButton(
+            R.string.logout,
+            (dialog, which) -> {
+              authmanager.logoutUser();
+              NavOptions navOptions =
+                  new NavOptions.Builder().setPopUpTo(R.id.mobile_navigation, true).build();
+              getNavController().navigate(R.id.authenticationFragment, null, navOptions);
+            })
+        .setNegativeButton(R.string.cancel, null)
+        .show();
+  }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
 }
