@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.navigation.NavOptions;
 import com.google.android.material.textfield.TextInputEditText;
+import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentAuthenticationBinding;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.AuthenticationViewModel;
@@ -101,9 +103,10 @@ public class AuthenticationFragment extends BaseFragment<AuthenticationViewModel
     }
     
     private void navigateToMain() {
-        // TODO: Navigate to chat list when we implement it
-        // For now, just finish the activity
-        requireActivity().finish();
+        NavOptions navOptions = new NavOptions.Builder()
+            .setPopUpTo(R.id.authenticationFragment, true)
+            .build();
+        getNavController().navigate(R.id.nav_home, null, navOptions);
     }
     
     private String getTextFromEditText(TextInputEditText editText) {

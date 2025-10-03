@@ -2,8 +2,12 @@ package com.wornux.chatzam;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -12,6 +16,7 @@ import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.databinding.ActivityMainBinding;
 import dagger.hilt.android.AndroidEntryPoint;
 import javax.inject.Inject;
+import java.util.Objects;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
@@ -29,13 +34,36 @@ public class MainActivity extends AppCompatActivity {
     binding = ActivityMainBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
 
+    setupBackPressHandler();
     setupNavigation();
     checkAuthenticationState();
   }
 
+  private void setupBackPressHandler() {
+    getOnBackPressedDispatcher()
+        .addCallback(
+            this,
+            new OnBackPressedCallback(true) {
+              @Override
+              public void handleOnBackPressed() {
+                if (!authManager.isUserLoggedIn()) {
+                  finishAffinity();
+                } else {
+                  setEnabled(false);
+                  getOnBackPressedDispatcher().onBackPressed();
+                  setEnabled(true);
+                }
+              }
+            });
+  }
+
   private void checkAuthenticationState() {
-    if (!authManager.isUserLoggedIn()) {
-      navController.navigate(R.id.authenticationFragment);
+    boolean isLoggedIn = authManager.isUserLoggedIn();
+
+    if (!isLoggedIn) {
+      NavOptions navOptions =
+          new NavOptions.Builder().setPopUpTo(R.id.mobile_navigation, true).build();
+      navController.navigate(R.id.authenticationFragment, null, navOptions);
     }
   }
 
@@ -45,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     NavigationView navigationView = binding.navView;
 
     mAppBarConfiguration =
-        new AppBarConfiguration.Builder(R.id.nav_home)
+        new AppBarConfiguration.Builder(R.id.nav_home, R.id.nav_user_profile, R.id.nav_settings)
             .setOpenableLayout(binding.drawerLayout)
             .build();
 
@@ -57,13 +85,21 @@ public class MainActivity extends AppCompatActivity {
       navController = navHostFragment.getNavController();
       NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
       NavigationUI.setupWithNavController(navigationView, navController);
-    }
-  }
 
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.fab_options_menu, menu);
-    return true;
+      navController.addOnDestinationChangedListener(
+          (controller, destination, arguments) -> {
+            boolean isAuthScreen = destination.getId() == R.id.authenticationFragment;
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(!isAuthScreen);
+
+            if (isAuthScreen) {
+              binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+              binding.navView.setVisibility(View.GONE);
+            } else if (authManager.isUserLoggedIn()) {
+              binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+              binding.navView.setVisibility(View.VISIBLE);
+            }
+          });
+    }
   }
 
   @Override
