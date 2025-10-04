@@ -74,7 +74,7 @@ class FabHomeFragment : Fragment() {
                 modifier = Modifier.align(Alignment.BottomEnd),
                 expanded = fabMenuExpanded,
                 button = {
-                    createToggleButton(
+                    CreateToggleButton(
                         fabMenuExpanded = fabMenuExpanded,
                         fabVisible = fabVisible,
                         focusRequester = focusRequester,
@@ -98,14 +98,14 @@ class FabHomeFragment : Fragment() {
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    private fun createToggleButton(
+    private fun CreateToggleButton(
         fabMenuExpanded: Boolean,
         fabVisible: Boolean,
         focusRequester: FocusRequester,
         onToggle: () -> Unit
     ) {
         ToggleFloatingActionButton(
-            modifier = createToggleButtonModifier(fabMenuExpanded, fabVisible, focusRequester),
+            modifier = Modifier.toggleButtonModifier(fabMenuExpanded, fabVisible, focusRequester),
             checked = fabMenuExpanded,
             onCheckedChange = { onToggle() }
         ) {
@@ -123,12 +123,12 @@ class FabHomeFragment : Fragment() {
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-    private fun createToggleButtonModifier(
+    private fun Modifier.toggleButtonModifier(
         fabMenuExpanded: Boolean,
         fabVisible: Boolean,
         focusRequester: FocusRequester
     ): Modifier =
-        Modifier
+        this
             .semantics {
                 traversalIndex = -1f
                 stateDescription = if (fabMenuExpanded) "Expanded" else "Collapsed"
