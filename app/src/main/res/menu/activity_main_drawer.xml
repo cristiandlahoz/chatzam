@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:showIn="navigation_view">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/message_multiple_02_stroke_rounded"
-            android:title="@string/chats" />
-    </group>
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/message_multiple_02_stroke_rounded"
+        android:title="@string/chats" />
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_user_profile"
-            android:icon="@drawable/user_2_line"
-            android:title="@string/profile" />
-        <item
-            android:id="@+id/nav_settings"
-            android:icon="@drawable/settings_4_line"
-            android:title="@string/settings" />
-    </group>
+    <item
+        android:id="@+id/nav_user_profile"
+        android:icon="@drawable/user_2_line"
+        android:title="@string/profile" />
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@drawable/settings_4_line"
+        android:title="@string/settings" />
 </menu>

@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/nav_home"
         android:name="com.wornux.chatzam.ui.fragments.ChatsFragment"
-        android:label="@string/chats"
+        android:label="@string/nav_header_title"
         tools:layout="@layout/fragment_chats">
         <action
             android:id="@+id/action_nav_home_to_nav_chat"

@@ -60,4 +60,5 @@
     <string name="searchbar_hint">john doe</string>
     <string name="save_changes">Save Changes</string>
     <string name="tap_to_change_photo">Tap to change photo</string>
+    <string name="account">Account</string>
 </resources>

@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.semantics.contentDescription
@@ -48,79 +49,112 @@ class FabHomeFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
+    ): View = createComposeView()
+
+    private fun createComposeView(): View =
+        ComposeView(requireContext()).apply {
             setContent {
-                TestFab(findNavController())
+                FloatingActionMenu(findNavController())
+            }
+        }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    @Preview
+    private fun FloatingActionMenu(navController: NavController? = null) {
+        val listState = rememberLazyListState()
+        val fabVisible by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
+        val focusRequester = remember { FocusRequester() }
+        var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+
+        HandleBackPress(fabMenuExpanded) { fabMenuExpanded = false }
+
+        Box {
+            FloatingActionButtonMenu(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                expanded = fabMenuExpanded,
+                button = {
+                    createToggleButton(
+                        fabMenuExpanded = fabMenuExpanded,
+                        fabVisible = fabVisible,
+                        focusRequester = focusRequester,
+                        onToggle = { fabMenuExpanded = !fabMenuExpanded }
+                    )
+                }
+            ) {
+                getMenuItems().forEach { (icon, label) ->
+                    FloatingActionButtonMenuItem(
+                        onClick = {
+                            handleMenuItemClick(navController, label)
+                            fabMenuExpanded = false
+                        },
+                        icon = { Icon(icon, contentDescription = null) },
+                        text = { Text(text = label) }
+                    )
+                }
             }
         }
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    @Preview
-    fun TestFab(navController: NavController? = null) {
-        val listState = rememberLazyListState()
-        val fabVisible by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
-        val focusRequester = remember { FocusRequester() }
-
-        Box {
-            val items =
-                listOf(
-                    Icons.Filled.People to "New group",
-                    Icons.Filled.Contacts to "New chat",
-                )
-
-            var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
-
-            BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
-
-            FloatingActionButtonMenu(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                expanded = fabMenuExpanded,
-                button = {
-                    ToggleFloatingActionButton(
-                        modifier =
-                            Modifier.semantics {
-                                traversalIndex = -1f
-                                stateDescription = if (fabMenuExpanded) "Expanded" else "Collapsed"
-                                contentDescription = "Toggle menu"
-                            }
-                                .animateFloatingActionButton(
-                                    visible = fabVisible || fabMenuExpanded,
-                                    alignment = Alignment.BottomEnd,
-                                )
-                                .focusRequester(focusRequester),
-                        checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded },
-                    ) {
-                        val imageVector by remember {
-                            derivedStateOf {
-                                if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
-                            }
-                        }
-                        Icon(
-                            painter = rememberVectorPainter(imageVector),
-                            contentDescription = null,
-                            modifier = Modifier.animateIcon({ checkedProgress }),
-                        )
-                    }
-                },
-            ) {
-                items.forEachIndexed { i, item ->
-                    FloatingActionButtonMenuItem(
-                        onClick = { 
-                            when (item.second) {
-                                "New group" -> navController?.navigate(R.id.nav_group_creation)
-                                "New chat" -> navController?.navigate(R.id.nav_chat_creation)
-                            }
-                            fabMenuExpanded = false 
-                        },
-                        icon = { Icon(item.first, contentDescription = null) },
-                        text = { Text(text = item.second) },
-                    )
+    private fun createToggleButton(
+        fabMenuExpanded: Boolean,
+        fabVisible: Boolean,
+        focusRequester: FocusRequester,
+        onToggle: () -> Unit
+    ) {
+        ToggleFloatingActionButton(
+            modifier = createToggleButtonModifier(fabMenuExpanded, fabVisible, focusRequester),
+            checked = fabMenuExpanded,
+            onCheckedChange = { onToggle() }
+        ) {
+            val imageVector by remember {
+                derivedStateOf {
+                    if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
                 }
             }
+            Icon(
+                painter = rememberVectorPainter(imageVector),
+                contentDescription = null,
+                modifier = Modifier.animateIcon({ checkedProgress })
+            )
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    private fun createToggleButtonModifier(
+        fabMenuExpanded: Boolean,
+        fabVisible: Boolean,
+        focusRequester: FocusRequester
+    ): Modifier =
+        Modifier
+            .semantics {
+                traversalIndex = -1f
+                stateDescription = if (fabMenuExpanded) "Expanded" else "Collapsed"
+                contentDescription = "Toggle menu"
+            }
+            .animateFloatingActionButton(
+                visible = fabVisible || fabMenuExpanded,
+                alignment = Alignment.BottomEnd
+            )
+            .focusRequester(focusRequester)
+
+    @Composable
+    private fun HandleBackPress(enabled: Boolean, onBack: () -> Unit) {
+        BackHandler(enabled, onBack)
+    }
+
+    private fun getMenuItems(): List<Pair<ImageVector, String>> =
+        listOf(
+            Icons.Filled.People to "New group",
+            Icons.Filled.Contacts to "New chat"
+        )
+
+    private fun handleMenuItemClick(navController: NavController?, label: String) {
+        when (label) {
+            "New group" -> navController?.navigate(R.id.nav_group_creation)
+            "New chat" -> navController?.navigate(R.id.nav_chat_creation)
         }
     }
 }

@@ -22,3 +22,4 @@ app/.project
 app/.settings/
 .idea/deviceManager.xml 
 .idea/aws.xml
+.idea/
