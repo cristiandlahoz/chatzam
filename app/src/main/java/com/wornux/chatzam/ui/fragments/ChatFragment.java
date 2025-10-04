@@ -108,17 +108,6 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
   @Override
   protected void setupClickListeners() {
     binding.sendButton.setOnClickListener(v -> sendMessage());
-
-    binding.messageEditText.setOnEditorActionListener(
-        (v, actionId, event) -> {
-          sendMessage();
-          return true;
-        });
-  }
-
-  @Override
-  protected Class<ChatViewModel> getViewModelClass() {
-    return ChatViewModel.class;
   }
 
   private void sendMessage() {
@@ -140,5 +129,10 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
   public void onDestroyView() {
     super.onDestroyView();
     binding = null;
+  }
+
+  @Override
+  protected Class<ChatViewModel> getViewModelClass() {
+    return ChatViewModel.class;
   }
 }

@@ -131,8 +131,9 @@ public class MessageRepository {
                 .encryptedContent(document.getString("encryptedContent"))
                 .messageType(MessageType.valueOf(document.getString("messageType")))
                 .timestamp(document.getDate("timestamp"))
-                .isDelivered(document.getBoolean("isDelivered") != null ? document.getBoolean("isDelivered") : false)
-                .isRead(document.getBoolean("isRead") != null ? document.getBoolean("isRead") : false)
+                .isDelivered(document.getBoolean("isDelivered") != null && Boolean.TRUE.equals(
+                        document.getBoolean("isDelivered")))
+                .isRead(document.getBoolean("isRead") != null && Boolean.TRUE.equals(document.getBoolean("isRead")))
                 .mediaUrl(document.getString("mediaUrl"))
                 .build();
     }

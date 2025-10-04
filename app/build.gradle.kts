@@ -46,6 +46,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.recyclerview)
+    implementation(libs.fragment)
     implementation(libs.core.ktx)
     implementation(libs.ui.tooling.preview)
     compileOnly(libs.lombok)

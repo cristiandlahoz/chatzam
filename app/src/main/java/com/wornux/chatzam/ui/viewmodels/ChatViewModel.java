@@ -29,16 +29,11 @@ public class ChatViewModel extends BaseViewModel {
     this.messageRepository = messageRepository;
     this.authManager = authManager;
 
+    LiveData<List<Message>> emptyMessages = new MutableLiveData<>();
     this.messages =
         Transformations.switchMap(
             currentChatId,
-            chatId -> {
-              if (chatId != null) {
-                return messageRepository.getMessages(chatId);
-              } else {
-                return new MutableLiveData<>();
-              }
-            });
+            chatId -> (chatId != null) ? messageRepository.getMessages(chatId) : emptyMessages);
   }
 
   public void setChatId(String chatId) {

@@ -53,9 +53,11 @@
     <string name="group_name">Group name</string>
     <string name="chat_name">Chat name</string>
     <string name="add_members">Add members</string>
-    <string name="search_users">Search users...</string>
+    <string name="search_users">Search users…</string>
     <string name="available_users">Available Users</string>
     <string name="clear">Clear</string>
     <string name="search_member">Search member</string>
     <string name="searchbar_hint">john doe</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="tap_to_change_photo">Tap to change photo</string>
 </resources>
