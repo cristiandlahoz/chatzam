@@ -6,16 +6,19 @@
             app:startDestination="@+id/nav_home">
 
     <fragment
-            android:id="@+id/nav_home"
-            android:name="com.wornux.chatzam.ui.fragments.ChatsFragment"
-            android:label="@string/chats"
-            tools:layout="@layout/fragment_chats">
+        android:id="@+id/nav_home"
+        android:name="com.wornux.chatzam.ui.fragments.ChatsFragment"
+        android:label="@string/chats"
+        tools:layout="@layout/fragment_chats">
         <action
-                android:id="@+id/action_nav_home_to_nav_chat"
-                app:destination="@id/nav_chat" />
+            android:id="@+id/action_nav_home_to_nav_chat"
+            app:destination="@id/nav_chat" />
         <action
-                android:id="@+id/action_nav_home_to_nav_group_creation"
-                app:destination="@id/nav_group_creation" />
+            android:id="@+id/action_nav_home_to_nav_group_creation"
+            app:destination="@id/nav_group_creation" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_chat_creation"
+            app:destination="@id/nav_chat_creation" />
     </fragment>
 
     <fragment
@@ -51,5 +54,11 @@
             android:name="com.wornux.chatzam.ui.fragments.AuthenticationFragment"
             android:label="Authentication"
             tools:layout="@layout/fragment_authentication" />
+    <fragment
+        android:id="@+id/nav_chat_creation"
+        android:name="com.wornux.chatzam.ui.fragments.ChatCreationFragment"
+        android:label="Create Chat"
+        tools:layout="@layout/fragment_chat_creation">
+    </fragment>
 
 </navigation>

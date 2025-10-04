@@ -102,7 +102,7 @@ public class ChatCreationViewModel extends BaseViewModel {
         participants.add(selectedUser.getUserId());
 
         setLoading(true);
-        chatRepository.createChat(participants, false)
+        chatRepository.createIndividualChat(participants, selectedUser.getDisplayName())
                 .addOnCompleteListener(task -> {
                     setLoading(false);
                     if (!task.isSuccessful()) {
