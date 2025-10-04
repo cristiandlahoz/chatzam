@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/dark_background"
     tools:context=".ui.fragments.GroupCreationFragment">
 
     <ScrollView
@@ -26,7 +26,7 @@
                 android:background="@drawable/search_view_rounded_background"
                 android:hint="@string/search_users"
                 app:boxBackgroundMode="none"
-                app:hintTextColor="@android:color/darker_gray"
+                app:hintTextColor="@color/text_color_secondary"
                 android:layout_marginBottom="16dp">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/search_edit_text"
@@ -36,16 +36,24 @@
                     android:drawableStart="@drawable/ic_search"
                     android:inputType="text"
                     android:padding="12dp"
-                    android:textColor="@android:color/white" />
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="@color/text_color_secondary" />
 
             </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/text_color_secondary"
+                android:alpha="0.2"
+                android:layout_marginBottom="16dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="@string/available_users"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -63,10 +71,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/material_dynamic_neutral20"
         android:enabled="false"
         android:text="@string/create_chat"
-        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

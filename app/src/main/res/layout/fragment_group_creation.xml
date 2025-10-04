@@ -46,8 +46,8 @@
                 android:layout_marginBottom="24dp"
                 android:hint="Group name"
                 app:boxStrokeColor="?attr/colorPrimary"
-                app:hintTextColor="@color/text_color_secondary"
-                android:textColorHint="@color/text_color_secondary">
+                app:hintTextColor="?attr/colorPrimaryVariant"
+                app:startIconDrawable="@drawable/quill_pen_ai_line">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/groupNameEditText"
@@ -67,17 +67,35 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/searchUsersEditText"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/search_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="@color/dark_surface_variant"
+                android:background="@drawable/search_view_rounded_background"
                 android:hint="Search users..."
-                android:inputType="text"
-                android:padding="12dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textColorHint="@color/text_color_secondary" />
+                app:boxBackgroundMode="none"
+                app:hintTextColor="@color/text_color_secondary"
+                app:hintEnabled="false"
+                android:layout_marginBottom="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/searchUsersEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search users..."
+                    android:drawableStart="@drawable/ic_search"
+                    android:inputType="text"
+                    android:padding="12dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="@color/text_color_secondary" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/text_color_secondary"
+                android:alpha="0.2"
+                android:layout_marginBottom="16dp" />
 
             <TextView
                 android:id="@+id/selectedMembersLabel"
