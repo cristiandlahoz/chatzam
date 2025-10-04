@@ -70,12 +70,17 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
                 showSnackbar("Profile image updated successfully!");
             }
         });
-        
-        viewModel.getLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            binding.loadingProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            binding.saveButton.setEnabled(!isLoading);
-        });
-        
+
+    viewModel
+        .getLoading()
+        .observe(
+            getViewLifecycleOwner(),
+            isLoading -> {
+              binding.loadingProgressBar.setVisibility(
+                  Boolean.TRUE.equals(isLoading) ? View.VISIBLE : View.GONE);
+              binding.saveButton.setEnabled(!isLoading);
+            });
+
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
                 showError(error);

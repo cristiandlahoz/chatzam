@@ -69,8 +69,7 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
           }
 
           @Override
-          public void onMessageLongClick(Message message) {
-          }
+          public void onMessageLongClick(Message message) {}
         });
   }
 
