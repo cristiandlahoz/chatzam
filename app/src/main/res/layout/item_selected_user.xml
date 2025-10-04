@@ -21,16 +21,24 @@
             app:civ_border_color="?attr/colorPrimary"
             app:civ_border_width="2dp" />
 
-        <ImageButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/removeUserButton"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="top|end"
-            android:background="@android:color/holo_red_light"
-            android:contentDescription="Remove user"
-            android:scaleType="centerInside"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="?attr/colorOnPrimary" />
+            android:contentDescription="@string/remove_user"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            app:backgroundTint="@android:color/holo_red_light"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/cancel_circle_half_dot_stroke_rounded"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="16dp"
+            app:iconTint="?attr/colorOnPrimary" />
 
     </FrameLayout>
 

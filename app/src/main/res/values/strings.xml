@@ -61,4 +61,6 @@
     <string name="save_changes">Save Changes</string>
     <string name="tap_to_change_photo">Tap to change photo</string>
     <string name="account">Account</string>
+    <string name="remove_user">Remove user</string>
+    <string name="selected_members_0">Selected Members (0)</string>
 </resources>

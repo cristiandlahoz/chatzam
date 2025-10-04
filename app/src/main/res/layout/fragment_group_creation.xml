@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="24dp"
-                android:text="Tap to add group photo"
+                android:text="@string/tap_to_add_group_photo"
                 android:textColor="@color/text_color_secondary"
                 android:textSize="14sp" />
 
@@ -44,7 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:hint="Group name"
+                android:hint="@string/group_name"
                 app:boxStrokeColor="?attr/colorPrimary"
                 app:hintTextColor="?attr/colorPrimaryVariant"
                 app:startIconDrawable="@drawable/quill_pen_ai_line">
@@ -62,7 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Add Members"
+                android:text="@string/add_members"
                 android:textColor="?attr/colorOnBackground"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -72,7 +72,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/search_view_rounded_background"
-                android:hint="Search users..."
+                android:hint="@string/search_member"
                 app:boxBackgroundMode="none"
                 app:hintTextColor="@color/text_color_secondary"
                 app:hintEnabled="false"
@@ -81,7 +81,7 @@
                     android:id="@+id/searchUsersEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Search users..."
+                    android:hint="@string/search_users"
                     android:drawableStart="@drawable/ic_search"
                     android:inputType="text"
                     android:padding="12dp"
@@ -102,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Selected Members (0)"
+                android:text="@string/selected_members_0"
                 android:textColor="?attr/colorOnBackground"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -120,7 +120,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Available Users"
+                android:text="@string/available_users"
                 android:textColor="?attr/colorOnBackground"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -142,7 +142,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:enabled="false"
-        android:text="Create Group"
+        android:text="@string/create_group"
         style="@style/Widget.Material3.Button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
