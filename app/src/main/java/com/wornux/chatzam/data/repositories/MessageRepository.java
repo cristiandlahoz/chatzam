@@ -1,18 +1,16 @@
 package com.wornux.chatzam.data.repositories;
 
-import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.wornux.chatzam.services.FirebaseStorageService;
-import com.wornux.chatzam.services.FirestoreService;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.data.enums.MessageType;
-
-
+import com.wornux.chatzam.data.repositories.base.BaseRepository;
+import com.wornux.chatzam.services.FirebaseManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,29 +19,22 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class MessageRepository {
-    
-    private static final String MESSAGES_COLLECTION = "messages";
-    
-    private final FirestoreService firestoreService;
-    private final FirebaseStorageService storageService;
+public class MessageRepository extends BaseRepository<Message> {
     
     @Inject
-    public MessageRepository(FirestoreService firestoreService, 
-                                FirebaseStorageService storageService) {
-        this.firestoreService = firestoreService;
-        this.storageService = storageService;
+    public MessageRepository(FirebaseManager firebaseManager) {
+        super(firebaseManager.getFirestore(), Message.class);
     }
     
-    public Task<DocumentReference> sendMessage(Message message) {
+    public Task<DocumentReference> createMessage(Message message) {
         Map<String, Object> messageData = messageToMap(message);
-        return firestoreService.addDocument(MESSAGES_COLLECTION, messageData);
+        return addDocument(messageData);
     }
     
-    public LiveData<List<Message>> getMessages(String chatId) {
+    public LiveData<List<Message>> getMessagesByChatId(String chatId) {
         MutableLiveData<List<Message>> messagesLiveData = new MutableLiveData<>();
         
-        firestoreService.getFirestore().collection(MESSAGES_COLLECTION)
+        firestore.collection(collectionName)
                 .whereEqualTo("chatId", chatId)
                 .orderBy("timestamp", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, error) -> {
@@ -62,47 +53,17 @@ public class MessageRepository {
         return messagesLiveData;
     }
     
-    public Task<Void> markMessageAsRead(String messageId) {
+    public Task<Void> markAsRead(String messageId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("isRead", true);
         updates.put("isDelivered", true);
-        
-        return firestoreService.updateDocument(MESSAGES_COLLECTION, messageId, updates);
+        return updateDocument(messageId, updates);
     }
     
-    public Task<Void> markMessageAsDelivered(String messageId) {
+    public Task<Void> markAsDelivered(String messageId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("isDelivered", true);
-        
-        return firestoreService.updateDocument(MESSAGES_COLLECTION, messageId, updates);
-    }
-    
-    public Task<Void> deleteMessage(String messageId) {
-        return firestoreService.deleteDocument(MESSAGES_COLLECTION, messageId);
-    }
-    
-    public Task<String> uploadMedia(Uri uri, MessageType messageType) {
-        String fileName = "media_" + System.currentTimeMillis();
-        
-        Task<Uri> uploadTask;
-        switch (messageType) {
-            case IMAGE:
-                uploadTask = storageService.uploadImage(uri, fileName);
-                break;
-            case VIDEO:
-                uploadTask = storageService.uploadVideo(uri, fileName);
-                break;
-            case DOCUMENT:
-                uploadTask = storageService.uploadDocument(uri, fileName);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported media type: " + messageType);
-        }
-        
-        return uploadTask.continueWith(task -> {
-            Uri downloadUrl = task.getResult();
-            return downloadUrl.toString();
-        });
+        return updateDocument(messageId, updates);
     }
     
     private Map<String, Object> messageToMap(Message message) {

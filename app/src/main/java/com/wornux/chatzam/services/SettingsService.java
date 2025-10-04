@@ -1,4 +1,4 @@
-package com.wornux.chatzam.data.repositories;
+package com.wornux.chatzam.services;
 
 import android.content.SharedPreferences;
 
@@ -6,12 +6,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class SettingsRepository {
+public class SettingsService {
 
   private final SharedPreferences preferences;
 
   @Inject
-  public SettingsRepository(SharedPreferences preferences) {
+  public SettingsService(SharedPreferences preferences) {
     this.preferences = preferences;
   }
 

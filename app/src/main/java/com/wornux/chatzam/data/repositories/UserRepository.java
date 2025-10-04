@@ -1,17 +1,15 @@
 package com.wornux.chatzam.data.repositories;
 
-import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.wornux.chatzam.services.AuthenticationManager;
-import com.wornux.chatzam.services.FirebaseStorageService;
-import com.wornux.chatzam.services.FirestoreService;
-import com.wornux.chatzam.data.entities.UserProfile;
-
+import com.wornux.chatzam.data.entities.User;
+import com.wornux.chatzam.data.repositories.base.BaseRepository;
+import com.wornux.chatzam.services.FirebaseManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,172 +18,143 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class UserRepository {
-
-  private static final String USERS_COLLECTION = "users";
-  private static final String FRIENDS_COLLECTION = "friends";
-
-  private final FirestoreService firestoreService;
-  private final FirebaseStorageService storageService;
-  private final AuthenticationManager authManager;
-
-  @Inject
-  public UserRepository(
-      FirestoreService firestoreService,
-      FirebaseStorageService storageService,
-      AuthenticationManager authManager) {
-    this.firestoreService = firestoreService;
-    this.storageService = storageService;
-    this.authManager = authManager;
-  }
-
-  public Task<DocumentReference> createUserProfile(UserProfile userProfile) {
-    Map<String, Object> userData = userProfileToMap(userProfile);
-    return firestoreService.addDocument(USERS_COLLECTION, userData);
-  }
-
-  public Task<UserProfile> getUserProfile(String userId) {
-    return firestoreService
-        .getDocument(USERS_COLLECTION, userId)
-        .continueWith(
-            task -> {
-              DocumentSnapshot document = task.getResult();
-              if (document.exists()) {
-                return documentToUserProfile(document);
-              }
-              return null;
-            });
-  }
-
-  public Task<Void> updateUserProfile(UserProfile userProfile) {
-    Map<String, Object> userData = userProfileToMap(userProfile);
-    return firestoreService.updateDocument(USERS_COLLECTION, userProfile.getUserId(), userData);
-  }
-
-  public Task<List<UserProfile>> searchUsers(String query) {
-    return firestoreService
-        .getCollection(USERS_COLLECTION)
-        .continueWith(
-            task -> {
-              QuerySnapshot querySnapshot = task.getResult();
-              List<UserProfile> users = new ArrayList<>();
-
-              for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                UserProfile user = documentToUserProfile(document);
-                if (user.getDisplayName().toLowerCase().contains(query.toLowerCase())
-                    || user.getEmail().toLowerCase().contains(query.toLowerCase())) {
-                  users.add(user);
-                }
-              }
-              return users;
-            });
-  }
-
-  public LiveData<List<UserProfile>> getFriends(String userId) {
-    MutableLiveData<List<UserProfile>> friendsLiveData = new MutableLiveData<>();
-
-    firestoreService.addSnapshotListener(
-        FRIENDS_COLLECTION + "/" + userId + "/friends",
-        (value, error) -> {
-          if (error == null && value != null) {
-            List<UserProfile> friends = new ArrayList<>();
-
-            for (DocumentSnapshot doc : value.getDocuments()) {
-              String friendId = doc.getId();
-              getUserProfile(friendId)
-                  .addOnSuccessListener(
-                      friendProfile -> {
-                        if (friendProfile != null) {
-                          friends.add(friendProfile);
-                          friendsLiveData.setValue(friends);
-                        }
-                      });
-            }
-          }
-        });
-
-    return friendsLiveData;
-  }
-
-  public Task<Void> addFriend(String userId, String friendId) {
-    Map<String, Object> friendData = new HashMap<>();
-    friendData.put("friendId", friendId);
-    friendData.put("timestamp", System.currentTimeMillis());
-
-    return firestoreService
-        .addDocument(FRIENDS_COLLECTION + "/" + userId + "/friends", friendData)
-        .continueWith(task -> null);
-  }
-
-  public Task<Void> removeFriend(String userId, String friendId) {
-    return firestoreService.deleteDocument(
-        FRIENDS_COLLECTION + "/" + userId + "/friends", friendId);
-  }
-
-  public Task<String> uploadProfileImage(String userId, Uri imageUri) {
-    String fileName = "profile_" + userId + "_" + System.currentTimeMillis();
-    return storageService
-        .uploadImage(imageUri, fileName)
-        .continueWith(
-            task -> {
-              Uri downloadUrl = task.getResult();
-              return downloadUrl.toString();
-            });
-  }
-
-  public Task<Void> updateProfileImage(String userId, String imageUrl) {
-    Map<String, Object> updates = new HashMap<>();
-    updates.put("profileImageUrl", imageUrl);
-    return firestoreService.updateDocument(USERS_COLLECTION, userId, updates);
-  }
-
-  public LiveData<UserProfile> getCurrentUserProfile() {
-    MutableLiveData<UserProfile> profileLiveData = new MutableLiveData<>();
-
-    String currentUserId = getCurrentUserId();
-    if (currentUserId != null) {
-      firestoreService
-          .getFirestore()
-          .collection(USERS_COLLECTION)
-          .document(currentUserId)
-          .addSnapshotListener(
-              (documentSnapshot, error) -> {
-                if (error == null && documentSnapshot != null && documentSnapshot.exists()) {
-                  UserProfile profile = documentToUserProfile(documentSnapshot);
-                  profileLiveData.setValue(profile);
-                }
-              });
+public class UserRepository extends BaseRepository<User> {
+    
+    private static final String FRIENDS_COLLECTION = "friends";
+    
+    @Inject
+    public UserRepository(FirebaseManager firebaseManager) {
+        super(firebaseManager.getFirestore(), User.class);
     }
+    
+    public Task<DocumentReference> createUser(User user) {
+        Map<String, Object> userData = userToMap(user);
+        return addDocument(userData);
+    }
+    
+    public Task<User> getUserById(String userId) {
+        return getDocument(userId)
+                .continueWith(task -> {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        return documentToUser(document);
+                    }
+                    return null;
+                });
+    }
+    
+    public Task<Void> updateUser(User user) {
+        Map<String, Object> userData = userToMap(user);
+        return updateDocument(user.getUserId(), userData);
+    }
+    
+    public Task<List<User>> searchUsers(String query) {
+        return getCollection()
+                .continueWith(task -> {
+                    QuerySnapshot querySnapshot = task.getResult();
+                    List<User> users = new ArrayList<>();
 
-    return profileLiveData;
-  }
+                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        User user = documentToUser(document);
+                        if (query.isEmpty() ||
+                            user.getDisplayName().toLowerCase().contains(query.toLowerCase()) ||
+                            user.getEmail().toLowerCase().contains(query.toLowerCase())) {
+                            users.add(user);
+                        }
+                    }
+                    return users;
+                });
+    }
+    
+    public LiveData<User> getUserRealtime(String userId) {
+        MutableLiveData<User> userLiveData = new MutableLiveData<>();
+        
+        firestore.collection(collectionName)
+                .document(userId)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error == null && documentSnapshot != null && documentSnapshot.exists()) {
+                        User user = documentToUser(documentSnapshot);
+                        userLiveData.setValue(user);
+                    }
+                });
+        
+        return userLiveData;
+    }
+    
+    public Task<Void> updateProfileImage(String userId, String imageUrl) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("profileImageUrl", imageUrl);
+        return updateDocument(userId, updates);
+    }
+    
+    public LiveData<List<User>> getFriends(String userId) {
+        MutableLiveData<List<User>> friendsLiveData = new MutableLiveData<>();
 
-  private String getCurrentUserId() {
-    return authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUid() : null;
-  }
+        firestore.collection(FRIENDS_COLLECTION)
+                .document(userId)
+                .collection("friends")
+                .addSnapshotListener((value, error) -> {
+                    if (error == null && value != null) {
+                        List<User> friends = new ArrayList<>();
 
-  private Map<String, Object> userProfileToMap(UserProfile userProfile) {
-    Map<String, Object> data = new HashMap<>();
-    data.put("userId", userProfile.getUserId());
-    data.put("email", userProfile.getEmail());
-    data.put("displayName", userProfile.getDisplayName());
-    data.put("profileImageUrl", userProfile.getProfileImageUrl());
-    data.put("isOnline", userProfile.isOnline());
-    data.put("lastSeen", userProfile.getLastSeen());
-    data.put("status", userProfile.getStatus() != null ? userProfile.getStatus().name() : null);
-    return data;
-  }
+                        for (DocumentSnapshot doc : value.getDocuments()) {
+                            String friendId = doc.getId();
+                            getUserById(friendId)
+                                    .addOnSuccessListener(friendUser -> {
+                                        if (friendUser != null) {
+                                            friends.add(friendUser);
+                                            friendsLiveData.setValue(friends);
+                                        }
+                                    });
+                        }
+                    }
+                });
 
-  private UserProfile documentToUserProfile(DocumentSnapshot document) {
-    return UserProfile.builder()
-        .userId(document.getId())
-        .email(document.getString("email"))
-        .displayName(document.getString("displayName"))
-        .profileImageUrl(document.getString("profileImageUrl"))
-        .isOnline(
-            document.getBoolean("isOnline") != null
-                && Boolean.TRUE.equals(document.getBoolean("isOnline")))
-        .lastSeen(document.getDate("lastSeen"))
-        .build();
-  }
+        return friendsLiveData;
+    }
+    
+    public Task<Void> addFriend(String userId, String friendId) {
+        Map<String, Object> friendData = new HashMap<>();
+        friendData.put("friendId", friendId);
+        friendData.put("timestamp", System.currentTimeMillis());
+
+        return firestore.collection(FRIENDS_COLLECTION)
+                .document(userId)
+                .collection("friends")
+                .add(friendData)
+                .continueWith(task -> null);
+    }
+    
+    public Task<Void> removeFriend(String userId, String friendId) {
+        return firestore.collection(FRIENDS_COLLECTION)
+                .document(userId)
+                .collection("friends")
+                .document(friendId)
+                .delete();
+    }
+    
+    private Map<String, Object> userToMap(User user) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", user.getUserId());
+        data.put("email", user.getEmail());
+        data.put("displayName", user.getDisplayName());
+        data.put("profileImageUrl", user.getProfileImageUrl());
+        data.put("isOnline", user.isOnline());
+        data.put("lastSeen", user.getLastSeen());
+        data.put("status", user.getStatus() != null ? user.getStatus().name() : null);
+        return data;
+    }
+    
+    private User documentToUser(DocumentSnapshot document) {
+        return User.builder()
+                .userId(document.getId())
+                .email(document.getString("email"))
+                .displayName(document.getString("displayName"))
+                .profileImageUrl(document.getString("profileImageUrl"))
+                .isOnline(
+                    document.getBoolean("isOnline") != null
+                        && Boolean.TRUE.equals(document.getBoolean("isOnline")))
+                .lastSeen(document.getDate("lastSeen"))
+                .build();
+    }
 }

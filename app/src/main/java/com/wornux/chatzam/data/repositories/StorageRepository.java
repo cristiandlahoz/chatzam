@@ -1,21 +1,22 @@
-package com.wornux.chatzam.services;
+package com.wornux.chatzam.data.repositories;
 
 import android.net.Uri;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.wornux.chatzam.services.FirebaseManager;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class FirebaseStorageService {
+public class StorageRepository {
     
     private final FirebaseStorage storage;
     private final StorageReference storageRef;
     
     @Inject
-    public FirebaseStorageService(FirebaseManager firebaseManager) {
+    public StorageRepository(FirebaseManager firebaseManager) {
         this.storage = firebaseManager.getStorage();
         this.storageRef = storage.getReference();
     }
