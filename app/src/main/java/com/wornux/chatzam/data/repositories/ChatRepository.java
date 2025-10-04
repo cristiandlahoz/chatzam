@@ -54,14 +54,15 @@ public class ChatRepository {
         return chatsLiveData;
     }
     
-    public Task<String> createChat(List<String> participants, boolean isGroup) {
+    public Task<String> createIndividualChat(List<String> participants, String chatDisplayName) {
         String chatId = UUID.randomUUID().toString();
 
         Chat chat = Chat.builder()
                 .chatId(chatId)
                 .participants(participants)
-                .chatType(isGroup ? ChatType.GROUP : ChatType.INDIVIDUAL)
-                .isGroup(isGroup)
+                .chatType(ChatType.INDIVIDUAL)
+                .isGroup(false)
+                .groupName(chatDisplayName)
                 .unreadCount(0)
                 .build();
         
