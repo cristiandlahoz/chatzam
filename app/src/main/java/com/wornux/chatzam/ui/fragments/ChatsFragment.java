@@ -82,12 +82,7 @@ public class ChatsFragment extends BaseFragment<ChatListViewModel> implements Ch
   }
 
   @Override
-  protected void setupClickListeners() {
-    binding.createGroupFab.setOnClickListener(
-        v ->
-            getNavController()
-                .navigate(com.wornux.chatzam.R.id.action_nav_home_to_nav_group_creation));
-  }
+  protected void setupClickListeners() {}
 
     @Override
     protected Class<ChatListViewModel> getViewModelClass() {
