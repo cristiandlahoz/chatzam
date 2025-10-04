@@ -54,4 +54,5 @@
     <string name="available_users">Available Users</string>
     <string name="clear">Clear</string>
     <string name="search_member">Search member</string>
+    <string name="searchbar_hint">john doe</string>
 </resources>
