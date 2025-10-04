@@ -16,6 +16,7 @@
         android:layout_marginEnd="12dp"
         android:src="@drawable/ic_launcher_foreground"
         app:civ_border_color="@android:color/darker_gray"
+        app:civ_circle_background_color="@android:color/background_dark"
         app:civ_border_width="1dp" />
 
     <LinearLayout
@@ -49,7 +50,8 @@
         android:id="@+id/radioButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        android:buttonTint="@android:color/holo_purple"/>/>
 
 
 </LinearLayout>
