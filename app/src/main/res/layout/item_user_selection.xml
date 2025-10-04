@@ -15,7 +15,7 @@
         android:layout_height="48dp"
         android:layout_marginEnd="12dp"
         android:src="@drawable/ic_launcher_foreground"
-        app:civ_border_color="@android:color/darker_gray"
+        app:civ_border_color="@color/text_color_secondary"
         app:civ_border_width="1dp" />
 
     <LinearLayout
@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/colorOnBackground"
             android:textSize="16sp"
             android:textStyle="bold"
             tools:text="John Doe" />
@@ -39,7 +39,7 @@
             android:id="@+id/userEmailText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/text_color_secondary"
             android:textSize="14sp"
             tools:text="john.doe@example.com" />
 
@@ -50,6 +50,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:buttonTint="@color/design_default_color_primary" />
+        android:buttonTint="?attr/colorPrimary" />
 
 </LinearLayout>

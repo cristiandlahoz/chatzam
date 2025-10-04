@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#091114"
+    android:background="@color/dark_background"
     tools:context=".ui.fragments.ChatFragment">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -28,7 +28,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="0dp"
-        android:background="@color/material_dynamic_neutral20"
+        android:background="@color/dark_surface"
         android:elevation="0dp"
         android:orientation="horizontal"
         android:padding="8dp"
@@ -48,8 +48,8 @@
             android:maxLines="4"
             android:minHeight="40dp"
             android:padding="8dp"
-            android:textColor="@color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:textColor="?attr/colorOnSurface"
+            android:textColorHint="@color/text_color_secondary"
             android:textSize="16sp" />
 
         <ImageButton
@@ -60,7 +60,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/send_message"
             android:src="@android:drawable/ic_menu_send"
-            app:tint="@color/white" />
+            app:tint="?attr/colorPrimary" />
 
     </LinearLayout>
 

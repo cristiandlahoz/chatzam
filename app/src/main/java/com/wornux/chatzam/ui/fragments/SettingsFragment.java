@@ -40,24 +40,19 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
   protected void setupObservers() {
     viewModel
         .getPushNotifications()
-        .observe(
-            getViewLifecycleOwner(),
-            enabled -> binding.pushNotificationsSwitch.setChecked(enabled));
+        .observe(getViewLifecycleOwner(), binding.pushNotificationsSwitch::setChecked);
 
     viewModel
         .getMessageSounds()
-        .observe(
-            getViewLifecycleOwner(), enabled -> binding.messageSoundsSwitch.setChecked(enabled));
+        .observe(getViewLifecycleOwner(), binding.messageSoundsSwitch::setChecked);
 
     viewModel
         .getShowOnlineStatus()
-        .observe(
-            getViewLifecycleOwner(), enabled -> binding.onlineStatusSwitch.setChecked(enabled));
+        .observe(getViewLifecycleOwner(), binding.onlineStatusSwitch::setChecked);
 
     viewModel
         .getReadReceipts()
-        .observe(
-            getViewLifecycleOwner(), enabled -> binding.readReceiptsSwitch.setChecked(enabled));
+        .observe(getViewLifecycleOwner(), binding.readReceiptsSwitch::setChecked);
   }
 
   @Override
@@ -87,9 +82,6 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
         });
 
     binding.logoutButton.setOnClickListener(v -> logout());
-
-    binding.deleteAccountButton.setOnClickListener(
-        v -> showSnackbar(getString(R.string.account_deletion_functionality_coming_soon)));
   }
 
   private void logout() {

@@ -18,7 +18,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:src="@drawable/ic_launcher_foreground"
-            app:civ_border_color="@color/design_default_color_primary"
+            app:civ_border_color="?attr/colorPrimary"
             app:civ_border_width="2dp" />
 
         <ImageButton
@@ -30,7 +30,7 @@
             android:contentDescription="Remove user"
             android:scaleType="centerInside"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="@android:color/white" />
+            app:tint="?attr/colorOnPrimary" />
 
     </FrameLayout>
 
@@ -39,11 +39,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:maxWidth="60dp"
-        android:textColor="@android:color/black"
-        android:textSize="12sp"
-        tools:text="John" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:maxWidth="60dp"
+            android:textColor="?attr/colorOnBackground"
+            android:textSize="12sp"
+            tools:text="John" />
 
 </LinearLayout>

@@ -39,14 +39,12 @@
     <string name="message_sounds">Message Sounds</string>
     <string name="push_notifications">Push Notifications</string>
     <string name="notifications">Notifications</string>
-    <string name="settings_fragment_title">Settings</string>
     <string name="privacy">Privacy</string>
     <string name="show_online_status">Show Online Status</string>
     <string name="read_receipts">Read Receipts</string>
     <string name="notification_settings_updated">Notification settings updated</string>
     <string name="sound_settings_updated">Sound settings updated</string>
     <string name="privacy_settings_updated">Privacy settings updated</string>
-    <string name="account_deletion_functionality_coming_soon">Account deletion functionality coming soon!</string>
     <string name="logout">Logout</string>
     <string name="delete_account">Delete Account</string>
     <string name="logout_confirmation_title">Logout?</string>

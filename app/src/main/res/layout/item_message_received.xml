@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
     android:gravity="start"
-    android:background="#091114"
+    android:background="@color/dark_background"
     android:orientation="horizontal"
     android:paddingStart="16dp"
     android:paddingEnd="64dp">
@@ -18,13 +18,13 @@
         android:layout_gravity="bottom"
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_launcher_foreground"
-        app:civ_border_color="@android:color/darker_gray"
+        app:civ_border_color="@color/text_color_secondary"
         app:civ_border_width="1dp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#091114"
+        android:background="@color/dark_surface_variant"
         android:orientation="vertical"
         android:padding="12dp">
 
@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
             tools:text="This is a received message" />
 
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/text_color_secondary"
             android:textSize="12sp"
             tools:text="14:30" />
 
