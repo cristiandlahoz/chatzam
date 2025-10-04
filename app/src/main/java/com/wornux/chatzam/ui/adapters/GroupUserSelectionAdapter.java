@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.databinding.ItemUserSelectionBinding;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,13 +15,13 @@ import java.util.Set;
 
 public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSelectionAdapter.UserSelectionViewHolder> {
     
-    private List<UserProfile> users = new ArrayList<>();
+    private List<User> users = new ArrayList<>();
     private Set<String> selectedUserIds = new HashSet<>();
     private OnUserSelectionListener selectionListener;
     
     public interface OnUserSelectionListener {
-        void onUserSelected(UserProfile user);
-        void onUserDeselected(UserProfile user);
+        void onUserSelected(User user);
+        void onUserDeselected(User user);
     }
     
     public void setOnUserSelectionListener(OnUserSelectionListener listener) {
@@ -38,7 +38,7 @@ public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSel
     
     @Override
     public void onBindViewHolder(@NonNull UserSelectionViewHolder holder, int position) {
-        UserProfile user = users.get(position);
+        User user = users.get(position);
         holder.bind(user);
     }
     
@@ -47,7 +47,7 @@ public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSel
         return users.size();
     }
     
-    public void updateUsers(List<UserProfile> newUsers) {
+    public void updateUsers(List<User> newUsers) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new UserDiffCallback(users, newUsers));
         users.clear();
         users.addAll(newUsers);
@@ -63,9 +63,9 @@ public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSel
         return new ArrayList<>(selectedUserIds);
     }
     
-    public List<UserProfile> getSelectedUsers() {
-        List<UserProfile> selectedUsers = new ArrayList<>();
-        for (UserProfile user : users) {
+    public List<User> getSelectedUsers() {
+        List<User> selectedUsers = new ArrayList<>();
+        for (User user : users) {
             if (selectedUserIds.contains(user.getUserId())) {
                 selectedUsers.add(user);
             }
@@ -82,7 +82,7 @@ public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSel
             
             binding.userSelectionCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                    UserProfile user = users.get(getAdapterPosition());
+                    User user = users.get(getAdapterPosition());
                     if (isChecked) {
                         selectedUserIds.add(user.getUserId());
                         if (selectionListener != null) {
@@ -102,7 +102,7 @@ public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSel
             });
         }
         
-        public void bind(UserProfile user) {
+        public void bind(User user) {
             binding.userNameText.setText(user.getDisplayName() != null ? user.getDisplayName() : "Unknown User");
             binding.userEmailText.setText(user.getEmail() != null ? user.getEmail() : "");
             
@@ -126,10 +126,10 @@ public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSel
     }
     
     private static class UserDiffCallback extends DiffUtil.Callback {
-        private final List<UserProfile> oldList;
-        private final List<UserProfile> newList;
+        private final List<User> oldList;
+        private final List<User> newList;
         
-        public UserDiffCallback(List<UserProfile> oldList, List<UserProfile> newList) {
+        public UserDiffCallback(List<User> oldList, List<User> newList) {
             this.oldList = oldList;
             this.newList = newList;
         }
@@ -152,8 +152,8 @@ public class GroupUserSelectionAdapter extends RecyclerView.Adapter<GroupUserSel
         
         @Override
         public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            UserProfile oldUser = oldList.get(oldItemPosition);
-            UserProfile newUser = newList.get(newItemPosition);
+            User oldUser = oldList.get(oldItemPosition);
+            User newUser = newList.get(newItemPosition);
             
             return oldUser.equals(newUser);
         }

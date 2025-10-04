@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentGroupCreationBinding;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.ui.adapters.SelectedUsersAdapter;
 import com.wornux.chatzam.ui.adapters.GroupUserSelectionAdapter;
 import com.wornux.chatzam.ui.base.BaseFragment;
@@ -50,13 +50,13 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
         
         groupUserSelectionAdapter.setOnUserSelectionListener(new GroupUserSelectionAdapter.OnUserSelectionListener() {
             @Override
-            public void onUserSelected(UserProfile user) {
+            public void onUserSelected(User user) {
                 viewModel.addUserToSelection(user);
                 selectedUsersAdapter.addUser(user);
             }
             
             @Override
-            public void onUserDeselected(UserProfile user) {
+            public void onUserDeselected(User user) {
                 viewModel.removeUserFromSelection(user);
                 selectedUsersAdapter.removeUser(user);
             }

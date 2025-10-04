@@ -6,7 +6,7 @@ import androidx.lifecycle.Transformations;
 import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.data.enums.MessageType;
-import com.wornux.chatzam.data.repositories.MessageRepository;
+import com.wornux.chatzam.services.MessageService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import lombok.Getter;
@@ -19,21 +19,21 @@ import javax.inject.Inject;
 @HiltViewModel
 public class ChatViewModel extends BaseViewModel {
 
-  private final MessageRepository messageRepository;
+  private final MessageService messageService;
   private final AuthenticationManager authManager;
   private final MutableLiveData<String> currentChatId = new MutableLiveData<>();
   @Getter private final LiveData<List<Message>> messages;
 
   @Inject
-  public ChatViewModel(MessageRepository messageRepository, AuthenticationManager authManager) {
-    this.messageRepository = messageRepository;
+  public ChatViewModel(MessageService messageService, AuthenticationManager authManager) {
+    this.messageService = messageService;
     this.authManager = authManager;
 
     LiveData<List<Message>> emptyMessages = new MutableLiveData<>();
     this.messages =
         Transformations.switchMap(
             currentChatId,
-            chatId -> (chatId != null) ? messageRepository.getMessages(chatId) : emptyMessages);
+            chatId -> (chatId != null) ? messageService.getMessages(chatId) : emptyMessages);
   }
 
   public void setChatId(String chatId) {
@@ -77,7 +77,7 @@ public class ChatViewModel extends BaseViewModel {
             .build();
 
     setLoading(true);
-    messageRepository
+    messageService
         .sendMessage(message)
         .addOnSuccessListener(
             documentReference -> {
@@ -91,7 +91,7 @@ public class ChatViewModel extends BaseViewModel {
   }
 
   public void markMessageAsRead(String messageId) {
-    messageRepository
+    messageService
         .markMessageAsRead(messageId)
         .addOnFailureListener(
             exception -> setError("Failed to mark message as read: " + exception.getMessage()));

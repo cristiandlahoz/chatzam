@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.data.entities.Chat;
-import com.wornux.chatzam.data.repositories.ChatRepository;
+import com.wornux.chatzam.services.ChatService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import lombok.Getter;
@@ -16,21 +16,20 @@ import javax.inject.Inject;
 @HiltViewModel
 public class ChatListViewModel extends BaseViewModel {
     
-    private final ChatRepository chatRepository;
+    private final ChatService chatService;
     private final AuthenticationManager authManager;
     @Getter
     private final LiveData<List<Chat>> chats;
     
     @Inject
-    public ChatListViewModel(ChatRepository chatRepository, 
+    public ChatListViewModel(ChatService chatService, 
                            AuthenticationManager authManager) {
-        this.chatRepository = chatRepository;
+        this.chatService = chatService;
         this.authManager = authManager;
         
-        // Get real-time chats from Firebase for current user
         String currentUserId = getCurrentUserId();
         if (currentUserId != null) {
-            this.chats = chatRepository.getChats(currentUserId);
+            this.chats = chatService.getChats(currentUserId);
         } else {
             this.chats = new MutableLiveData<>();
         }
@@ -43,7 +42,7 @@ public class ChatListViewModel extends BaseViewModel {
     
     public void deleteChat(String chatId) {
         setLoading(true);
-        chatRepository.deleteChat(chatId)
+        chatService.deleteChat(chatId)
                 .addOnSuccessListener(aVoid -> {
                     setLoading(false);
                 })

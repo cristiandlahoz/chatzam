@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentChatCreationBinding;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.ui.adapters.SingleUserSelectionAdapter;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.ChatCreationViewModel;
@@ -50,12 +50,12 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
 
         userSelectionAdapter.setOnUserSelectionListener(new SingleUserSelectionAdapter.OnUserSelectionListener() {
             @Override
-            public void onUserSelected(UserProfile user) {
+            public void onUserSelected(User user) {
                 viewModel.addUserToSelection(user);
             }
 
             @Override
-            public void onUserDeselected(UserProfile user) {
+            public void onUserDeselected(User user) {
                 viewModel.removeUserFromSelection(user);
             }
         });

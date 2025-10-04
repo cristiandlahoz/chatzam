@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.databinding.ItemUserChatSelectionBinding;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,13 +15,13 @@ import java.util.Set;
 
 public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserSelectionAdapter.SingleUserSelectionViewHolder> {
     
-    private List<UserProfile> users = new ArrayList<>();
+    private List<User> users = new ArrayList<>();
     private Set<String> selectedUserIds = new HashSet<>();
     private OnUserSelectionListener selectionListener;
     
     public interface OnUserSelectionListener {
-        void onUserSelected(UserProfile user);
-        void onUserDeselected(UserProfile user);
+        void onUserSelected(User user);
+        void onUserDeselected(User user);
     }
     
     public void setOnUserSelectionListener(OnUserSelectionListener listener) {
@@ -38,7 +38,7 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
     
     @Override
     public void onBindViewHolder(@NonNull SingleUserSelectionViewHolder holder, int position) {
-        UserProfile user = users.get(position);
+        User user = users.get(position);
         holder.bind(user);
     }
     
@@ -47,14 +47,14 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
         return users.size();
     }
     
-    public void updateUsers(List<UserProfile> newUsers) {
+    public void updateUsers(List<User> newUsers) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new UserDiffCallback(users, newUsers));
         users.clear();
         users.addAll(newUsers);
         diffResult.dispatchUpdatesTo(this);
     }
 
-    public void setSelectedUser(UserProfile user) {
+    public void setSelectedUser(User user) {
         selectedUserIds.clear();
         if (user != null) {
             selectedUserIds.add(user.getUserId());
@@ -71,9 +71,9 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
         return new ArrayList<>(selectedUserIds);
     }
     
-    public List<UserProfile> getSelectedUsers() {
-        List<UserProfile> selectedUsers = new ArrayList<>();
-        for (UserProfile user : users) {
+    public List<User> getSelectedUsers() {
+        List<User> selectedUsers = new ArrayList<>();
+        for (User user : users) {
             if (selectedUserIds.contains(user.getUserId())) {
                 selectedUsers.add(user);
             }
@@ -90,11 +90,11 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
             
             binding.radioButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                    UserProfile user = users.get(getAdapterPosition());
+                    User user = users.get(getAdapterPosition());
                     if (isChecked) {
                         if (!selectedUserIds.isEmpty()) {
-                            UserProfile previouslySelectedUser = null;
-                            for (UserProfile u : users) {
+                            User previouslySelectedUser = null;
+                            for (User u : users) {
                                 if (selectedUserIds.contains(u.getUserId())) {
                                     previouslySelectedUser = u;
                                     break;
@@ -124,7 +124,7 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
             });
         }
         
-        public void bind(UserProfile user) {
+        public void bind(User user) {
             binding.userNameText.setText(user.getDisplayName() != null ? user.getDisplayName() : "Unknown User");
             binding.userEmailText.setText(user.getEmail() != null ? user.getEmail() : "");
             
@@ -134,8 +134,8 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
             binding.radioButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
                     if (!selectedUserIds.isEmpty()) {
-                        UserProfile previouslySelectedUser = null;
-                        for (UserProfile u : users) {
+                        User previouslySelectedUser = null;
+                        for (User u : users) {
                             if (selectedUserIds.contains(u.getUserId())) {
                                 previouslySelectedUser = u;
                                 break;
@@ -162,10 +162,10 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
     }
     
     private static class UserDiffCallback extends DiffUtil.Callback {
-        private final List<UserProfile> oldList;
-        private final List<UserProfile> newList;
+        private final List<User> oldList;
+        private final List<User> newList;
         
-        public UserDiffCallback(List<UserProfile> oldList, List<UserProfile> newList) {
+        public UserDiffCallback(List<User> oldList, List<User> newList) {
             this.oldList = oldList;
             this.newList = newList;
         }
@@ -188,8 +188,8 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
         
         @Override
         public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            UserProfile oldUser = oldList.get(oldItemPosition);
-            UserProfile newUser = newList.get(newItemPosition);
+            User oldUser = oldList.get(oldItemPosition);
+            User newUser = newList.get(newItemPosition);
             
             return oldUser.equals(newUser);
         }

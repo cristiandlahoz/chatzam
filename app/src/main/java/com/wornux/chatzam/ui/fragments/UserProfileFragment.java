@@ -13,7 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.wornux.chatzam.databinding.FragmentUserProfileBinding;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.data.enums.UserStatus;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.UserProfileViewModel;
@@ -100,7 +100,7 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
         return UserProfileViewModel.class;
     }
 
-    private void populateProfileData(UserProfile profile) {
+    private void populateProfileData(User profile) {
         if (binding.displayNameEditText.getText() == null || 
             binding.displayNameEditText.getText().toString().isEmpty()) {
             binding.displayNameEditText.setText(profile.getDisplayName());

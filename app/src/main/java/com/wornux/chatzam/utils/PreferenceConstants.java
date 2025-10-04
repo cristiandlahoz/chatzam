@@ -15,5 +15,6 @@ public final class PreferenceConstants {
     public static final boolean DEFAULT_READ_RECEIPTS = true;
     
     private PreferenceConstants() {
+        //not required
     }
 }

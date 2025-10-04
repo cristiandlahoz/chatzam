@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.google.firebase.auth.FirebaseUser;
 import com.wornux.chatzam.services.AuthenticationManager;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.data.enums.UserStatus;
-import com.wornux.chatzam.data.repositories.UserRepository;
+import com.wornux.chatzam.services.UserService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import javax.inject.Inject;
@@ -15,7 +15,7 @@ import javax.inject.Inject;
 public class AuthenticationViewModel extends BaseViewModel {
     
     private final AuthenticationManager authManager;
-    private final UserRepository userRepository;
+    private final UserService userService;
     
     private final MutableLiveData<FirebaseUser> _loginResult = new MutableLiveData<>();
     private final MutableLiveData<FirebaseUser> _registrationResult = new MutableLiveData<>();
@@ -23,9 +23,9 @@ public class AuthenticationViewModel extends BaseViewModel {
     
     @Inject
     public AuthenticationViewModel(AuthenticationManager authManager, 
-                                 UserRepository userRepository) {
+                                 UserService userService) {
         this.authManager = authManager;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
     
     public LiveData<FirebaseUser> getLoginResult() {
@@ -82,7 +82,7 @@ public class AuthenticationViewModel extends BaseViewModel {
     }
     
     private void createUserProfile(FirebaseUser firebaseUser, String displayName) {
-        UserProfile userProfile = UserProfile.builder()
+        User userProfile = User.builder()
                 .userId(firebaseUser.getUid())
                 .email(firebaseUser.getEmail())
                 .displayName(displayName)
@@ -90,7 +90,7 @@ public class AuthenticationViewModel extends BaseViewModel {
                 .status(UserStatus.ONLINE)
                 .build();
         
-        userRepository.createUserProfile(userProfile)
+        userService.createUserProfile(userProfile)
                 .addOnSuccessListener(aVoid -> {
                     setLoading(false);
                     _registrationResult.setValue(firebaseUser);

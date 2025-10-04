@@ -2,9 +2,9 @@ package com.wornux.chatzam.ui.viewmodels;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import com.wornux.chatzam.data.entities.UserProfile;
-import com.wornux.chatzam.data.repositories.ChatRepository;
-import com.wornux.chatzam.data.repositories.UserRepository;
+import com.wornux.chatzam.data.entities.User;
+import com.wornux.chatzam.services.ChatService;
+import com.wornux.chatzam.services.UserService;
 import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import java.util.ArrayList;
@@ -16,47 +16,47 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class ChatCreationViewModel extends BaseViewModel {
 
-    private final UserRepository userRepository;
-    private final ChatRepository chatRepository;
-    private final MutableLiveData<List<UserProfile>> availableUsers = new MutableLiveData<>();
-    private final MutableLiveData<List<UserProfile>> selectedUsers = new MutableLiveData<>();
+    private final UserService userService;
+    private final ChatService chatService;
+    private final MutableLiveData<List<User>> availableUsers = new MutableLiveData<>();
+    private final MutableLiveData<List<User>> selectedUsers = new MutableLiveData<>();
     private final AuthenticationManager authManager;
 
 
     @Inject
-    public ChatCreationViewModel(UserRepository userRepository,
-                                 ChatRepository chatRepository,
+    public ChatCreationViewModel(UserService userService,
+                                 ChatService chatService,
                                  AuthenticationManager authManager) {
-        this.userRepository = userRepository;
-        this.chatRepository = chatRepository;
+        this.userService = userService;
+        this.chatService = chatService;
         this.authManager = authManager;
         loadUsers();
     }
 
 
-    public LiveData<List<UserProfile>> getAvailableUsers() {
+    public LiveData<List<User>> getAvailableUsers() {
         return availableUsers;
     }
 
-    public LiveData<List<UserProfile>> getSelectedUsers() {
+    public LiveData<List<User>> getSelectedUsers() {
         return selectedUsers;
     }
 
     public void searchUsers(String query) {
-        userRepository.searchUsers(query).addOnCompleteListener(task -> {
+        userService.searchUsers(query).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 availableUsers.setValue(task.getResult());
             }
         });
     }
 
-    public void addUserToSelection(UserProfile user) {
-        List<UserProfile> currentSelection = new ArrayList<>();
+    public void addUserToSelection(User user) {
+        List<User> currentSelection = new ArrayList<>();
         currentSelection.add(user);
         selectedUsers.setValue(currentSelection);
     }
 
-    public void removeUserFromSelection(UserProfile user) {
+    public void removeUserFromSelection(User user) {
         selectedUsers.setValue(new ArrayList<>());
     }
 
@@ -64,12 +64,12 @@ public class ChatCreationViewModel extends BaseViewModel {
         String currentUserId = getCurrentUserId();
         if (currentUserId != null) {
             setLoading(true);
-            userRepository.searchUsers("")
+            userService.searchUsers("")
                     .addOnSuccessListener(users -> {
                         setLoading(false);
                         if (users != null) {
-                            List<UserProfile> filteredUsers = new ArrayList<>();
-                            for (UserProfile user : users) {
+                            List<User> filteredUsers = new ArrayList<>();
+                            for (User user : users) {
                                 if (!user.getUserId().equals(currentUserId)) {
                                     filteredUsers.add(user);
                                 }
@@ -90,19 +90,19 @@ public class ChatCreationViewModel extends BaseViewModel {
     }
 
     public void createChat(String currentUserId, OnCompleteListener<String> onCompleteListener) {
-        List<UserProfile> selected = selectedUsers.getValue();
+        List<User> selected = selectedUsers.getValue();
         if (selected == null || selected.isEmpty()) {
             setError("No user selected");
             return;
         }
 
-        UserProfile selectedUser = selected.get(0);
+        User selectedUser = selected.get(0);
         List<String> participants = new ArrayList<>();
         participants.add(currentUserId);
         participants.add(selectedUser.getUserId());
 
         setLoading(true);
-        chatRepository.createIndividualChat(participants, selectedUser.getDisplayName())
+        chatService.createIndividualChat(participants, selectedUser.getDisplayName())
                 .addOnCompleteListener(task -> {
                     setLoading(false);
                     if (!task.isSuccessful()) {

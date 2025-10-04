@@ -6,18 +6,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.databinding.ItemSelectedUserBinding;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdapter.SelectedUserViewHolder> {
     
-    private List<UserProfile> selectedUsers = new ArrayList<>();
+    private List<User> selectedUsers = new ArrayList<>();
     private OnUserRemoveListener removeListener;
     
     public interface OnUserRemoveListener {
-        void onUserRemove(UserProfile user);
+        void onUserRemove(User user);
     }
     
     public void setOnUserRemoveListener(OnUserRemoveListener listener) {
@@ -34,7 +34,7 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
     
     @Override
     public void onBindViewHolder(@NonNull SelectedUserViewHolder holder, int position) {
-        UserProfile user = selectedUsers.get(position);
+        User user = selectedUsers.get(position);
         holder.bind(user);
     }
     
@@ -43,7 +43,7 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
         return selectedUsers.size();
     }
     
-    public void updateSelectedUsers(List<UserProfile> newUsers) {
+    public void updateSelectedUsers(List<User> newUsers) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
             new SelectedUserDiffCallback(selectedUsers, newUsers));
         selectedUsers.clear();
@@ -51,14 +51,14 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
         diffResult.dispatchUpdatesTo(this);
     }
     
-    public void addUser(UserProfile user) {
+    public void addUser(User user) {
         if (!selectedUsers.contains(user)) {
             selectedUsers.add(user);
             notifyItemInserted(selectedUsers.size() - 1);
         }
     }
     
-    public void removeUser(UserProfile user) {
+    public void removeUser(User user) {
         int index = selectedUsers.indexOf(user);
         if (index != -1) {
             selectedUsers.remove(index);
@@ -75,13 +75,13 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
             
             binding.removeUserButton.setOnClickListener(v -> {
                 if (getAdapterPosition() != RecyclerView.NO_POSITION && removeListener != null) {
-                    UserProfile user = selectedUsers.get(getAdapterPosition());
+                    User user = selectedUsers.get(getAdapterPosition());
                     removeListener.onUserRemove(user);
                 }
             });
         }
         
-        public void bind(UserProfile user) {
+        public void bind(User user) {
             String displayName = user.getDisplayName();
             if (displayName != null && !displayName.isEmpty()) {
                 String firstName = displayName.split(" ")[0];
@@ -93,10 +93,10 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
     }
     
     private static class SelectedUserDiffCallback extends DiffUtil.Callback {
-        private final List<UserProfile> oldList;
-        private final List<UserProfile> newList;
+        private final List<User> oldList;
+        private final List<User> newList;
         
-        public SelectedUserDiffCallback(List<UserProfile> oldList, List<UserProfile> newList) {
+        public SelectedUserDiffCallback(List<User> oldList, List<User> newList) {
             this.oldList = oldList;
             this.newList = newList;
         }

@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import com.wornux.chatzam.services.AuthenticationManager;
-import com.wornux.chatzam.data.entities.UserProfile;
-import com.wornux.chatzam.data.repositories.ChatRepository;
-import com.wornux.chatzam.data.repositories.UserRepository;
+import com.wornux.chatzam.data.entities.User;
+import com.wornux.chatzam.services.ChatService;
+import com.wornux.chatzam.services.UserService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
@@ -17,31 +17,31 @@ import javax.inject.Inject;
 @HiltViewModel
 public class GroupChatViewModel extends BaseViewModel {
     
-    private final ChatRepository chatRepository;
-    private final UserRepository userRepository;
+    private final ChatService chatService;
+    private final UserService userService;
     private final AuthenticationManager authManager;
     
     private final MutableLiveData<String> searchQuery = new MutableLiveData<>("");
-    private final MutableLiveData<List<UserProfile>> availableUsers = new MutableLiveData<>();
-    private final MutableLiveData<List<UserProfile>> selectedUsers = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<User>> availableUsers = new MutableLiveData<>();
+    private final MutableLiveData<List<User>> selectedUsers = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> groupCreated = new MutableLiveData<>();
     
     @Inject
-    public GroupChatViewModel(ChatRepository chatRepository, 
-                             UserRepository userRepository,
+    public GroupChatViewModel(ChatService chatService, 
+                             UserService userService,
                              AuthenticationManager authManager) {
-        this.chatRepository = chatRepository;
-        this.userRepository = userRepository;
+        this.chatService = chatService;
+        this.userService = userService;
         this.authManager = authManager;
         
         loadAvailableUsers();
     }
     
-    public LiveData<List<UserProfile>> getAvailableUsers() {
+    public LiveData<List<User>> getAvailableUsers() {
         return availableUsers;
     }
     
-    public LiveData<List<UserProfile>> getSelectedUsers() {
+    public LiveData<List<User>> getSelectedUsers() {
         return selectedUsers;
     }
     
@@ -61,7 +61,7 @@ public class GroupChatViewModel extends BaseViewModel {
         }
         
         setLoading(true);
-        userRepository.searchUsers(query.trim())
+        userService.searchUsers(query.trim())
                 .addOnSuccessListener(users -> {
                     setLoading(false);
                     if (users != null) {
@@ -78,12 +78,12 @@ public class GroupChatViewModel extends BaseViewModel {
         String currentUserId = getCurrentUserId();
         if (currentUserId != null) {
             setLoading(true);
-            userRepository.searchUsers("")
+            userService.searchUsers("")
                     .addOnSuccessListener(users -> {
                         setLoading(false);
                         if (users != null) {
-                            List<UserProfile> filteredUsers = new ArrayList<>();
-                            for (UserProfile user : users) {
+                            List<User> filteredUsers = new ArrayList<>();
+                            for (User user : users) {
                                 if (!user.getUserId().equals(currentUserId)) {
                                     filteredUsers.add(user);
                                 }
@@ -98,10 +98,10 @@ public class GroupChatViewModel extends BaseViewModel {
         }
     }
     
-    public void addUserToSelection(UserProfile user) {
-        List<UserProfile> current = selectedUsers.getValue();
+    public void addUserToSelection(User user) {
+        List<User> current = selectedUsers.getValue();
         if (current != null) {
-            List<UserProfile> updated = new ArrayList<>(current);
+            List<User> updated = new ArrayList<>(current);
             if (!updated.contains(user)) {
                 updated.add(user);
                 selectedUsers.setValue(updated);
@@ -109,10 +109,10 @@ public class GroupChatViewModel extends BaseViewModel {
         }
     }
     
-    public void removeUserFromSelection(UserProfile user) {
-        List<UserProfile> current = selectedUsers.getValue();
+    public void removeUserFromSelection(User user) {
+        List<User> current = selectedUsers.getValue();
         if (current != null) {
-            List<UserProfile> updated = new ArrayList<>(current);
+            List<User> updated = new ArrayList<>(current);
             updated.remove(user);
             selectedUsers.setValue(updated);
         }
@@ -120,7 +120,7 @@ public class GroupChatViewModel extends BaseViewModel {
     
     public void createGroup(String groupName) {
         String currentUserId = getCurrentUserId();
-        List<UserProfile> selected = selectedUsers.getValue();
+        List<User> selected = selectedUsers.getValue();
         
         if (currentUserId == null) {
             setError("User not logged in");
@@ -140,12 +140,12 @@ public class GroupChatViewModel extends BaseViewModel {
         List<String> participantIds = new ArrayList<>();
         participantIds.add(currentUserId);
         
-        for (UserProfile user : selected) {
+        for (User user : selected) {
             participantIds.add(user.getUserId());
         }
         
         setLoading(true);
-        chatRepository.createGroupChat(groupName.trim(), participantIds, currentUserId)
+        chatService.createGroupChat(groupName.trim(), participantIds, currentUserId)
                 .addOnSuccessListener(chatId -> {
                     setLoading(false);
                     groupCreated.setValue(true);
@@ -158,7 +158,7 @@ public class GroupChatViewModel extends BaseViewModel {
     
     public void addMembersToGroup(String chatId, List<String> newMemberIds) {
         setLoading(true);
-        chatRepository.addMembersToGroup(chatId, newMemberIds)
+        chatService.addMembersToGroup(chatId, newMemberIds)
                 .addOnSuccessListener(aVoid -> {
                     setLoading(false);
                 })
@@ -170,7 +170,7 @@ public class GroupChatViewModel extends BaseViewModel {
     
     public void removeMemberFromGroup(String chatId, String memberId) {
         setLoading(true);
-        chatRepository.removeMemberFromGroup(chatId, memberId)
+        chatService.removeMemberFromGroup(chatId, memberId)
                 .addOnSuccessListener(aVoid -> {
                     setLoading(false);
                 })
@@ -184,7 +184,7 @@ public class GroupChatViewModel extends BaseViewModel {
         String currentUserId = getCurrentUserId();
         if (currentUserId != null) {
             setLoading(true);
-            chatRepository.leaveGroup(chatId, currentUserId)
+            chatService.leaveGroup(chatId, currentUserId)
                     .addOnSuccessListener(aVoid -> {
                         setLoading(false);
                     })
@@ -197,7 +197,7 @@ public class GroupChatViewModel extends BaseViewModel {
     
     public void updateGroupInfo(String chatId, String groupName, String groupImageUrl) {
         setLoading(true);
-        chatRepository.updateGroupInfo(chatId, groupName, groupImageUrl)
+        chatService.updateGroupInfo(chatId, groupName, groupImageUrl)
                 .addOnSuccessListener(aVoid -> {
                     setLoading(false);
                 })

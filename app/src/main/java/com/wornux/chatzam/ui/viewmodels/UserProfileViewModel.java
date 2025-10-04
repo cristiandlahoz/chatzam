@@ -4,9 +4,9 @@ import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.wornux.chatzam.services.AuthenticationManager;
-import com.wornux.chatzam.data.entities.UserProfile;
+import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.data.enums.UserStatus;
-import com.wornux.chatzam.data.repositories.UserRepository;
+import com.wornux.chatzam.services.UserService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
@@ -15,23 +15,23 @@ import javax.inject.Inject;
 @HiltViewModel
 public class UserProfileViewModel extends BaseViewModel {
     
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final AuthenticationManager authManager;
     
-    private final MutableLiveData<UserProfile> currentProfile = new MutableLiveData<>();
+    private final MutableLiveData<User> currentProfile = new MutableLiveData<>();
     private final MutableLiveData<Boolean> profileUpdated = new MutableLiveData<>();
     private final MutableLiveData<String> profileImageUrl = new MutableLiveData<>();
     
     @Inject
-    public UserProfileViewModel(UserRepository userRepository, 
+    public UserProfileViewModel(UserService userService, 
                                AuthenticationManager authManager) {
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.authManager = authManager;
         
-        loadCurrentUserProfile();
+        loadCurrentUser();
     }
     
-    public LiveData<UserProfile> getCurrentProfile() {
+    public LiveData<User> getCurrentProfile() {
         return currentProfile;
     }
     
@@ -43,11 +43,11 @@ public class UserProfileViewModel extends BaseViewModel {
         return profileImageUrl;
     }
     
-    private void loadCurrentUserProfile() {
+    private void loadCurrentUser() {
         String currentUserId = getCurrentUserId();
         if (currentUserId != null) {
             setLoading(true);
-            userRepository.getUserProfile(currentUserId)
+            userService.getUserProfile(currentUserId)
                     .addOnSuccessListener(profile -> {
                         setLoading(false);
                         if (profile != null) {
@@ -62,7 +62,7 @@ public class UserProfileViewModel extends BaseViewModel {
     }
     
     public void updateProfile(String displayName, UserStatus status) {
-        UserProfile current = currentProfile.getValue();
+        User current = currentProfile.getValue();
         String currentUserId = getCurrentUserId();
         
         if (current == null || currentUserId == null) {
@@ -75,7 +75,7 @@ public class UserProfileViewModel extends BaseViewModel {
             return;
         }
         
-        UserProfile updatedProfile = UserProfile.builder()
+        User updatedProfile = User.builder()
                 .userId(currentUserId)
                 .email(current.getEmail())
                 .displayName(displayName.trim())
@@ -86,7 +86,7 @@ public class UserProfileViewModel extends BaseViewModel {
                 .build();
         
         setLoading(true);
-        userRepository.updateUserProfile(updatedProfile)
+        userService.updateUserProfile(updatedProfile)
                 .addOnSuccessListener(aVoid -> {
                     setLoading(false);
                     currentProfile.setValue(updatedProfile);
@@ -112,7 +112,7 @@ public class UserProfileViewModel extends BaseViewModel {
         }
         
         setLoading(true);
-        userRepository.uploadProfileImage(currentUserId, imageUri)
+        userService.uploadProfileImage(currentUserId, imageUri)
                 .addOnSuccessListener(imageUrl -> {
                     profileImageUrl.setValue(imageUrl);
                     updateProfileImageUrl(imageUrl);
@@ -127,12 +127,12 @@ public class UserProfileViewModel extends BaseViewModel {
         String currentUserId = getCurrentUserId();
         
         if (currentUserId != null) {
-            userRepository.updateProfileImage(currentUserId, imageUrl)
+            userService.updateProfileImage(currentUserId, imageUrl)
                     .addOnSuccessListener(aVoid -> {
                         setLoading(false);
-                        UserProfile current = currentProfile.getValue();
+                        User current = currentProfile.getValue();
                         if (current != null) {
-                            UserProfile updated = UserProfile.builder()
+                            User updated = User.builder()
                                     .userId(current.getUserId())
                                     .email(current.getEmail())
                                     .displayName(current.getDisplayName())
@@ -152,7 +152,7 @@ public class UserProfileViewModel extends BaseViewModel {
     }
     
     public void refreshProfile() {
-        loadCurrentUserProfile();
+        loadCurrentUser();
     }
     
     private String getCurrentUserId() {

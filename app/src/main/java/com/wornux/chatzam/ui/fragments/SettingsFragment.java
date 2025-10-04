@@ -32,11 +32,6 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
   }
 
   @Override
-  protected Class<SettingsViewModel> getViewModelClass() {
-    return SettingsViewModel.class;
-  }
-
-  @Override
   protected void setupObservers() {
     viewModel
         .getPushNotifications()
@@ -104,5 +99,10 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
   public void onDestroyView() {
     super.onDestroyView();
     binding = null;
+  }
+
+  @Override
+  protected Class<SettingsViewModel> getViewModelClass() {
+    return SettingsViewModel.class;
   }
 }

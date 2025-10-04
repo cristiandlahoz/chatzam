@@ -2,7 +2,7 @@ package com.wornux.chatzam.ui.viewmodels;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import com.wornux.chatzam.data.repositories.SettingsRepository;
+import com.wornux.chatzam.services.SettingsService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import com.wornux.chatzam.utils.PreferenceConstants;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -12,7 +12,7 @@ import javax.inject.Inject;
 @HiltViewModel
 public class SettingsViewModel extends BaseViewModel {
     
-    private final SettingsRepository repository;
+    private final SettingsService settingsService;
 
     private final MutableLiveData<Boolean> pushNotifications = new MutableLiveData<>();
     private final MutableLiveData<Boolean> messageSounds = new MutableLiveData<>();
@@ -20,8 +20,8 @@ public class SettingsViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> readReceipts = new MutableLiveData<>();
     
     @Inject
-    public SettingsViewModel(SettingsRepository repository) {
-        this.repository = repository;
+    public SettingsViewModel(SettingsService settingsService) {
+        this.settingsService = settingsService;
         loadSettings();
     }
     
@@ -42,45 +42,41 @@ public class SettingsViewModel extends BaseViewModel {
     }
     
     private void loadSettings() {
-        pushNotifications.setValue(repository.getBoolean(
+        pushNotifications.setValue(settingsService.getBoolean(
             PreferenceConstants.KEY_PUSH_NOTIFICATIONS, 
             PreferenceConstants.DEFAULT_PUSH_NOTIFICATIONS));
         
-        messageSounds.setValue(repository.getBoolean(
+        messageSounds.setValue(settingsService.getBoolean(
             PreferenceConstants.KEY_MESSAGE_SOUNDS, 
             PreferenceConstants.DEFAULT_MESSAGE_SOUNDS));
         
-        showOnlineStatus.setValue(repository.getBoolean(
+        showOnlineStatus.setValue(settingsService.getBoolean(
             PreferenceConstants.KEY_SHOW_ONLINE_STATUS, 
             PreferenceConstants.DEFAULT_SHOW_ONLINE_STATUS));
         
-        readReceipts.setValue(repository.getBoolean(
+        readReceipts.setValue(settingsService.getBoolean(
             PreferenceConstants.KEY_READ_RECEIPTS, 
             PreferenceConstants.DEFAULT_READ_RECEIPTS));
     }
     
     public void updatePushNotifications(boolean enabled) {
         pushNotifications.setValue(enabled);
-        repository.saveBoolean(PreferenceConstants.KEY_PUSH_NOTIFICATIONS, enabled);
+        settingsService.saveBoolean(PreferenceConstants.KEY_PUSH_NOTIFICATIONS, enabled);
     }
     
     public void updateMessageSounds(boolean enabled) {
         messageSounds.setValue(enabled);
-        repository.saveBoolean(PreferenceConstants.KEY_MESSAGE_SOUNDS, enabled);
+        settingsService.saveBoolean(PreferenceConstants.KEY_MESSAGE_SOUNDS, enabled);
     }
     
     public void updateShowOnlineStatus(boolean enabled) {
         showOnlineStatus.setValue(enabled);
-        repository.saveBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, enabled);
+        settingsService.saveBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, enabled);
     }
     
     public void updateReadReceipts(boolean enabled) {
         readReceipts.setValue(enabled);
-        repository.saveBoolean(PreferenceConstants.KEY_READ_RECEIPTS, enabled);
+        settingsService.saveBoolean(PreferenceConstants.KEY_READ_RECEIPTS, enabled);
     }
 
-    public void logout(){
-
-    }
-    
 }
