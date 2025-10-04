@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentChatCreationBinding;
 import com.wornux.chatzam.data.entities.UserProfile;
-import com.wornux.chatzam.ui.adapters.UserSelectionAdapter;
+import com.wornux.chatzam.ui.adapters.SingleUserSelectionAdapter;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.ChatCreationViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -24,7 +24,8 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
     AuthenticationManager authenticationManager;
 
     private FragmentChatCreationBinding binding;
-    private UserSelectionAdapter userSelectionAdapter;
+    private SingleUserSelectionAdapter userSelectionAdapter;
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -43,11 +44,11 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
     }
 
     private void setupRecyclerView() {
-        userSelectionAdapter = new UserSelectionAdapter();
+        userSelectionAdapter = new SingleUserSelectionAdapter();
         binding.availableUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.availableUsersRecyclerView.setAdapter(userSelectionAdapter);
 
-        userSelectionAdapter.setOnUserSelectionListener(new UserSelectionAdapter.OnUserSelectionListener() {
+        userSelectionAdapter.setOnUserSelectionListener(new SingleUserSelectionAdapter.OnUserSelectionListener() {
             @Override
             public void onUserSelected(UserProfile user) {
                 viewModel.addUserToSelection(user);
@@ -61,7 +62,7 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
     }
 
     private void setupSearchView() {
-        binding.searchView.getEditText().addTextChangedListener(new android.text.TextWatcher() {
+        binding.searchEditText.addTextChangedListener(new android.text.TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -86,6 +87,11 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
 
         viewModel.getSelectedUsers().observe(getViewLifecycleOwner(), users -> {
             binding.createChatButton.setEnabled(users != null && !users.isEmpty());
+            if (users != null && !users.isEmpty()) {
+                userSelectionAdapter.setSelectedUser(users.get(0));
+            } else {
+                userSelectionAdapter.setSelectedUser(null);
+            }
         });
     }
 

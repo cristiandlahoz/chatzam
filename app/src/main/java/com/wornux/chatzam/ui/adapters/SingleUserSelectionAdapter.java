@@ -5,7 +5,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
-import com.wornux.chatzam.databinding.ItemUserSelectionBinding;
+import com.wornux.chatzam.databinding.ItemUserChatSelectionBinding;
 import com.wornux.chatzam.data.entities.UserProfile;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class UserSelectionAdapter extends RecyclerView.Adapter<UserSelectionAdapter.UserSelectionViewHolder> {
+public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserSelectionAdapter.SingleUserSelectionViewHolder> {
     
     private List<UserProfile> users = new ArrayList<>();
     private Set<String> selectedUserIds = new HashSet<>();
@@ -30,14 +30,14 @@ public class UserSelectionAdapter extends RecyclerView.Adapter<UserSelectionAdap
     
     @NonNull
     @Override
-    public UserSelectionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemUserSelectionBinding binding = ItemUserSelectionBinding.inflate(
+    public SingleUserSelectionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ItemUserChatSelectionBinding binding = ItemUserChatSelectionBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false);
-        return new UserSelectionViewHolder(binding);
+        return new SingleUserSelectionViewHolder(binding);
     }
     
     @Override
-    public void onBindViewHolder(@NonNull UserSelectionViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull SingleUserSelectionViewHolder holder, int position) {
         UserProfile user = users.get(position);
         holder.bind(user);
     }
@@ -52,6 +52,14 @@ public class UserSelectionAdapter extends RecyclerView.Adapter<UserSelectionAdap
         users.clear();
         users.addAll(newUsers);
         diffResult.dispatchUpdatesTo(this);
+    }
+
+    public void setSelectedUser(UserProfile user) {
+        selectedUserIds.clear();
+        if (user != null) {
+            selectedUserIds.add(user.getUserId());
+        }
+        notifyDataSetChanged();
     }
     
     public void clearSelections() {
@@ -73,21 +81,35 @@ public class UserSelectionAdapter extends RecyclerView.Adapter<UserSelectionAdap
         return selectedUsers;
     }
     
-    class UserSelectionViewHolder extends RecyclerView.ViewHolder {
-        private final ItemUserSelectionBinding binding;
+    class SingleUserSelectionViewHolder extends RecyclerView.ViewHolder {
+        private final ItemUserChatSelectionBinding binding;
         
-        public UserSelectionViewHolder(@NonNull ItemUserSelectionBinding binding) {
+        public SingleUserSelectionViewHolder(@NonNull ItemUserChatSelectionBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
             
-            binding.userSelectionCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            binding.radioButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (getAdapterPosition() != RecyclerView.NO_POSITION) {
                     UserProfile user = users.get(getAdapterPosition());
                     if (isChecked) {
+                        if (!selectedUserIds.isEmpty()) {
+                            UserProfile previouslySelectedUser = null;
+                            for (UserProfile u : users) {
+                                if (selectedUserIds.contains(u.getUserId())) {
+                                    previouslySelectedUser = u;
+                                    break;
+                                }
+                            }
+                            selectedUserIds.clear();
+                            if (previouslySelectedUser != null && selectionListener != null) {
+                                selectionListener.onUserDeselected(previouslySelectedUser);
+                            }
+                        }
                         selectedUserIds.add(user.getUserId());
                         if (selectionListener != null) {
                             selectionListener.onUserSelected(user);
                         }
+                        notifyDataSetChanged();
                     } else {
                         selectedUserIds.remove(user.getUserId());
                         if (selectionListener != null) {
@@ -98,7 +120,7 @@ public class UserSelectionAdapter extends RecyclerView.Adapter<UserSelectionAdap
             });
             
             binding.getRoot().setOnClickListener(v -> {
-                binding.userSelectionCheckBox.toggle();
+                binding.radioButton.toggle();
             });
         }
         
@@ -107,14 +129,28 @@ public class UserSelectionAdapter extends RecyclerView.Adapter<UserSelectionAdap
             binding.userEmailText.setText(user.getEmail() != null ? user.getEmail() : "");
             
             boolean isSelected = selectedUserIds.contains(user.getUserId());
-            binding.userSelectionCheckBox.setOnCheckedChangeListener(null);
-            binding.userSelectionCheckBox.setChecked(isSelected);
-            binding.userSelectionCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            binding.radioButton.setOnCheckedChangeListener(null);
+            binding.radioButton.setChecked(isSelected);
+            binding.radioButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
+                    if (!selectedUserIds.isEmpty()) {
+                        UserProfile previouslySelectedUser = null;
+                        for (UserProfile u : users) {
+                            if (selectedUserIds.contains(u.getUserId())) {
+                                previouslySelectedUser = u;
+                                break;
+                            }
+                        }
+                        selectedUserIds.clear();
+                        if (previouslySelectedUser != null && selectionListener != null) {
+                            selectionListener.onUserDeselected(previouslySelectedUser);
+                        }
+                    }
                     selectedUserIds.add(user.getUserId());
                     if (selectionListener != null) {
                         selectionListener.onUserSelected(user);
                     }
+                    notifyDataSetChanged();
                 } else {
                     selectedUserIds.remove(user.getUserId());
                     if (selectionListener != null) {

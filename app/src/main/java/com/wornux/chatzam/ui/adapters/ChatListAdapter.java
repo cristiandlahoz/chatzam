@@ -74,7 +74,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
                 ? chat.getGroupName()
                 : binding.getRoot().getContext().getString(R.string.group_chat);
       } else {
-        chatName = binding.getRoot().getContext().getString(R.string.private_chat);
+        chatName = chat.getGroupName();
       }
       binding.chatNameText.setText(chatName);
     }

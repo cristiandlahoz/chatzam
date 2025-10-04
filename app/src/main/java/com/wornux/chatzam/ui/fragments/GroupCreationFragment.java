@@ -8,12 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentGroupCreationBinding;
 import com.wornux.chatzam.data.entities.UserProfile;
 import com.wornux.chatzam.ui.adapters.SelectedUsersAdapter;
-import com.wornux.chatzam.ui.adapters.UserSelectionAdapter;
+import com.wornux.chatzam.ui.adapters.GroupUserSelectionAdapter;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.GroupChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -22,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
     
     private FragmentGroupCreationBinding binding;
-    private UserSelectionAdapter userSelectionAdapter;
+    private GroupUserSelectionAdapter groupUserSelectionAdapter;
     private SelectedUsersAdapter selectedUsersAdapter;
 
     @Override
@@ -40,16 +39,16 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
     }
     
     private void setupRecyclerViews() {
-        userSelectionAdapter = new UserSelectionAdapter();
+        groupUserSelectionAdapter = new GroupUserSelectionAdapter();
         binding.availableUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.availableUsersRecyclerView.setAdapter(userSelectionAdapter);
+        binding.availableUsersRecyclerView.setAdapter(groupUserSelectionAdapter);
         
         selectedUsersAdapter = new SelectedUsersAdapter();
         binding.selectedMembersRecyclerView.setLayoutManager(
             new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.selectedMembersRecyclerView.setAdapter(selectedUsersAdapter);
         
-        userSelectionAdapter.setOnUserSelectionListener(new UserSelectionAdapter.OnUserSelectionListener() {
+        groupUserSelectionAdapter.setOnUserSelectionListener(new GroupUserSelectionAdapter.OnUserSelectionListener() {
             @Override
             public void onUserSelected(UserProfile user) {
                 viewModel.addUserToSelection(user);
@@ -65,7 +64,7 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
         
         selectedUsersAdapter.setOnUserRemoveListener(user -> {
             viewModel.removeUserFromSelection(user);
-            userSelectionAdapter.notifyDataSetChanged();
+            groupUserSelectionAdapter.notifyDataSetChanged();
         });
     }
     
@@ -88,7 +87,7 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
     protected void setupObservers() {
         viewModel.getAvailableUsers().observe(getViewLifecycleOwner(), users -> {
             if (users != null) {
-                userSelectionAdapter.updateUsers(users);
+                groupUserSelectionAdapter.updateUsers(users);
             }
         });
         
