@@ -4,8 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -69,7 +74,11 @@ class FabHomeFragment : Fragment() {
 
         HandleBackPress(fabMenuExpanded) { fabMenuExpanded = false }
 
-        Box {
+        Box(modifier = Modifier.fillMaxSize()) {
+            TapOutsideToClose(fabMenuExpanded = fabMenuExpanded) {
+                fabMenuExpanded = false
+            }
+
             FloatingActionButtonMenu(
                 modifier = Modifier.align(Alignment.BottomEnd),
                 expanded = fabMenuExpanded,
@@ -150,6 +159,21 @@ class FabHomeFragment : Fragment() {
             Icons.Filled.People to "New group",
             Icons.Filled.Contacts to "New chat"
         )
+    
+    @Composable
+    private fun TapOutsideToClose(fabMenuExpanded: Boolean, onDismiss: () -> Unit) {
+        if (fabMenuExpanded) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.35f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = onDismiss
+                    )
+            )
+        }
+    }
 
     private fun handleMenuItemClick(navController: NavController?, label: String) {
         when (label) {
