@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.google.android.material.snackbar.Snackbar;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentChatCreationBinding;
@@ -14,6 +15,7 @@ import com.wornux.chatzam.ui.adapters.SingleUserSelectionAdapter;
 import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.ChatCreationViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
+import com.wornux.chatzam.R;
 import com.wornux.chatzam.services.AuthenticationManager;
 import javax.inject.Inject;
 
@@ -102,6 +104,13 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
             viewModel.createChat(currentUserId, task -> {
                 if (task.isSuccessful()) {
                     getNavController().popBackStack();
+                } else if (task.getException() != null) {
+                    String message = task.getException().getMessage();
+                    if ("Chat already exists".equals(message)) {
+                        Snackbar.make(binding.getRoot(), getString(R.string.chat_already_exists), Snackbar.LENGTH_SHORT).show();
+                    } else {
+                        Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
+                    }
                 }
             });
         });

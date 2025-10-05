@@ -63,4 +63,5 @@
     <string name="account">Account</string>
     <string name="remove_user">Remove user</string>
     <string name="selected_members_0">Selected Members (0)</string>
+    <string name="chat_already_exists">There is a chat with this user already.</string>
 </resources>

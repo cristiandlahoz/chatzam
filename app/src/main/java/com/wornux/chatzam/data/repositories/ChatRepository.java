@@ -19,14 +19,14 @@ import javax.inject.Singleton;
 @Singleton
 public class ChatRepository extends BaseRepository<Chat> {
     
+    private final MutableLiveData<List<Chat>> chatsLiveData = new MutableLiveData<>();
+    private List<Chat> currentChats = new ArrayList<>();
     @Inject
     public ChatRepository(FirebaseManager firebaseManager) {
         super(firebaseManager.getFirestore(), Chat.class);
     }
     
     public LiveData<List<Chat>> getChatsByParticipant(String userId) {
-        MutableLiveData<List<Chat>> chatsLiveData = new MutableLiveData<>();
-
         firestore.collection(collectionName)
                 .whereArrayContains("participants", userId)
                 .addSnapshotListener((value, error) -> {
@@ -37,7 +37,8 @@ public class ChatRepository extends BaseRepository<Chat> {
                             Chat chat = documentToChat(document);
                             chats.add(chat);
                         }
-                        
+
+                        currentChats = chats;
                         chatsLiveData.setValue(chats);
                     }
                 });
@@ -46,8 +47,10 @@ public class ChatRepository extends BaseRepository<Chat> {
     }
     
     public Task<String> createChat(Chat chat) {
-        Map<String, Object> chatData = chatToMap(chat);
-        return addDocument(chatData).continueWith(task -> chat.getChatId());
+        return firestore.collection(collectionName)
+                .document(chat.getChatId())
+                .set(chat)
+                .continueWith(task -> chat.getChatId());
     }
     
     public Task<Chat> getChatById(String chatId) {
@@ -87,6 +90,27 @@ public class ChatRepository extends BaseRepository<Chat> {
         return updateDocument(chatId, updates);
     }
     
+     public Task<Boolean> checkIfIndividualChatExists(String canonicalChatId){
+        return firestore.collection(collectionName).document(canonicalChatId)
+                .get()
+                .continueWith(task -> {
+                    if(!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    return task.getResult().exists();
+                });
+    }
+
+    public boolean doesChatExistLocally(String canonicalChatId) {
+        if (currentChats == null || canonicalChatId == null) {
+            return false;
+        }
+        for (Chat chat : currentChats) {
+            if (canonicalChatId.equals(chat.getChatId())) return true;
+        }
+        return false;
+    }
+
     private Map<String, Object> chatToMap(Chat chat) {
         Map<String, Object> data = new HashMap<>();
         data.put("chatId", chat.getChatId());

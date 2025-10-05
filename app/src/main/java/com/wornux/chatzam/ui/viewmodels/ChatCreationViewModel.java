@@ -10,6 +10,7 @@ import com.wornux.chatzam.ui.base.BaseViewModel;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.tasks.OnCompleteListener;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
@@ -101,14 +102,24 @@ public class ChatCreationViewModel extends BaseViewModel {
         participants.add(currentUserId);
         participants.add(selectedUser.getUserId());
 
-        setLoading(true);
-        chatService.createIndividualChat(participants, selectedUser.getDisplayName())
-                .addOnCompleteListener(task -> {
-                    setLoading(false);
-                    if (!task.isSuccessful()) {
-                        setError("Failed to create chat: " + task.getException().getMessage());
-                    }
-                    onCompleteListener.onComplete(task);
-                });
+        if (chatService.doesChatExistLocally(participants)) {
+            onCompleteListener.onComplete(Tasks.forException(new Exception("Chat already exists")));
+        } else {
+            chatService.checkIfIndividualChatExists(participants).addOnCompleteListener(checkTask -> {
+                if (checkTask.isSuccessful() && Boolean.TRUE.equals(checkTask.getResult())) {
+                    onCompleteListener.onComplete(Tasks.forException(new Exception("Chat already exists")));
+                } else {
+                    setLoading(true);
+                    chatService.createIndividualChat(participants, selectedUser.getDisplayName())
+                            .addOnCompleteListener(creationTask -> {
+                                setLoading(false);
+                                if (!creationTask.isSuccessful()) {
+                                    setError("Failed to create chat: " + creationTask.getException().getMessage());
+                                }
+                                onCompleteListener.onComplete(creationTask);
+                            });
+                }
+            });
+        }
     }
 }
