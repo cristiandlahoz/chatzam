@@ -1,6 +1,7 @@
 package com.wornux.chatzam.ui.viewmodels;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import com.wornux.chatzam.services.AuthenticationManager;
@@ -11,9 +12,9 @@ import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import javax.inject.Inject;
 
 @HiltViewModel
@@ -22,18 +23,21 @@ public class ChatViewModel extends BaseViewModel {
   private final MessageService messageService;
   private final AuthenticationManager authManager;
   private final MutableLiveData<String> currentChatId = new MutableLiveData<>();
-  @Getter private final LiveData<List<Message>> messages;
+  private final LiveData<List<Message>> firestoreMessages;
+  private final MediatorLiveData<List<Message>> messagesMediator = new MediatorLiveData<>();
+  @Getter private final LiveData<List<Message>> messages = messagesMediator;
 
   @Inject
   public ChatViewModel(MessageService messageService, AuthenticationManager authManager) {
     this.messageService = messageService;
     this.authManager = authManager;
 
-    LiveData<List<Message>> emptyMessages = new MutableLiveData<>();
-    this.messages =
-        Transformations.switchMap(
-            currentChatId,
-            chatId -> (chatId != null) ? messageService.getMessages(chatId) : emptyMessages);
+    LiveData<List<Message>> emptyMessages = new MutableLiveData<>(new ArrayList<>());
+    firestoreMessages = Transformations.switchMap(
+        currentChatId,
+        chatId -> (chatId != null) ? messageService.getMessages(chatId) : emptyMessages);
+
+    messagesMediator.addSource(firestoreMessages, messagesMediator::setValue);
   }
 
   public void setChatId(String chatId) {
@@ -66,7 +70,7 @@ public class ChatViewModel extends BaseViewModel {
 
     Message message =
         Message.builder()
-            .messageId(UUID.randomUUID().toString())
+            .messageId("temp_" + System.currentTimeMillis())
             .senderId(currentUserId)
             .chatId(chatId)
             .content(content.trim())
@@ -76,13 +80,25 @@ public class ChatViewModel extends BaseViewModel {
             .isRead(false)
             .build();
 
+    List<Message> currentMessages = messagesMediator.getValue();
+    if (currentMessages != null) {
+      List<Message> updatedMessages = new ArrayList<>(currentMessages);
+      updatedMessages.add(message);
+      messagesMediator.setValue(updatedMessages);
+    }
+
     messageService
         .sendMessage(message)
         .addOnSuccessListener(
             documentReference -> {
                 setLoading(false);})
         .addOnFailureListener(
-            exception -> setError("Failed to send message: " + exception.getMessage()));
+            exception -> {
+              setError("Failed to send message: " + exception.getMessage());
+              if (currentMessages != null) {
+                messagesMediator.setValue(currentMessages);
+              }
+            });
   }
 
   public void markMessageAsRead(String messageId) {

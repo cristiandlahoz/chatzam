@@ -68,7 +68,6 @@ public class MessageRepository extends BaseRepository<Message> {
     
     private Map<String, Object> messageToMap(Message message) {
         Map<String, Object> data = new HashMap<>();
-        data.put("messageId", message.getMessageId());
         data.put("senderId", message.getSenderId());
         data.put("receiverId", message.getReceiverId());
         data.put("chatId", message.getChatId());
