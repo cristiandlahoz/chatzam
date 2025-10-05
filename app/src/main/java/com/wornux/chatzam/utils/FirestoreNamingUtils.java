@@ -1,6 +1,6 @@
 package com.wornux.chatzam.utils;
 
-public class FirestoreNamingUtils {
+public final class FirestoreNamingUtils {
     
     private FirestoreNamingUtils() {
         //not required

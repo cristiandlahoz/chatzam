@@ -19,11 +19,8 @@ import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.UserProfileViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 @AndroidEntryPoint
-public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
+public class UserFragment extends BaseFragment<UserProfileViewModel> {
     
     private FragmentUserProfileBinding binding;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
