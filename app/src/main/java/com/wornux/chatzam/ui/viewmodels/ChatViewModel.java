@@ -76,18 +76,13 @@ public class ChatViewModel extends BaseViewModel {
             .isRead(false)
             .build();
 
-    setLoading(true);
     messageService
         .sendMessage(message)
         .addOnSuccessListener(
             documentReference -> {
-              setLoading(false);
-            })
+                setLoading(false);})
         .addOnFailureListener(
-            exception -> {
-              setLoading(false);
-              setError("Failed to send message: " + exception.getMessage());
-            });
+            exception -> setError("Failed to send message: " + exception.getMessage()));
   }
 
   public void markMessageAsRead(String messageId) {
