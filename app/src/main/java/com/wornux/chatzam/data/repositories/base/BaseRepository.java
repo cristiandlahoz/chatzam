@@ -13,36 +13,36 @@ import java.util.Map;
 
 public abstract class BaseRepository<T> {
     
-    protected final FirebaseFirestore firestore;
+    protected final FirebaseFirestore db;
     protected final String collectionName;
     protected final Class<T> entityClass;
     
-    protected BaseRepository(FirebaseFirestore firestore, Class<T> entityClass) {
-        this.firestore = firestore;
+    protected BaseRepository(FirebaseFirestore db, Class<T> entityClass) {
+        this.db = db;
         this.entityClass = entityClass;
         this.collectionName = FirestoreNamingUtils.toCollectionName(entityClass.getSimpleName());
     }
     
     public Task<DocumentReference> addDocument(Map<String, Object> data) {
-        return firestore.collection(collectionName).add(data);
+        return db.collection(collectionName).add(data);
     }
     
     public Task<DocumentSnapshot> getDocument(String documentId) {
-        return firestore.collection(collectionName).document(documentId).get();
+        return db.collection(collectionName).document(documentId).get();
     }
     
     public Task<Void> updateDocument(String documentId, Map<String, Object> data) {
-        return firestore.collection(collectionName).document(documentId).update(data);
+        return db.collection(collectionName).document(documentId).update(data);
     }
     
     public Task<Void> deleteDocument(String documentId) {
-        return firestore.collection(collectionName).document(documentId).delete();
+        return db.collection(collectionName).document(documentId).delete();
     }
     
     public LiveData<QuerySnapshot> getCollectionRealtime() {
         MutableLiveData<QuerySnapshot> liveData = new MutableLiveData<>();
         
-        firestore.collection(collectionName)
+        db.collection(collectionName)
                 .addSnapshotListener((value, error) -> {
                     if (error == null && value != null) {
                         liveData.setValue(value);
@@ -53,10 +53,10 @@ public abstract class BaseRepository<T> {
     }
     
     public void addSnapshotListener(EventListener<QuerySnapshot> listener) {
-        firestore.collection(collectionName).addSnapshotListener(listener);
+        db.collection(collectionName).addSnapshotListener(listener);
     }
     
     public Task<QuerySnapshot> getCollection() {
-        return firestore.collection(collectionName).get();
+        return db.collection(collectionName).get();
     }
 }

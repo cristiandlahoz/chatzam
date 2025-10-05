@@ -91,7 +91,7 @@ public class AuthenticationViewModel extends BaseViewModel {
                 .build();
         
         userService.createUserProfile(userProfile)
-                .addOnSuccessListener(aVoid -> {
+                .addOnSuccessListener(v -> {
                     setLoading(false);
                     _registrationResult.setValue(firebaseUser);
                 })

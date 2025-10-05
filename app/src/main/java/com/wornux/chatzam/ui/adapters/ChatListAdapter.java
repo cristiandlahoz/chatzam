@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.ItemChatBinding;
 import com.wornux.chatzam.data.entities.Chat;
+import lombok.Setter;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -19,6 +20,8 @@ import java.util.Objects;
 
 public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewHolder> {
   private OnChatClickListener clickListener;
+  @Setter
+  private String currentUserId;
 
   public interface OnChatClickListener {
     void onChatClick(Chat chat);
@@ -26,7 +29,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
     void onChatLongClick(Chat chat);
   }
 
-  public void setOnChatClickListener(OnChatClickListener listener) {
+    public void setOnChatClickListener(OnChatClickListener listener) {
     this.clickListener = listener;
   }
 

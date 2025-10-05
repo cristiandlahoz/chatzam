@@ -39,8 +39,6 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
         super.onViewCreated(view, savedInstanceState);
         setupRecyclerView();
         setupSearchView();
-        setupObservers();
-        setupClickListeners();
     }
 
     private void setupRecyclerView() {
@@ -85,13 +83,9 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
             }
         });
 
-        viewModel.getSelectedUsers().observe(getViewLifecycleOwner(), users -> {
-            binding.createChatButton.setEnabled(users != null && !users.isEmpty());
-            if (users != null && !users.isEmpty()) {
-                userSelectionAdapter.setSelectedUser(users.get(0));
-            } else {
-                userSelectionAdapter.setSelectedUser(null);
-            }
+        viewModel.getSelectedUsers().observe(getViewLifecycleOwner(), user -> {
+            binding.createChatButton.setEnabled(user != null);
+            userSelectionAdapter.setSelectedUser(user);
         });
     }
 

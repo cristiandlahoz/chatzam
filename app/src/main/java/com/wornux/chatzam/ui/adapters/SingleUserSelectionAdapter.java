@@ -15,8 +15,8 @@ import java.util.Set;
 
 public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserSelectionAdapter.SingleUserSelectionViewHolder> {
     
-    private List<User> users = new ArrayList<>();
-    private Set<String> selectedUserIds = new HashSet<>();
+    private final List<User> users = new ArrayList<>();
+    private final Set<String> selectedUserIds = new HashSet<>();
     private OnUserSelectionListener selectionListener;
     
     public interface OnUserSelectionListener {
@@ -81,7 +81,7 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
         return selectedUsers;
     }
     
-    class SingleUserSelectionViewHolder extends RecyclerView.ViewHolder {
+    public class SingleUserSelectionViewHolder extends RecyclerView.ViewHolder {
         private final ItemUserChatSelectionBinding binding;
         
         public SingleUserSelectionViewHolder(@NonNull ItemUserChatSelectionBinding binding) {

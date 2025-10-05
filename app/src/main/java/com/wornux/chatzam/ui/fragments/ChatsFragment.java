@@ -58,8 +58,8 @@ public class ChatsFragment extends BaseFragment<ChatListViewModel> implements Ch
         .observe(
             getViewLifecycleOwner(),
             isEmpty -> {
-              binding.emptyStateText.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-              binding.chatsRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+              binding.emptyStateText.setVisibility(Boolean.TRUE.equals(isEmpty) ? View.VISIBLE : View.GONE);
+              binding.chatsRecyclerView.setVisibility(Boolean.TRUE.equals(isEmpty) ? View.GONE : View.VISIBLE);
             });
 
     viewModel
@@ -67,7 +67,7 @@ public class ChatsFragment extends BaseFragment<ChatListViewModel> implements Ch
         .observe(
             getViewLifecycleOwner(),
             isLoading -> {
-              binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+              binding.progressBar.setVisibility(Boolean.TRUE.equals(isLoading) ? View.VISIBLE : View.GONE);
             });
 
     viewModel

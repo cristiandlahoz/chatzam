@@ -1,5 +1,6 @@
 package com.wornux.chatzam.ui.viewmodels;
 
+import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.wornux.chatzam.data.entities.User;
@@ -7,9 +8,10 @@ import com.wornux.chatzam.services.ChatService;
 import com.wornux.chatzam.services.UserService;
 import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.ui.base.BaseViewModel;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
 import javax.inject.Inject;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
@@ -19,7 +21,7 @@ public class ChatCreationViewModel extends BaseViewModel {
     private final UserService userService;
     private final ChatService chatService;
     private final MutableLiveData<List<User>> availableUsers = new MutableLiveData<>();
-    private final MutableLiveData<List<User>> selectedUsers = new MutableLiveData<>();
+    private final MutableLiveData<User> selectedUsers = new MutableLiveData<>();
     private final AuthenticationManager authManager;
 
 
@@ -38,7 +40,7 @@ public class ChatCreationViewModel extends BaseViewModel {
         return availableUsers;
     }
 
-    public LiveData<List<User>> getSelectedUsers() {
+    public LiveData<User> getSelectedUsers() {
         return selectedUsers;
     }
 
@@ -51,13 +53,11 @@ public class ChatCreationViewModel extends BaseViewModel {
     }
 
     public void addUserToSelection(User user) {
-        List<User> currentSelection = new ArrayList<>();
-        currentSelection.add(user);
-        selectedUsers.setValue(currentSelection);
+        selectedUsers.setValue(user);
     }
 
     public void removeUserFromSelection(User user) {
-        selectedUsers.setValue(new ArrayList<>());
+        selectedUsers.setValue(null);
     }
 
     private void loadUsers() {
@@ -90,23 +90,22 @@ public class ChatCreationViewModel extends BaseViewModel {
     }
 
     public void createChat(String currentUserId, OnCompleteListener<String> onCompleteListener) {
-        List<User> selected = selectedUsers.getValue();
-        if (selected == null || selected.isEmpty()) {
+        User selected = selectedUsers.getValue();
+        if (selected == null) {
             setError("No user selected");
             return;
         }
 
-        User selectedUser = selected.get(0);
-        List<String> participants = new ArrayList<>();
+        Set<String> participants = new HashSet<>();
         participants.add(currentUserId);
-        participants.add(selectedUser.getUserId());
+        participants.add(selected.getUserId());
 
         setLoading(true);
-        chatService.createIndividualChat(participants, selectedUser.getDisplayName())
+        chatService.createIndividualChat(participants)
                 .addOnCompleteListener(task -> {
                     setLoading(false);
                     if (!task.isSuccessful()) {
-                        setError("Failed to create chat: " + task.getException().getMessage());
+                        setError("Failed to create chat: " + Objects.requireNonNull(task.getException()).getMessage());
                     }
                     onCompleteListener.onComplete(task);
                 });

@@ -5,11 +5,11 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.data.repositories.base.BaseRepository;
 import com.wornux.chatzam.services.FirebaseManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,19 +19,19 @@ import javax.inject.Singleton;
 
 @Singleton
 public class UserRepository extends BaseRepository<User> {
-    
+
     private static final String FRIENDS_COLLECTION = "friends";
-    
+
     @Inject
     public UserRepository(FirebaseManager firebaseManager) {
         super(firebaseManager.getFirestore(), User.class);
     }
-    
-    public Task<DocumentReference> createUser(User user) {
+
+    public Task<Void> createUser(User user) {
         Map<String, Object> userData = userToMap(user);
-        return addDocument(userData);
+        return db.collection(collectionName).document(user.getUserId()).set(userData);
     }
-    
+
     public Task<User> getUserById(String userId) {
         return getDocument(userId)
                 .continueWith(task -> {
@@ -42,12 +42,12 @@ public class UserRepository extends BaseRepository<User> {
                     return null;
                 });
     }
-    
+
     public Task<Void> updateUser(User user) {
         Map<String, Object> userData = userToMap(user);
         return updateDocument(user.getUserId(), userData);
     }
-    
+
     public Task<List<User>> searchUsers(String query) {
         return getCollection()
                 .continueWith(task -> {
@@ -57,19 +57,19 @@ public class UserRepository extends BaseRepository<User> {
                     for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                         User user = documentToUser(document);
                         if (query.isEmpty() ||
-                            user.getDisplayName().toLowerCase().contains(query.toLowerCase()) ||
-                            user.getEmail().toLowerCase().contains(query.toLowerCase())) {
+                                user.getDisplayName().toLowerCase().contains(query.toLowerCase()) ||
+                                user.getEmail().toLowerCase().contains(query.toLowerCase())) {
                             users.add(user);
                         }
                     }
                     return users;
                 });
     }
-    
+
     public LiveData<User> getUserRealtime(String userId) {
         MutableLiveData<User> userLiveData = new MutableLiveData<>();
-        
-        firestore.collection(collectionName)
+
+        db.collection(collectionName)
                 .document(userId)
                 .addSnapshotListener((documentSnapshot, error) -> {
                     if (error == null && documentSnapshot != null && documentSnapshot.exists()) {
@@ -77,20 +77,20 @@ public class UserRepository extends BaseRepository<User> {
                         userLiveData.setValue(user);
                     }
                 });
-        
+
         return userLiveData;
     }
-    
+
     public Task<Void> updateProfileImage(String userId, String imageUrl) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("profileImageUrl", imageUrl);
         return updateDocument(userId, updates);
     }
-    
+
     public LiveData<List<User>> getFriends(String userId) {
         MutableLiveData<List<User>> friendsLiveData = new MutableLiveData<>();
 
-        firestore.collection(FRIENDS_COLLECTION)
+        db.collection(FRIENDS_COLLECTION)
                 .document(userId)
                 .collection("friends")
                 .addSnapshotListener((value, error) -> {
@@ -112,27 +112,27 @@ public class UserRepository extends BaseRepository<User> {
 
         return friendsLiveData;
     }
-    
+
     public Task<Void> addFriend(String userId, String friendId) {
         Map<String, Object> friendData = new HashMap<>();
         friendData.put("friendId", friendId);
         friendData.put("timestamp", System.currentTimeMillis());
 
-        return firestore.collection(FRIENDS_COLLECTION)
+        return db.collection(FRIENDS_COLLECTION)
                 .document(userId)
                 .collection("friends")
                 .add(friendData)
                 .continueWith(task -> null);
     }
-    
+
     public Task<Void> removeFriend(String userId, String friendId) {
-        return firestore.collection(FRIENDS_COLLECTION)
+        return db.collection(FRIENDS_COLLECTION)
                 .document(userId)
                 .collection("friends")
                 .document(friendId)
                 .delete();
     }
-    
+
     private Map<String, Object> userToMap(User user) {
         Map<String, Object> data = new HashMap<>();
         data.put("userId", user.getUserId());
@@ -144,16 +144,16 @@ public class UserRepository extends BaseRepository<User> {
         data.put("status", user.getStatus() != null ? user.getStatus().name() : null);
         return data;
     }
-    
+
     private User documentToUser(DocumentSnapshot document) {
         return User.builder()
-                .userId(document.getId())
+                .userId(document.getString("userId"))
                 .email(document.getString("email"))
                 .displayName(document.getString("displayName"))
                 .profileImageUrl(document.getString("profileImageUrl"))
                 .isOnline(
-                    document.getBoolean("isOnline") != null
-                        && Boolean.TRUE.equals(document.getBoolean("isOnline")))
+                        document.getBoolean("isOnline") != null
+                                && Boolean.TRUE.equals(document.getBoolean("isOnline")))
                 .lastSeen(document.getDate("lastSeen"))
                 .build();
     }

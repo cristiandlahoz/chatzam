@@ -29,7 +29,7 @@ public class UserService {
     this.authManager = authManager;
   }
 
-  public Task<DocumentReference> createUserProfile(User user) {
+  public Task<Void> createUserProfile(User user) {
     if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
       throw new IllegalArgumentException("User email is required");
     }

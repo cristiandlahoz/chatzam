@@ -4,15 +4,12 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.data.enums.ChatType;
 import com.wornux.chatzam.data.repositories.base.BaseRepository;
 import com.wornux.chatzam.services.FirebaseManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -27,7 +24,7 @@ public class ChatRepository extends BaseRepository<Chat> {
     public LiveData<List<Chat>> getChatsByParticipant(String userId) {
         MutableLiveData<List<Chat>> chatsLiveData = new MutableLiveData<>();
 
-        firestore.collection(collectionName)
+        db.collection(collectionName)
                 .whereArrayContains("participants", userId)
                 .addSnapshotListener((value, error) -> {
                     if (error == null && value != null) {
@@ -94,7 +91,6 @@ public class ChatRepository extends BaseRepository<Chat> {
         data.put("chatType", chat.getChatType() != null ? chat.getChatType().name() : null);
         data.put("lastMessageTimestamp", chat.getLastMessageTimestamp());
         data.put("unreadCount", chat.getUnreadCount());
-        data.put("isGroup", chat.isGroup());
         data.put("groupName", chat.getGroupName());
         data.put("groupImageUrl", chat.getGroupImageUrl());
         data.put("createdBy", chat.getCreatedBy());
@@ -103,15 +99,19 @@ public class ChatRepository extends BaseRepository<Chat> {
     }
     
     private Chat documentToChat(DocumentSnapshot document) {
-        List<String> participants = (List<String>) document.get("participants");
-        
+        Set<String> participants = new HashSet<>();
+        if (document.get("participants") instanceof List values)
+            for (Object value : values) {
+                participants.add(value.toString());
+            }
+
+
         return Chat.builder()
                 .chatId(document.getId())
-                .participants(participants != null ? participants : new ArrayList<>())
+                .participants(participants)
                 .chatType(ChatType.valueOf(document.getString("chatType")))
                 .lastMessageTimestamp(document.getDate("lastMessageTimestamp"))
                 .unreadCount(document.getLong("unreadCount") != null ? document.getLong("unreadCount").intValue() : 0)
-                .isGroup(document.getBoolean("isGroup") != null ? document.getBoolean("isGroup") : false)
                 .groupName(document.getString("groupName"))
                 .groupImageUrl(document.getString("groupImageUrl"))
                 .createdBy(document.getString("createdBy"))

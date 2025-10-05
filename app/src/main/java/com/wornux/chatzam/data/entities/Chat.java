@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Data
 @SuperBuilder
@@ -18,22 +16,22 @@ import java.util.List;
 public class Chat {
     private String chatId;
     @Builder.Default
-    private List<String> participants = new ArrayList<>();
+    private Set<String> participants = new HashSet<>();
     private ChatType chatType;
     private Message lastMessage;
     private Date lastMessageTimestamp;
     private int unreadCount;
-    private boolean isGroup;
     private String groupName;
     private String groupImageUrl;
     private String createdBy;
     @Builder.Default
     private Date createdAt = new Date();
 
+    public boolean containParticipant(String userId){
+        return participants.contains(userId);
+    }
     public void addParticipant(String userId) {
-        if (!participants.contains(userId)) {
-            participants.add(userId);
-        }
+        participants.add(userId);
     }
 
     public void removeParticipant(String userId) {

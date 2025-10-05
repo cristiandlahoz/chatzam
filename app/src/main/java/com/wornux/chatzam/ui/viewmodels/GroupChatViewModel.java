@@ -11,7 +11,9 @@ import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
 
 @HiltViewModel
@@ -137,7 +139,7 @@ public class GroupChatViewModel extends BaseViewModel {
             return;
         }
         
-        List<String> participantIds = new ArrayList<>();
+        Set<String> participantIds = new HashSet<>();
         participantIds.add(currentUserId);
         
         for (User user : selected) {
@@ -159,9 +161,7 @@ public class GroupChatViewModel extends BaseViewModel {
     public void addMembersToGroup(String chatId, List<String> newMemberIds) {
         setLoading(true);
         chatService.addMembersToGroup(chatId, newMemberIds)
-                .addOnSuccessListener(aVoid -> {
-                    setLoading(false);
-                })
+                .addOnSuccessListener(aVoid -> setLoading(false))
                 .addOnFailureListener(exception -> {
                     setLoading(false);
                     setError("Failed to add members: " + exception.getMessage());
@@ -171,9 +171,7 @@ public class GroupChatViewModel extends BaseViewModel {
     public void removeMemberFromGroup(String chatId, String memberId) {
         setLoading(true);
         chatService.removeMemberFromGroup(chatId, memberId)
-                .addOnSuccessListener(aVoid -> {
-                    setLoading(false);
-                })
+                .addOnSuccessListener(aVoid -> setLoading(false))
                 .addOnFailureListener(exception -> {
                     setLoading(false);
                     setError("Failed to remove member: " + exception.getMessage());
@@ -185,9 +183,7 @@ public class GroupChatViewModel extends BaseViewModel {
         if (currentUserId != null) {
             setLoading(true);
             chatService.leaveGroup(chatId, currentUserId)
-                    .addOnSuccessListener(aVoid -> {
-                        setLoading(false);
-                    })
+                    .addOnSuccessListener(aVoid -> setLoading(false))
                     .addOnFailureListener(exception -> {
                         setLoading(false);
                         setError("Failed to leave group: " + exception.getMessage());
@@ -198,9 +194,7 @@ public class GroupChatViewModel extends BaseViewModel {
     public void updateGroupInfo(String chatId, String groupName, String groupImageUrl) {
         setLoading(true);
         chatService.updateGroupInfo(chatId, groupName, groupImageUrl)
-                .addOnSuccessListener(aVoid -> {
-                    setLoading(false);
-                })
+                .addOnSuccessListener(aVoid -> setLoading(false))
                 .addOnFailureListener(exception -> {
                     setLoading(false);
                     setError("Failed to update group info: " + exception.getMessage());

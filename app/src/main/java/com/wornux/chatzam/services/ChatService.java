@@ -7,11 +7,7 @@ import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.data.enums.ChatType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -29,7 +25,7 @@ public class ChatService {
         return repository.getChatsByParticipant(userId);
     }
     
-    public Task<String> createIndividualChat(List<String> participants, String chatDisplayName) {
+    public Task<String> createIndividualChat(Set<String> participants) {
         if (participants == null || participants.size() != 2) {
             throw new IllegalArgumentException("Individual chat must have exactly 2 participants");
         }
@@ -40,8 +36,6 @@ public class ChatService {
                 .chatId(chatId)
                 .participants(participants)
                 .chatType(ChatType.INDIVIDUAL)
-                .isGroup(false)
-                .groupName(chatDisplayName)
                 .unreadCount(0)
                 .build();
         
@@ -70,7 +64,7 @@ public class ChatService {
         return repository.deleteDocument(chatId);
     }
     
-    public Task<String> createGroupChat(String groupName, List<String> participants, String createdBy) {
+    public Task<String> createGroupChat(String groupName, Set<String> participants, String createdBy) {
         if (groupName == null || groupName.trim().isEmpty()) {
             throw new IllegalArgumentException("Group name cannot be empty");
         }
@@ -85,7 +79,6 @@ public class ChatService {
                 .chatId(chatId)
                 .participants(participants)
                 .chatType(ChatType.GROUP)
-                .isGroup(true)
                 .groupName(groupName)
                 .createdBy(createdBy)
                 .createdAt(new java.util.Date())
@@ -98,13 +91,8 @@ public class ChatService {
     public Task<Void> addMembersToGroup(String chatId, List<String> newMembers) {
         return getChatById(chatId).continueWithTask(task -> {
             Chat chat = task.getResult();
-            if (chat == null) {
-                throw new IllegalArgumentException("Chat not found");
-            }
-            if (!chat.isGroup()) {
-                throw new IllegalArgumentException("Chat is not a group");
-            }
-            
+            validChatGroup(chat);
+
             List<String> updatedParticipants = new ArrayList<>(chat.getParticipants());
             for (String member : newMembers) {
                 if (!updatedParticipants.contains(member)) {
@@ -119,20 +107,24 @@ public class ChatService {
     public Task<Void> removeMemberFromGroup(String chatId, String memberId) {
         return getChatById(chatId).continueWithTask(task -> {
             Chat chat = task.getResult();
-            if (chat == null) {
-                throw new IllegalArgumentException("Chat not found");
-            }
-            if (!chat.isGroup()) {
-                throw new IllegalArgumentException("Chat is not a group");
-            }
-            
+            validChatGroup(chat);
+
             List<String> updatedParticipants = new ArrayList<>(chat.getParticipants());
             updatedParticipants.remove(memberId);
             
             return repository.updateParticipants(chatId, updatedParticipants);
         });
     }
-    
+
+    private void validChatGroup(Chat chat) {
+        if (chat == null) {
+            throw new IllegalArgumentException("Chat not found");
+        }
+        if (chat.getChatType() != ChatType.GROUP) {
+            throw new IllegalArgumentException("Chat is not a group");
+        }
+    }
+
     public Task<Void> updateGroupInfo(String chatId, String groupName, String groupImageUrl) {
         return repository.updateGroupInfo(chatId, groupName, groupImageUrl);
     }
@@ -141,13 +133,4 @@ public class ChatService {
         return removeMemberFromGroup(chatId, userId);
     }
     
-    public Task<List<String>> getGroupMembers(String chatId) {
-        return getChatById(chatId).continueWith(task -> {
-            Chat chat = task.getResult();
-            if (chat != null && chat.isGroup()) {
-                return chat.getParticipants();
-            }
-            return new ArrayList<>();
-        });
-    }
 }

@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.data.enums.MessageType;
@@ -34,7 +33,7 @@ public class MessageRepository extends BaseRepository<Message> {
     public LiveData<List<Message>> getMessagesByChatId(String chatId) {
         MutableLiveData<List<Message>> messagesLiveData = new MutableLiveData<>();
         
-        firestore.collection(collectionName)
+        db.collection(collectionName)
                 .whereEqualTo("chatId", chatId)
                 .orderBy("timestamp", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, error) -> {
