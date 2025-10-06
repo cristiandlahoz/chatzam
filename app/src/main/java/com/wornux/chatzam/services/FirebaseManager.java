@@ -3,7 +3,6 @@ package com.wornux.chatzam.services;
 import android.content.Context;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
@@ -20,7 +19,6 @@ public class FirebaseManager {
   private final FirebaseFirestore firestore;
   private final FirebaseStorage storage;
   private final FirebaseMessaging messaging;
-  private final FirebaseDatabase database;
 
   @Inject
   public FirebaseManager(@ApplicationContext Context context) {
@@ -30,6 +28,5 @@ public class FirebaseManager {
     this.firestore = FirebaseFirestore.getInstance();
     this.storage = FirebaseStorage.getInstance();
     this.messaging = FirebaseMessaging.getInstance();
-    this.database = FirebaseDatabase.getInstance();
   }
 }

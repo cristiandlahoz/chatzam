@@ -68,13 +68,14 @@ dependencies {
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
     
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    
     // Firebase Dependencies (using BoM for version management)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.messaging)
-    implementation(libs.firebase.database)
 
     // Compose
     implementation(libs.material.base)
