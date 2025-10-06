@@ -2,6 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_send_image"
-        android:icon="@drawable/ic_image"
+        android:icon="@drawable/image_03_stroke_rounded"
         android:title="@string/send_image" />
 </menu>

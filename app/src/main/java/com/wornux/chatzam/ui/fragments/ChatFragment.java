@@ -93,7 +93,12 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
           }
 
           @Override
-          public void onMessageLongClick(Message message) {}
+          public void onImageClick(Message message) {
+            if (message.hasMedia()) {
+              ImageViewerDialog dialog = ImageViewerDialog.newInstance(message.getMediaUrl());
+              dialog.show(getParentFragmentManager(), "ImageViewerDialog");
+            }
+          }
         });
   }
 
@@ -173,7 +178,7 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
     permissionLauncher = registerForActivityResult(
         new ActivityResultContracts.RequestPermission(),
         isGranted -> {
-          if (isGranted) {
+          if (Boolean.TRUE.equals(isGranted)) {
             openLegacyImagePicker();
           } else {
             showError(getString(R.string.permission_denied));

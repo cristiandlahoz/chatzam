@@ -31,7 +31,7 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
     public interface OnMessageClickListener {
         void onMessageClick(Message message);
 
-        void onMessageLongClick(Message message);
+        void onImageClick(Message message);
     }
 
     public MessageAdapter(String currentUserId) {
@@ -140,10 +140,17 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
                         .load(message.getMediaUrl())
                         .centerCrop()
                         .into(getMessageImageView());
+                
+                getMessageImageView().setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onImageClick(message);
+                    }
+                });
             } else {
                 getMessageImageView().setVisibility(View.GONE);
                 getMessageTextView().setVisibility(View.VISIBLE);
                 ((android.widget.TextView) getMessageTextView()).setText(message.getContent());
+                getMessageImageView().setOnClickListener(null);
             }
 
             if (message.getTimestamp() != null) {
@@ -159,20 +166,11 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
                     listener.onMessageClick(message);
                 }
             });
-
-            if (listener != null) {
-                itemView.setOnLongClickListener(v -> {
-                    listener.onMessageLongClick(message);
-                    return true;
-                });
-            } else {
-                itemView.setOnLongClickListener(null);
-            }
         }
     }
 
     private static final DiffUtil.ItemCallback<Message> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Message>() {
+            new DiffUtil.ItemCallback<>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull Message oldItem, @NonNull Message newItem) {
                     return oldItem.getMessageId().equals(newItem.getMessageId());

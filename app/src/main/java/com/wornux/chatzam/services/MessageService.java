@@ -12,6 +12,7 @@ import com.wornux.chatzam.data.enums.MessageType;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Objects;
 
 @Singleton
 public class MessageService {
@@ -57,18 +58,10 @@ public class MessageService {
         String fileName = "media_" + System.currentTimeMillis();
 
         Task<Uri> uploadTask;
-        switch (messageType) {
-            case IMAGE:
-                uploadTask = storageRepository.uploadImage(uri, fileName);
-                break;
-            case VIDEO:
-                uploadTask = storageRepository.uploadVideo(uri, fileName);
-                break;
-            case DOCUMENT:
-                uploadTask = storageRepository.uploadDocument(uri, fileName);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported media type: " + messageType);
+        if (Objects.requireNonNull(messageType) == MessageType.IMAGE) {
+            uploadTask = storageRepository.uploadImage(uri, fileName);
+        } else {
+            throw new IllegalArgumentException("Unsupported media type: " + messageType);
         }
 
         return uploadTask.continueWith(task -> {

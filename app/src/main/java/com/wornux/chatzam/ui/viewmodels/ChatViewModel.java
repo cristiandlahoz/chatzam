@@ -166,9 +166,7 @@ public class ChatViewModel extends BaseViewModel {
                 }
 
                 messageService.sendMessage(message)
-                    .addOnSuccessListener(messageId -> {
-                        setLoading(false);
-                    })
+                    .addOnSuccessListener(messageId -> setLoading(false))
                     .addOnFailureListener(exception -> {
                         setError("Failed to send image: " + exception.getMessage());
                         setLoading(false);
