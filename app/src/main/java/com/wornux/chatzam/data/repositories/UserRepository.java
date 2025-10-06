@@ -3,10 +3,12 @@ package com.wornux.chatzam.data.repositories;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.wornux.chatzam.data.entities.User;
+import com.wornux.chatzam.data.entities.UserDTO;
 import com.wornux.chatzam.data.repositories.base.BaseRepository;
 import com.wornux.chatzam.services.FirebaseManager;
 
@@ -20,16 +22,15 @@ import javax.inject.Singleton;
 @Singleton
 public class UserRepository extends BaseRepository<User> {
 
-    private static final String FRIENDS_COLLECTION = "friends";
-
     @Inject
     public UserRepository(FirebaseManager firebaseManager) {
         super(firebaseManager.getFirestore(), User.class);
     }
 
     public Task<Void> createUser(User user) {
-        Map<String, Object> userData = userToMap(user);
-        return db.collection(collectionName).document(user.getUserId()).set(userData);
+        return db.collection(collectionName)
+                .document(user.getUserId())
+                .set(user);
     }
 
     public Task<User> getUserById(String userId) {
@@ -37,32 +38,36 @@ public class UserRepository extends BaseRepository<User> {
                 .continueWith(task -> {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        return documentToUser(document);
+                        return document.toObject(User.class);
                     }
                     return null;
                 });
     }
 
     public Task<Void> updateUser(User user) {
-        Map<String, Object> userData = userToMap(user);
-        return updateDocument(user.getUserId(), userData);
+        return db.collection(collectionName)
+                .document(user.getUserId())
+                .set(user);
     }
 
     public Task<List<User>> searchUsers(String query) {
         return getCollection()
                 .continueWith(task -> {
                     QuerySnapshot querySnapshot = task.getResult();
-                    List<User> users = new ArrayList<>();
+                    List<User> users = querySnapshot.toObjects(User.class);
 
-                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                        User user = documentToUser(document);
-                        if (query.isEmpty() ||
-                                user.getDisplayName().toLowerCase().contains(query.toLowerCase()) ||
+                    if (query.isEmpty()) {
+                        return users;
+                    }
+
+                    List<User> filteredUsers = new ArrayList<>();
+                    for (User user : users) {
+                        if (user.getDisplayName().toLowerCase().contains(query.toLowerCase()) ||
                                 user.getEmail().toLowerCase().contains(query.toLowerCase())) {
-                            users.add(user);
+                            filteredUsers.add(user);
                         }
                     }
-                    return users;
+                    return filteredUsers;
                 });
     }
 
@@ -73,7 +78,7 @@ public class UserRepository extends BaseRepository<User> {
                 .document(userId)
                 .addSnapshotListener((documentSnapshot, error) -> {
                     if (error == null && documentSnapshot != null && documentSnapshot.exists()) {
-                        User user = documentToUser(documentSnapshot);
+                        User user = documentSnapshot.toObject(User.class);
                         userLiveData.setValue(user);
                     }
                 });
@@ -81,80 +86,39 @@ public class UserRepository extends BaseRepository<User> {
         return userLiveData;
     }
 
-    public Task<Void> updateProfileImage(String userId, String imageUrl) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("profileImageUrl", imageUrl);
-        return updateDocument(userId, updates);
-    }
+    public Task<List<UserDTO>> getUserDTOsByIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Tasks.forResult(new ArrayList<>());
+        }
 
-    public LiveData<List<User>> getFriends(String userId) {
-        MutableLiveData<List<User>> friendsLiveData = new MutableLiveData<>();
+        List<String> limitedUserIds = userIds.size() > 10 ? userIds.subList(0, 10) : userIds;
 
-        db.collection(FRIENDS_COLLECTION)
-                .document(userId)
-                .collection("friends")
-                .addSnapshotListener((value, error) -> {
-                    if (error == null && value != null) {
-                        List<User> friends = new ArrayList<>();
-
-                        for (DocumentSnapshot doc : value.getDocuments()) {
-                            String friendId = doc.getId();
-                            getUserById(friendId)
-                                    .addOnSuccessListener(friendUser -> {
-                                        if (friendUser != null) {
-                                            friends.add(friendUser);
-                                            friendsLiveData.setValue(friends);
-                                        }
-                                    });
+        return db.collection(collectionName)
+                .whereIn(FieldPath.documentId(), limitedUserIds)
+                .get()
+                .continueWith(task -> {
+                    List<UserDTO> userDTOs = new ArrayList<>();
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                            User user = doc.toObject(User.class);
+                            if (user != null) {
+                                userDTOs.add(UserDTO.builder()
+                                        .userId(user.getUserId())
+                                        .displayName(user.getDisplayName())
+                                        .profileImageUrl(user.getProfileImageUrl())
+                                        .lastSeen(user.getLastSeen())
+                                        .isOnline(user.isOnline())
+                                        .build());
+                            }
                         }
                     }
+                    return userDTOs;
                 });
-
-        return friendsLiveData;
     }
 
-    public Task<Void> addFriend(String userId, String friendId) {
-        Map<String, Object> friendData = new HashMap<>();
-        friendData.put("friendId", friendId);
-        friendData.put("timestamp", System.currentTimeMillis());
-
-        return db.collection(FRIENDS_COLLECTION)
-                .document(userId)
-                .collection("friends")
-                .add(friendData)
-                .continueWith(task -> null);
-    }
-
-    public Task<Void> removeFriend(String userId, String friendId) {
-        return db.collection(FRIENDS_COLLECTION)
-                .document(userId)
-                .collection("friends")
-                .document(friendId)
-                .delete();
-    }
-
-    private Map<String, Object> userToMap(User user) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("userId", user.getUserId());
-        data.put("email", user.getEmail());
-        data.put("displayName", user.getDisplayName());
-        data.put("profileImageUrl", user.getProfileImageUrl());
-        data.put("isOnline", user.isOnline());
-        data.put("lastSeen", user.getLastSeen());
-        data.put("status", user.getStatus() != null ? user.getStatus().name() : null);
-        return data;
-    }
-
-    private User documentToUser(DocumentSnapshot document) {
-        return User.builder()
-                .userId(document.getString("userId"))
-                .email(document.getString("email"))
-                .displayName(document.getString("displayName"))
-                .profileImageUrl(document.getString("profileImageUrl"))
-                .isOnline(
-                        document.getBoolean("isOnline") != null
-                                && Boolean.TRUE.equals(document.getBoolean("isOnline")))
-                .lastSeen(document.getDate("lastSeen"))
-                .build();
+    public Task<Void> updateProfileImage(String userId, String imageUrl) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("profile_image_url", imageUrl);
+        return updateDocument(userId, updates);
     }
 }

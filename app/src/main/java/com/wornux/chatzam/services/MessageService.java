@@ -26,23 +26,23 @@ public class MessageService {
         this.storageRepository = storageRepository;
     }
 
-    public Task<DocumentReference> sendMessage(Message message) {
+    public Task<String> sendMessage(Message message) {
         if ((message.getContent() == null || message.getContent().trim().isEmpty()) && (message.getMediaUrl() == null || message.getMediaUrl().trim().isEmpty()))
             throw new IllegalArgumentException("Message must have content or media");
 
-        return messageRepository.createMessage(message);
+        return messageRepository.createMessage(message.getChatId(), message);
     }
 
     public LiveData<List<Message>> getMessages(String chatId) {
         return messageRepository.getMessagesByChatId(chatId);
     }
 
-    public Task<Void> markMessageAsRead(String messageId) {
-        return messageRepository.markAsRead(messageId);
+    public Task<Void> markMessageAsRead(String chatId, String messageId) {
+        return messageRepository.markAsRead(chatId, messageId);
     }
 
-    public Task<Void> markMessageAsDelivered(String messageId) {
-        return messageRepository.markAsDelivered(messageId);
+    public Task<Void> markMessageAsDelivered(String chatId, String messageId) {
+        return messageRepository.markAsDelivered(chatId, messageId);
     }
 
     public Task<Void> deleteMessage(String messageId) {

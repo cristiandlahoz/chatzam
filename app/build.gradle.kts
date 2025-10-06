@@ -58,6 +58,16 @@ dependencies {
     annotationProcessor(libs.hilt.compiler)
     implementation(libs.hilt.navigation.fragment)
     
+    // WorkManager Dependencies
+    implementation(libs.work.runtime)
+    implementation(libs.hilt.work)
+    annotationProcessor(libs.hilt.work)
+    implementation("com.google.guava:guava:31.1-android")
+    
+    // Glide Dependencies
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
+    
     // Firebase Dependencies (using BoM for version management)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)

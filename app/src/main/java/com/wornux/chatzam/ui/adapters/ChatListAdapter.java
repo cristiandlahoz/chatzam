@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.wornux.chatzam.R;
+import com.wornux.chatzam.data.entities.UserDTO;
 import com.wornux.chatzam.databinding.ItemChatBinding;
 import com.wornux.chatzam.data.entities.Chat;
 import lombok.Setter;
@@ -48,7 +50,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
   @Override
   public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
     Chat chat = getItem(position);
-    holder.bind(chat, clickListener);
+    holder.bind(chat, clickListener, currentUserId);
   }
 
   public static class ChatViewHolder extends RecyclerView.ViewHolder {
@@ -59,27 +61,48 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
       this.binding = binding;
     }
 
-    public void bind(Chat chat, OnChatClickListener listener) {
-      setupChatName(chat);
+    public void bind(Chat chat, OnChatClickListener listener, String currentUserId) {
+      setupChatName(chat, currentUserId);
+      setupChatImage(chat, currentUserId);
       setupLastMessage(chat);
       setupTimestamp(chat);
       setupUnreadBadge(chat);
       setupClickListeners(chat, listener);
-
-      // TODO: Load chat image using Glide or similar
     }
 
-    private void setupChatName(Chat chat) {
-      final String chatName;
-      if (chat.isGroup()) {
-        chatName =
-            (chat.getGroupName() != null && !chat.getGroupName().isEmpty())
-                ? chat.getGroupName()
-                : binding.getRoot().getContext().getString(R.string.group_chat);
-      } else {
-        chatName = chat.getGroupName();
-      }
+    private void setupChatName(Chat chat, String currentUserId) {
+      String chatName = chat.getDisplayName(currentUserId);
       binding.chatNameText.setText(chatName);
+    }
+    
+    private void setupChatImage(Chat chat, String currentUserId) {
+      if (chat.isGroup()) {
+        if (chat.getGroupImageUrl() != null && !chat.getGroupImageUrl().isEmpty()) {
+          Glide.with(binding.getRoot().getContext())
+              .load(chat.getGroupImageUrl())
+              .placeholder(R.mipmap.ic_launcher_round)
+              .into(binding.chatImageView);
+        } else {
+          binding.chatImageView.setImageResource(R.mipmap.ic_launcher_round);
+        }
+      } else {
+        String otherUserId = chat.getOtherParticipant(currentUserId);
+        if (otherUserId != null && chat.getParticipantDetails() != null) {
+          UserDTO otherUser =
+              chat.getParticipantDetails().get(otherUserId);
+          if (otherUser != null && otherUser.getProfileImageUrl() != null 
+              && !otherUser.getProfileImageUrl().isEmpty()) {
+            Glide.with(binding.getRoot().getContext())
+                .load(otherUser.getProfileImageUrl())
+                .placeholder(R.mipmap.ic_launcher_round)
+                .into(binding.chatImageView);
+          } else {
+            binding.chatImageView.setImageResource(R.mipmap.ic_launcher_round);
+          }
+        } else {
+          binding.chatImageView.setImageResource(R.mipmap.ic_launcher_round);
+        }
+      }
     }
 
     private void setupLastMessage(Chat chat) {
@@ -141,6 +164,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
         public boolean areContentsTheSame(@NonNull Chat oldItem, @NonNull Chat newItem) {
           return Objects.equals(oldItem.getGroupName(), newItem.getGroupName())
               && Objects.equals(oldItem.getLastMessageContent(), newItem.getLastMessageContent())
+//                  && Objects.equals(oldItem.getDisplayName(currentUserId), newItem.getDisplayName(currentUserId))
               && Objects.equals(
                   oldItem.getLastMessageTimestamp(), newItem.getLastMessageTimestamp())
               && oldItem.getUnreadCount() == newItem.getUnreadCount();

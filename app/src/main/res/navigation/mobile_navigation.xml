@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/mobile_navigation"
-            app:startDestination="@+id/nav_home">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
 
     <fragment
         android:id="@+id/nav_home"
@@ -22,43 +22,45 @@
     </fragment>
 
     <fragment
-            android:id="@+id/nav_chat"
-            android:name="com.wornux.chatzam.ui.fragments.ChatFragment"
-            android:label="Chat"
-            tools:layout="@layout/fragment_chat">
+        android:id="@+id/nav_chat"
+        android:name="com.wornux.chatzam.ui.fragments.ChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_chat">
         <argument
-                android:name="chat_id"
-                app:argType="string" />
+            android:name="chat_id"
+            app:argType="string" />
+        <argument
+            android:name="chat_name"
+            app:argType="string" />
     </fragment>
 
     <fragment
-            android:id="@+id/nav_group_creation"
-            android:name="com.wornux.chatzam.ui.fragments.GroupCreationFragment"
-            android:label="Create Group"
-            tools:layout="@layout/fragment_group_creation" />
+        android:id="@+id/nav_group_creation"
+        android:name="com.wornux.chatzam.ui.fragments.GroupCreationFragment"
+        android:label="Create Group"
+        tools:layout="@layout/fragment_group_creation" />
 
     <fragment
-            android:id="@+id/nav_user_profile"
-            android:name="com.wornux.chatzam.ui.fragments.UserFragment"
-            android:label="Profile"
-            tools:layout="@layout/fragment_user_profile" />
+        android:id="@+id/nav_user_profile"
+        android:name="com.wornux.chatzam.ui.fragments.UserFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_user_profile" />
 
     <fragment
-            android:id="@+id/nav_settings"
-            android:name="com.wornux.chatzam.ui.fragments.SettingsFragment"
-            android:label="Settings"
-            tools:layout="@layout/fragment_settings" />
+        android:id="@+id/nav_settings"
+        android:name="com.wornux.chatzam.ui.fragments.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
 
     <fragment
-            android:id="@+id/authenticationFragment"
-            android:name="com.wornux.chatzam.ui.fragments.AuthenticationFragment"
-            android:label="Authentication"
-            tools:layout="@layout/fragment_authentication" />
+        android:id="@+id/authenticationFragment"
+        android:name="com.wornux.chatzam.ui.fragments.AuthenticationFragment"
+        android:label="Authentication"
+        tools:layout="@layout/fragment_authentication" />
     <fragment
         android:id="@+id/nav_chat_creation"
         android:name="com.wornux.chatzam.ui.fragments.ChatCreationFragment"
         android:label="Create Chat"
-        tools:layout="@layout/fragment_chat_creation">
-    </fragment>
+        tools:layout="@layout/fragment_chat_creation" />
 
 </navigation>

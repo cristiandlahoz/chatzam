@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.wornux.chatzam.databinding.FragmentChatBinding;
 import com.wornux.chatzam.data.entities.Message;
@@ -14,6 +15,8 @@ import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.ChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
+import java.util.Objects;
+
 @AndroidEntryPoint
 public class ChatFragment extends BaseFragment<ChatViewModel> {
 
@@ -21,14 +24,7 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
   private MessageAdapter messageAdapter;
 
   private static final String ARG_CHAT_ID = "chat_id";
-
-  public static ChatFragment newInstance(String chatId) {
-    ChatFragment fragment = new ChatFragment();
-    Bundle args = new Bundle();
-    args.putString(ARG_CHAT_ID, chatId);
-    fragment.setArguments(args);
-    return fragment;
-  }
+  private static final String ARG_CHAT_NAME = "chat_name";
 
   @Override
   public View onCreateView(
@@ -42,8 +38,13 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
     super.onViewCreated(view, savedInstanceState);
 
     String chatId = getArguments() != null ? getArguments().getString(ARG_CHAT_ID) : null;
+    String chatName = getArguments() != null ? getArguments().getString(ARG_CHAT_NAME) : null;
     if (chatId != null) {
       viewModel.setChatId(chatId);
+    }
+
+    if(requireActivity() instanceof AppCompatActivity activity) {
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle(chatName);
     }
 
     setupRecyclerView();
@@ -81,8 +82,7 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
             getViewLifecycleOwner(),
             messages -> {
               if (messages != null) {
-                messageAdapter.updateMessages(messages);
-                scrollToBottom();
+                messageAdapter.submitList(messages, this::scrollToBottom);
               }
             });
 
@@ -115,7 +115,6 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
     if (!message.isEmpty()) {
       viewModel.sendMessage(message);
       binding.messageEditText.setText("");
-      scrollToBottom();
     }
   }
 

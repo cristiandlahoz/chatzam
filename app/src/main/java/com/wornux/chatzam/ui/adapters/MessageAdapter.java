@@ -4,51 +4,53 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.databinding.ItemMessageReceivedBinding;
 import com.wornux.chatzam.databinding.ItemMessageSentBinding;
 import com.wornux.chatzam.data.entities.Message;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
-public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    
-    private static final int VIEW_TYPE_SENT = 1;
-    private static final int VIEW_TYPE_RECEIVED = 2;
-    
-    private final List<Message> messages = new ArrayList<>();
-    private final String currentUserId;
+public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder> {
+
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private OnMessageClickListener clickListener;
-    
+    @Setter
+    private String currentUserId;
+
     public interface OnMessageClickListener {
         void onMessageClick(Message message);
+
         void onMessageLongClick(Message message);
     }
-    
+
     public MessageAdapter(String currentUserId) {
+        super(DIFF_CALLBACK);
         this.currentUserId = currentUserId;
     }
-    
+
     public void setOnMessageClickListener(OnMessageClickListener listener) {
         this.clickListener = listener;
     }
-    
+
     @Override
     public int getItemViewType(int position) {
-        Message message = messages.get(position);
-        return message.getSenderId().equals(currentUserId) ? VIEW_TYPE_SENT : VIEW_TYPE_RECEIVED;
+        Message message = getItem(position);
+        return message.getSenderId().equals(currentUserId) ? MessageViewType.SENT.getViewType() : MessageViewType.RECEIVED.getViewType();
     }
-    
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        
-        if (viewType == VIEW_TYPE_SENT) {
+
+        if (viewType == MessageViewType.SENT.getViewType()) {
             ItemMessageSentBinding binding = ItemMessageSentBinding.inflate(inflater, parent, false);
             return new SentMessageViewHolder(binding);
         } else {
@@ -56,128 +58,110 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return new ReceivedMessageViewHolder(binding);
         }
     }
-    
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Message message = messages.get(position);
-        
-        if (holder instanceof SentMessageViewHolder) {
-            ((SentMessageViewHolder) holder).bind(message);
-        } else if (holder instanceof ReceivedMessageViewHolder) {
-            ((ReceivedMessageViewHolder) holder).bind(message);
-        }
+        Message message = getItem(position);
+
+        if (holder instanceof SentMessageViewHolder sent)
+            sent.bind(message, clickListener, timeFormat);
+        else if (holder instanceof ReceivedMessageViewHolder received)
+            received.bind(message, clickListener, timeFormat);
     }
-    
-    @Override
-    public int getItemCount() {
-        return messages.size();
-    }
-    
-    public void updateMessages(List<Message> newMessages) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-            new MessageDiffCallback(messages, newMessages));
-        messages.clear();
-        messages.addAll(newMessages);
-        diffResult.dispatchUpdatesTo(this);
-    }
-    
-    class SentMessageViewHolder extends RecyclerView.ViewHolder {
+
+    static class SentMessageViewHolder extends RecyclerView.ViewHolder {
         private final ItemMessageSentBinding binding;
-        
+
         public SentMessageViewHolder(@NonNull ItemMessageSentBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
-            
-            binding.getRoot().setOnClickListener(v -> {
-                if (clickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
-                    clickListener.onMessageClick(messages.get(getAdapterPosition()));
-                }
-            });
-            
-            binding.getRoot().setOnLongClickListener(v -> {
-                if (clickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
-                    clickListener.onMessageLongClick(messages.get(getAdapterPosition()));
-                    return true;
-                }
-                return false;
-            });
         }
-        
-        public void bind(Message message) {
+
+        public void bind(Message message, OnMessageClickListener listener, SimpleDateFormat timeFormat) {
             binding.messageText.setText(message.getContent());
-            
+
             if (message.getTimestamp() != null) {
                 binding.timestampText.setText(timeFormat.format(message.getTimestamp()));
             }
+
+            setupClickListeners(message, listener);
         }
-    }
-    
-    class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
-        private final ItemMessageReceivedBinding binding;
-        
-        public ReceivedMessageViewHolder(@NonNull ItemMessageReceivedBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-            
-            binding.getRoot().setOnClickListener(v -> {
-                if (clickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
-                    clickListener.onMessageClick(messages.get(getAdapterPosition()));
+
+        private void setupClickListeners(Message message, OnMessageClickListener listener) {
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onMessageClick(message);
                 }
             });
-            
-            binding.getRoot().setOnLongClickListener(v -> {
-                if (clickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
-                    clickListener.onMessageLongClick(messages.get(getAdapterPosition()));
+
+            if (listener != null) {
+                itemView.setOnLongClickListener(v -> {
+                    listener.onMessageLongClick(message);
                     return true;
-                }
-                return false;
-            });
-        }
-        
-        public void bind(Message message) {
-            binding.messageText.setText(message.getContent());
-            
-            if (message.getTimestamp() != null) {
-                binding.timestampText.setText(timeFormat.format(message.getTimestamp()));
+                });
+            } else {
+                itemView.setOnLongClickListener(null);
             }
         }
     }
 
-    private static class MessageDiffCallback extends DiffUtil.Callback {
-        private final List<Message> oldList;
-        private final List<Message> newList;
-        
-        public MessageDiffCallback(List<Message> oldList, List<Message> newList) {
-            this.oldList = oldList;
-            this.newList = newList;
+    static class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
+        private final ItemMessageReceivedBinding binding;
+
+        public ReceivedMessageViewHolder(@NonNull ItemMessageReceivedBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
-        
-        @Override
-        public int getOldListSize() {
-            return oldList.size();
+
+        public void bind(Message message, OnMessageClickListener listener, SimpleDateFormat timeFormat) {
+            binding.messageText.setText(message.getContent());
+
+            if (message.getTimestamp() != null) {
+                binding.timestampText.setText(timeFormat.format(message.getTimestamp()));
+            }
+
+            setupClickListeners(message, listener);
         }
-        
-        @Override
-        public int getNewListSize() {
-            return newList.size();
-        }
-        
-        @Override
-        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-            return oldList.get(oldItemPosition).getMessageId()
-                    .equals(newList.get(newItemPosition).getMessageId());
-        }
-        
-        @Override
-        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            Message oldMessage = oldList.get(oldItemPosition);
-            Message newMessage = newList.get(newItemPosition);
-            
-            return oldMessage.equals(newMessage) &&
-                   oldMessage.getTimestamp() != null &&
-                   oldMessage.getTimestamp().equals(newMessage.getTimestamp()) &&
-                   oldMessage.isRead() == newMessage.isRead() &&
-                   oldMessage.isDelivered() == newMessage.isDelivered();
+
+        private void setupClickListeners(Message message, OnMessageClickListener listener) {
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onMessageClick(message);
+                }
+            });
+
+            if (listener != null) {
+                itemView.setOnLongClickListener(v -> {
+                    listener.onMessageLongClick(message);
+                    return true;
+                });
+            } else {
+                itemView.setOnLongClickListener(null);
+            }
         }
     }
+
+    private static final DiffUtil.ItemCallback<Message> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<Message>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull Message oldItem, @NonNull Message newItem) {
+                    return oldItem.getMessageId().equals(newItem.getMessageId());
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull Message oldItem, @NonNull Message newItem) {
+                    return Objects.equals(oldItem.getContent(), newItem.getContent())
+                            && Objects.equals(oldItem.getTimestamp(), newItem.getTimestamp())
+                            && oldItem.isRead() == newItem.isRead()
+                            && oldItem.isDelivered() == newItem.isDelivered();
+                }
+            };
+
+    @Getter
+    @RequiredArgsConstructor
+    private enum MessageViewType {
+        SENT(1), RECEIVED(2);
+        private final int viewType;
+    }
+
 }

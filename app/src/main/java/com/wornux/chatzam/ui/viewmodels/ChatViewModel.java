@@ -24,8 +24,6 @@ public class ChatViewModel extends BaseViewModel {
     private final AuthenticationManager authManager;
     private final MutableLiveData<String> currentChatId = new MutableLiveData<>();
     private final MediatorLiveData<List<Message>> messagesMediator = new MediatorLiveData<>();
-    @Getter
-    private final LiveData<List<Message>> messages = messagesMediator;
 
     @Inject
     public ChatViewModel(MessageService messageService, AuthenticationManager authManager) {
@@ -40,13 +38,17 @@ public class ChatViewModel extends BaseViewModel {
         messagesMediator.addSource(firestoreMessages, messagesMediator::setValue);
     }
 
+    public LiveData<List<Message>> getMessages() {
+        return messagesMediator;
+    }
+
     public void setChatId(String chatId) {
         currentChatId.setValue(chatId);
     }
 
     public LiveData<Boolean> isEmpty() {
         return Transformations.map(
-                messages, messageList -> messageList == null || messageList.isEmpty());
+                getMessages(), messageList -> messageList == null || messageList.isEmpty());
     }
 
     public void sendMessage(String content) {
@@ -102,10 +104,13 @@ public class ChatViewModel extends BaseViewModel {
     }
 
     public void markMessageAsRead(String messageId) {
-        messageService
-                .markMessageAsRead(messageId)
-                .addOnFailureListener(
-                        exception -> setError("Failed to mark message as read: " + exception.getMessage()));
+        String chatId = currentChatId.getValue();
+        if (chatId != null) {
+            messageService
+                    .markMessageAsRead(chatId, messageId)
+                    .addOnFailureListener(
+                            exception -> setError("Failed to mark message as read: " + exception.getMessage()));
+        }
     }
 
     public String getCurrentUserId() {

@@ -61,7 +61,7 @@ public class ChatListViewModel extends BaseViewModel {
         }
     }
     
-    private String getCurrentUserId() {
+    public String getCurrentUserId() {
         return authManager.getCurrentUser() != null ? 
                authManager.getCurrentUser().getUid() : null;
     }

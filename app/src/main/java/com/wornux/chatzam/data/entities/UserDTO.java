@@ -1,22 +1,21 @@
 package com.wornux.chatzam.data.entities;
 
 import com.google.firebase.firestore.PropertyName;
-import com.wornux.chatzam.data.enums.UserStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserDTO {
     @Getter(onMethod_ = {@PropertyName("user_id")})
     @Setter(onMethod_ = {@PropertyName("user_id")})
     private String userId;
-    
-    @Getter(onMethod_ = {@PropertyName("email")})
-    @Setter(onMethod_ = {@PropertyName("email")})
-    private String email;
     
     @Getter(onMethod_ = {@PropertyName("display_name")})
     @Setter(onMethod_ = {@PropertyName("display_name")})
@@ -26,26 +25,24 @@ public class User {
     @Setter(onMethod_ = {@PropertyName("profile_image_url")})
     private String profileImageUrl;
     
-    @Getter(onMethod_ = {@PropertyName("is_online")})
-    @Setter(onMethod_ = {@PropertyName("is_online")})
-    private boolean isOnline;
-    
     @Getter(onMethod_ = {@PropertyName("last_seen")})
     @Setter(onMethod_ = {@PropertyName("last_seen")})
     private Date lastSeen;
     
-    @Getter(onMethod_ = {@PropertyName("status")})
-    @Setter(onMethod_ = {@PropertyName("status")})
-    private UserStatus status;
+    @Getter(onMethod_ = {@PropertyName("is_online")})
+    @Setter(onMethod_ = {@PropertyName("is_online")})
+    private boolean isOnline;
 
-    public void updateLastSeen() {
-        this.lastSeen = new Date();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDTO userDTO = (UserDTO) o;
+        return userId != null && userId.equals(userDTO.userId);
     }
 
-    public void setOnlineStatus(boolean isOnline) {
-        this.isOnline = isOnline;
-        if (!isOnline) {
-            updateLastSeen();
-        }
+    @Override
+    public int hashCode() {
+        return userId != null ? userId.hashCode() : 0;
     }
 }
