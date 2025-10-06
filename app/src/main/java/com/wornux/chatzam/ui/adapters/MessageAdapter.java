@@ -1,14 +1,18 @@
 package com.wornux.chatzam.ui.adapters;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.wornux.chatzam.databinding.ItemMessageReceivedBinding;
 import com.wornux.chatzam.databinding.ItemMessageSentBinding;
 import com.wornux.chatzam.data.entities.Message;
+import com.wornux.chatzam.data.enums.MessageType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -69,55 +73,81 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
             received.bind(message, clickListener, timeFormat);
     }
 
-    static class SentMessageViewHolder extends RecyclerView.ViewHolder {
-        private final ItemMessageSentBinding binding;
+    static class SentMessageViewHolder extends BaseMessageViewHolder {
 
+        private final ItemMessageSentBinding binding;
         public SentMessageViewHolder(@NonNull ItemMessageSentBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
 
-        public void bind(Message message, OnMessageClickListener listener, SimpleDateFormat timeFormat) {
-            binding.messageText.setText(message.getContent());
-
-            if (message.getTimestamp() != null) {
-                binding.timestampText.setText(timeFormat.format(message.getTimestamp()));
-            }
-
-            setupClickListeners(message, listener);
+        @Override
+        protected ImageView getMessageImageView() {
+            return binding.messageImage;
         }
 
-        private void setupClickListeners(Message message, OnMessageClickListener listener) {
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onMessageClick(message);
-                }
-            });
-
-            if (listener != null) {
-                itemView.setOnLongClickListener(v -> {
-                    listener.onMessageLongClick(message);
-                    return true;
-                });
-            } else {
-                itemView.setOnLongClickListener(null);
-            }
+        @Override
+        protected View getMessageTextView() {
+            return binding.messageText;
         }
+
+        @Override
+        protected View getTimestampTextView() {
+            return binding.timestampText;
+        }
+
     }
+    static class ReceivedMessageViewHolder extends BaseMessageViewHolder {
 
-    static class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
         private final ItemMessageReceivedBinding binding;
-
         public ReceivedMessageViewHolder(@NonNull ItemMessageReceivedBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
 
+        @Override
+        protected ImageView getMessageImageView() {
+            return binding.messageImage;
+        }
+
+        @Override
+        protected View getMessageTextView() {
+            return binding.messageText;
+        }
+
+        @Override
+        protected View getTimestampTextView() {
+            return binding.timestampText;
+        }
+
+    }
+
+    abstract static class BaseMessageViewHolder extends RecyclerView.ViewHolder {
+        protected BaseMessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        protected abstract ImageView getMessageImageView();
+        protected abstract View getMessageTextView();
+        protected abstract View getTimestampTextView();
+
         public void bind(Message message, OnMessageClickListener listener, SimpleDateFormat timeFormat) {
-            binding.messageText.setText(message.getContent());
+            if (message.getMessageType() == MessageType.IMAGE && message.hasMedia()) {
+                getMessageImageView().setVisibility(View.VISIBLE);
+                getMessageTextView().setVisibility(View.GONE);
+
+                Glide.with(itemView.getContext())
+                        .load(message.getMediaUrl())
+                        .centerCrop()
+                        .into(getMessageImageView());
+            } else {
+                getMessageImageView().setVisibility(View.GONE);
+                getMessageTextView().setVisibility(View.VISIBLE);
+                ((android.widget.TextView) getMessageTextView()).setText(message.getContent());
+            }
 
             if (message.getTimestamp() != null) {
-                binding.timestampText.setText(timeFormat.format(message.getTimestamp()));
+                ((android.widget.TextView) getTimestampTextView()).setText(timeFormat.format(message.getTimestamp()));
             }
 
             setupClickListeners(message, listener);
@@ -162,6 +192,6 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
     private enum MessageViewType {
         SENT(1), RECEIVED(2);
         private final int viewType;
-    }
 
+    }
 }
