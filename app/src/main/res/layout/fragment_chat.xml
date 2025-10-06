@@ -36,6 +36,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <ImageButton
+            android:id="@+id/attachButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/attach_file"
+            android:src="@drawable/ic_attach"
+            app:tint="?attr/colorOnSurface" />
+
         <EditText
             android:id="@+id/messageEditText"
             android:layout_width="0dp"

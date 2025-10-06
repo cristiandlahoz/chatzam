@@ -1,5 +1,6 @@
 package com.wornux.chatzam.ui.viewmodels;
 
+import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -120,5 +121,65 @@ public class ChatViewModel extends BaseViewModel {
     public boolean isMessageFromCurrentUser(Message message) {
         String currentUserId = getCurrentUserId();
         return currentUserId != null && currentUserId.equals(message.getSenderId());
+    }
+
+    public void sendImageMessage(Uri imageUri) {
+        String currentUserId = getCurrentUserId();
+        String chatId = currentChatId.getValue();
+
+        if (currentUserId == null) {
+            setError("User not logged in");
+            return;
+        }
+
+        if (chatId == null) {
+            setError("No chat selected");
+            return;
+        }
+
+        if (imageUri == null) {
+            setError("Invalid image");
+            return;
+        }
+
+        setLoading(true);
+
+        messageService.uploadMedia(imageUri, MessageType.IMAGE)
+            .addOnSuccessListener(downloadUrl -> {
+                Message message = Message.builder()
+                    .messageId("temp_" + System.currentTimeMillis())
+                    .senderId(currentUserId)
+                    .chatId(chatId)
+                    .content("")
+                    .mediaUrl(downloadUrl)
+                    .messageType(MessageType.IMAGE)
+                    .timestamp(new Date())
+                    .isDelivered(false)
+                    .isRead(false)
+                    .build();
+
+                List<Message> currentMessages = messagesMediator.getValue();
+                if (currentMessages != null) {
+                    List<Message> updatedMessages = new ArrayList<>(currentMessages);
+                    updatedMessages.add(message);
+                    messagesMediator.setValue(updatedMessages);
+                }
+
+                messageService.sendMessage(message)
+                    .addOnSuccessListener(messageId -> {
+                        setLoading(false);
+                    })
+                    .addOnFailureListener(exception -> {
+                        setError("Failed to send image: " + exception.getMessage());
+                        setLoading(false);
+                        if (currentMessages != null) {
+                            messagesMediator.setValue(currentMessages);
+                        }
+                    });
+            })
+            .addOnFailureListener(exception -> {
+                setError("Failed to upload image: " + exception.getMessage());
+                setLoading(false);
+            });
     }
 }

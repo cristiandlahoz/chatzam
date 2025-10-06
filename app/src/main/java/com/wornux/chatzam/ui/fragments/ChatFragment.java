@@ -1,13 +1,26 @@
 package com.wornux.chatzam.ui.fragments;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentChatBinding;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.ui.adapters.MessageAdapter;
@@ -25,6 +38,16 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
 
   private static final String ARG_CHAT_ID = "chat_id";
   private static final String ARG_CHAT_NAME = "chat_name";
+
+  private ActivityResultLauncher<PickVisualMediaRequest> photoPickerLauncher;
+  private ActivityResultLauncher<Intent> legacyPickerLauncher;
+  private ActivityResultLauncher<String> permissionLauncher;
+
+  @Override
+  public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setupActivityResultLaunchers();
+  }
 
   @Override
   public View onCreateView(
@@ -108,6 +131,7 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
   @Override
   protected void setupClickListeners() {
     binding.sendButton.setOnClickListener(v -> sendMessage());
+    binding.attachButton.setOnClickListener(v -> showAttachmentMenu());
   }
 
   private void sendMessage() {
@@ -122,6 +146,84 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
     if (messageAdapter.getItemCount() > 0) {
       binding.messagesRecyclerView.scrollToPosition(messageAdapter.getItemCount() - 1);
     }
+  }
+
+  private void setupActivityResultLaunchers() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      photoPickerLauncher = registerForActivityResult(
+          new ActivityResultContracts.PickVisualMedia(),
+          uri -> {
+            if (uri != null) {
+              viewModel.sendImageMessage(uri);
+            }
+          });
+    }
+
+    legacyPickerLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+          if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+            Uri imageUri = result.getData().getData();
+            if (imageUri != null) {
+              viewModel.sendImageMessage(imageUri);
+            }
+          }
+        });
+
+    permissionLauncher = registerForActivityResult(
+        new ActivityResultContracts.RequestPermission(),
+        isGranted -> {
+          if (isGranted) {
+            openLegacyImagePicker();
+          } else {
+            showError(getString(R.string.permission_denied));
+          }
+        });
+  }
+
+  private void showAttachmentMenu() {
+    PopupMenu popupMenu = new PopupMenu(requireContext(), binding.attachButton);
+    popupMenu.getMenuInflater().inflate(R.menu.menu_attachment_options, popupMenu.getMenu());
+    popupMenu.setOnMenuItemClickListener(this::onAttachmentMenuItemClick);
+    popupMenu.show();
+  }
+
+  private boolean onAttachmentMenuItemClick(MenuItem item) {
+    if (item.getItemId() == R.id.action_send_image) {
+      openImagePicker();
+      return true;
+    }
+    return false;
+  }
+
+  private void openImagePicker() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      PickVisualMediaRequest request = new PickVisualMediaRequest.Builder()
+          .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+          .build();
+      photoPickerLauncher.launch(request);
+    } else {
+      checkPermissionAndOpenLegacyPicker();
+    }
+  }
+
+  private void checkPermissionAndOpenLegacyPicker() {
+    String permission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        ? Manifest.permission.READ_MEDIA_IMAGES
+        : Manifest.permission.READ_EXTERNAL_STORAGE;
+
+    if (ContextCompat.checkSelfPermission(requireContext(), permission) 
+        == PackageManager.PERMISSION_GRANTED) {
+      openLegacyImagePicker();
+    } else {
+      permissionLauncher.launch(permission);
+    }
+  }
+
+  private void openLegacyImagePicker() {
+    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    intent.setType("image/*");
+    legacyPickerLauncher.launch(intent);
   }
 
   @Override

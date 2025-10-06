@@ -63,4 +63,10 @@
     <string name="account">Account</string>
     <string name="remove_user">Remove user</string>
     <string name="selected_members_0">Selected Members (0)</string>
+    <string name="attach_file">Attach file</string>
+    <string name="send_image">Send Image</string>
+    <string name="uploading_image">Uploading image…</string>
+    <string name="image_upload_failed">Failed to upload image</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="permission_rationale">Storage permission is needed to select images</string>
 </resources>
