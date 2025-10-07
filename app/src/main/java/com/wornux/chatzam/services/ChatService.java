@@ -9,6 +9,7 @@ import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.data.entities.UserDTO;
 import com.wornux.chatzam.data.enums.ChatType;
 
+import java.time.Instant;
 import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -92,7 +93,7 @@ public class ChatService {
                             .groupName(groupName)
                             .createdBy(createdBy)
                             .participantDetails(task.getResult())
-                            .createdAt(new java.util.Date())
+                            .createdAt(Instant.now())
                             .unreadCount(0)
                             .build();
 

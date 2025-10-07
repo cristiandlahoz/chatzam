@@ -20,163 +20,167 @@ import javax.inject.Inject;
 @HiltViewModel
 public class ChatViewModel extends BaseViewModel {
 
-    private final MessageService messageService;
-    private final AuthenticationManager authManager;
-    private final MutableLiveData<String> currentChatId = new MutableLiveData<>();
-    private final MediatorLiveData<List<Message>> messagesMediator = new MediatorLiveData<>();
+  private final MessageService messageService;
+  private final AuthenticationManager authManager;
+  private final MutableLiveData<String> currentChatId = new MutableLiveData<>();
+  private final MediatorLiveData<List<Message>> messagesMediator = new MediatorLiveData<>();
 
-    @Inject
-    public ChatViewModel(MessageService messageService, AuthenticationManager authManager) {
-        this.messageService = messageService;
-        this.authManager = authManager;
+  @Inject
+  public ChatViewModel(MessageService messageService, AuthenticationManager authManager) {
+    this.messageService = messageService;
+    this.authManager = authManager;
 
-        LiveData<List<Message>> emptyMessages = new MutableLiveData<>(new ArrayList<>());
-        LiveData<List<Message>> firestoreMessages = Transformations.switchMap(
-                currentChatId,
-                chatId -> (chatId != null) ? messageService.getMessages(chatId) : emptyMessages);
+    LiveData<List<Message>> emptyMessages = new MutableLiveData<>(new ArrayList<>());
+    LiveData<List<Message>> firestoreMessages =
+        Transformations.switchMap(
+            currentChatId,
+            chatId -> (chatId != null) ? messageService.getMessages(chatId) : emptyMessages);
 
-        messagesMediator.addSource(firestoreMessages, messagesMediator::setValue);
+    messagesMediator.addSource(firestoreMessages, messagesMediator::setValue);
+  }
+
+  public LiveData<List<Message>> getMessages() {
+    return messagesMediator;
+  }
+
+  public void setChatId(String chatId) {
+    currentChatId.setValue(chatId);
+  }
+
+  public LiveData<Boolean> isEmpty() {
+    return Transformations.map(
+        getMessages(), messageList -> messageList == null || messageList.isEmpty());
+  }
+
+  public void sendMessage(String content) {
+    String currentUserId = getCurrentUserId();
+    String chatId = currentChatId.getValue();
+
+    if (currentUserId == null) {
+      setError("User not logged in");
+      return;
     }
 
-    public LiveData<List<Message>> getMessages() {
-        return messagesMediator;
+    if (chatId == null) {
+      setError("No chat selected");
+      return;
     }
 
-    public void setChatId(String chatId) {
-        currentChatId.setValue(chatId);
+    if (content == null || content.trim().isEmpty()) {
+      setError("Message cannot be empty");
+      return;
     }
 
-    public LiveData<Boolean> isEmpty() {
-        return Transformations.map(
-                getMessages(), messageList -> messageList == null || messageList.isEmpty());
+    Message message =
+        Message.builder()
+            .messageId("temp_" + System.currentTimeMillis())
+            .senderId(currentUserId)
+            .chatId(chatId)
+            .content(content.trim())
+            .messageType(MessageType.TEXT)
+            .timestamp(Instant.now())
+            .isDelivered(false)
+            .isRead(false)
+            .build();
+
+    List<Message> currentMessages = messagesMediator.getValue();
+    if (currentMessages != null) {
+      List<Message> updatedMessages = new ArrayList<>(currentMessages);
+      updatedMessages.add(message);
+      messagesMediator.setValue(updatedMessages);
+    }
+    messageService
+        .sendMessage(message)
+        .addOnSuccessListener(documentReference -> {})
+        .addOnFailureListener(
+            exception -> {
+              setError("Failed to send message: " + exception.getMessage());
+              if (currentMessages != null) {
+                messagesMediator.setValue(currentMessages);
+              }
+            });
+  }
+
+  public void markMessageAsRead(String messageId) {
+    String chatId = currentChatId.getValue();
+    if (chatId != null) {
+      messageService
+          .markMessageAsRead(chatId, messageId)
+          .addOnFailureListener(
+              exception -> setError("Failed to mark message as read: " + exception.getMessage()));
+    }
+  }
+
+  public String getCurrentUserId() {
+    return authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUid() : null;
+  }
+
+  public boolean isMessageFromCurrentUser(Message message) {
+    String currentUserId = getCurrentUserId();
+    return currentUserId != null && currentUserId.equals(message.getSenderId());
+  }
+
+  public void sendImageMessage(Uri imageUri) {
+    String currentUserId = getCurrentUserId();
+    String chatId = currentChatId.getValue();
+
+    if (currentUserId == null) {
+      setError("User not logged in");
+      return;
     }
 
-    public void sendMessage(String content) {
-        String currentUserId = getCurrentUserId();
-        String chatId = currentChatId.getValue();
-
-        if (currentUserId == null) {
-            setError("User not logged in");
-            return;
-        }
-
-        if (chatId == null) {
-            setError("No chat selected");
-            return;
-        }
-
-        if (content == null || content.trim().isEmpty()) {
-            setError("Message cannot be empty");
-            return;
-        }
-
-        Message message =
-                Message.builder()
-                        .messageId("temp_" + System.currentTimeMillis())
-                        .senderId(currentUserId)
-                        .chatId(chatId)
-                        .content(content.trim())
-                        .messageType(MessageType.TEXT)
-                        .timestamp(Instant.now())
-                        .isDelivered(false)
-                        .isRead(false)
-                        .build();
-
-
-        List<Message> currentMessages = messagesMediator.getValue();
-        if (currentMessages != null) {
-            List<Message> updatedMessages = new ArrayList<>(currentMessages);
-            updatedMessages.add(message);
-            messagesMediator.setValue(updatedMessages);
-        }
-        messageService
-                .sendMessage(message)
-                .addOnSuccessListener(
-                        documentReference -> {
-                        })
-                .addOnFailureListener(
-                        exception -> {
-                            setError("Failed to send message: " + exception.getMessage());
-                            if (currentMessages != null) {
-                                messagesMediator.setValue(currentMessages);
-                            }
-                        });
+    if (chatId == null) {
+      setError("No chat selected");
+      return;
     }
 
-    public void markMessageAsRead(String messageId) {
-        String chatId = currentChatId.getValue();
-        if (chatId != null) {
-            messageService
-                    .markMessageAsRead(chatId, messageId)
-                    .addOnFailureListener(
-                            exception -> setError("Failed to mark message as read: " + exception.getMessage()));
-        }
+    if (imageUri == null) {
+      setError("Invalid image");
+      return;
     }
 
-    public String getCurrentUserId() {
-        return authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUid() : null;
-    }
+    setLoading(true);
 
-    public boolean isMessageFromCurrentUser(Message message) {
-        String currentUserId = getCurrentUserId();
-        return currentUserId != null && currentUserId.equals(message.getSenderId());
-    }
+    messageService
+        .uploadMedia(imageUri, MessageType.IMAGE)
+        .addOnSuccessListener(
+            downloadUrl -> {
+              Message message =
+                  Message.builder()
+                      .messageId("temp_" + System.currentTimeMillis())
+                      .senderId(currentUserId)
+                      .chatId(chatId)
+                      .content("")
+                      .mediaUrl(downloadUrl)
+                      .messageType(MessageType.IMAGE)
+                      .timestamp(Instant.now())
+                      .isDelivered(false)
+                      .isRead(false)
+                      .build();
 
-    public void sendImageMessage(Uri imageUri) {
-        String currentUserId = getCurrentUserId();
-        String chatId = currentChatId.getValue();
+              List<Message> currentMessages = messagesMediator.getValue();
+              if (currentMessages != null) {
+                List<Message> updatedMessages = new ArrayList<>(currentMessages);
+                updatedMessages.add(message);
+                messagesMediator.setValue(updatedMessages);
+              }
 
-        if (currentUserId == null) {
-            setError("User not logged in");
-            return;
-        }
-
-        if (chatId == null) {
-            setError("No chat selected");
-            return;
-        }
-
-        if (imageUri == null) {
-            setError("Invalid image");
-            return;
-        }
-
-        setLoading(true);
-
-        messageService.uploadMedia(imageUri, MessageType.IMAGE)
-            .addOnSuccessListener(downloadUrl -> {
-                Message message = Message.builder()
-                    .messageId("temp_" + System.currentTimeMillis())
-                    .senderId(currentUserId)
-                    .chatId(chatId)
-                    .content("")
-                    .mediaUrl(downloadUrl)
-                    .messageType(MessageType.IMAGE)
-                    .timestamp(Instant.now())
-                    .isDelivered(false)
-                    .isRead(false)
-                    .build();
-
-                List<Message> currentMessages = messagesMediator.getValue();
-                if (currentMessages != null) {
-                    List<Message> updatedMessages = new ArrayList<>(currentMessages);
-                    updatedMessages.add(message);
-                    messagesMediator.setValue(updatedMessages);
-                }
-
-                messageService.sendMessage(message)
-                    .addOnSuccessListener(messageId -> setLoading(false))
-                    .addOnFailureListener(exception -> {
+              messageService
+                  .sendMessage(message)
+                  .addOnSuccessListener(messageId -> setLoading(false))
+                  .addOnFailureListener(
+                      exception -> {
                         setError("Failed to send image: " + exception.getMessage());
                         setLoading(false);
                         if (currentMessages != null) {
-                            messagesMediator.setValue(currentMessages);
+                          messagesMediator.setValue(currentMessages);
                         }
-                    });
+                      });
             })
-            .addOnFailureListener(exception -> {
-                setError("Failed to upload image: " + exception.getMessage());
-                setLoading(false);
+        .addOnFailureListener(
+            exception -> {
+              setError("Failed to upload image: " + exception.getMessage());
+              setLoading(false);
             });
-    }
+  }
 }
