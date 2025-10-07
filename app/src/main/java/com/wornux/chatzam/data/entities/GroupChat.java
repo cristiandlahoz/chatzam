@@ -12,7 +12,7 @@ import java.util.List;
 
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-public class GroupChat extends Chat {
+public non-sealed class GroupChat extends Chat {
     @Getter(onMethod_ = {@PropertyName("admin_users")})
     @Setter(onMethod_ = {@PropertyName("admin_users")})
     private List<String> adminUsers;

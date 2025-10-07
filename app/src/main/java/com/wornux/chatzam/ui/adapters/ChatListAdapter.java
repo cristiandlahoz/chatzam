@@ -154,7 +154,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
   }
 
   private static final DiffUtil.ItemCallback<Chat> DIFF_CALLBACK =
-      new DiffUtil.ItemCallback<Chat>() {
+      new DiffUtil.ItemCallback<>() {
         @Override
         public boolean areItemsTheSame(@NonNull Chat oldItem, @NonNull Chat newItem) {
           return oldItem.getChatId().equals(newItem.getChatId());

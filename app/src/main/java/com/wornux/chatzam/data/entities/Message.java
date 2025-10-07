@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,7 +53,7 @@ public class Message {
     @Getter(onMethod_ = {@PropertyName("timestamp")})
     @Setter(onMethod_ = {@PropertyName("timestamp")})
     @Builder.Default
-    private Date timestamp = new Date();
+    private Instant timestamp = Instant.now();
     
     @Getter(onMethod_ = {@PropertyName("is_delivered")})
     @Setter(onMethod_ = {@PropertyName("is_delivered")})
@@ -70,15 +71,6 @@ public class Message {
     @Getter(onMethod_ = {@PropertyName("media_url")})
     @Setter(onMethod_ = {@PropertyName("media_url")})
     private String mediaUrl;
-
-    public void markAsDelivered() {
-        this.isDelivered = true;
-    }
-
-    public void markAsRead() {
-        this.isRead = true;
-        this.isDelivered = true;
-    }
 
     @Exclude
     public boolean hasMedia() {

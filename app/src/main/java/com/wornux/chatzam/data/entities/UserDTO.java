@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Builder
@@ -27,7 +28,7 @@ public class UserDTO {
     
     @Getter(onMethod_ = {@PropertyName("last_seen")})
     @Setter(onMethod_ = {@PropertyName("last_seen")})
-    private Date lastSeen;
+    private Instant lastSeen;
     
     @Getter(onMethod_ = {@PropertyName("is_online")})
     @Setter(onMethod_ = {@PropertyName("is_online")})

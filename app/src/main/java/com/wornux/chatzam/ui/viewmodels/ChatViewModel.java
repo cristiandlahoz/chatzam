@@ -11,10 +11,9 @@ import com.wornux.chatzam.data.enums.MessageType;
 import com.wornux.chatzam.services.MessageService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
-import lombok.Getter;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 
@@ -78,7 +77,7 @@ public class ChatViewModel extends BaseViewModel {
                         .chatId(chatId)
                         .content(content.trim())
                         .messageType(MessageType.TEXT)
-                        .timestamp(new Date())
+                        .timestamp(Instant.now())
                         .isDelivered(false)
                         .isRead(false)
                         .build();
@@ -153,7 +152,7 @@ public class ChatViewModel extends BaseViewModel {
                     .content("")
                     .mediaUrl(downloadUrl)
                     .messageType(MessageType.IMAGE)
-                    .timestamp(new Date())
+                    .timestamp(Instant.now())
                     .isDelivered(false)
                     .isRead(false)
                     .build();

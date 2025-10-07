@@ -10,12 +10,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.Instant;
 import java.util.*;
 
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Chat {
+public sealed class Chat permits GroupChat {
     
     @Getter(onMethod_ = {@PropertyName("chat_id")})
     @Setter(onMethod_ = {@PropertyName("chat_id")})
@@ -40,7 +41,7 @@ public class Chat {
     
     @Getter(onMethod_ = {@PropertyName("last_message_timestamp")})
     @Setter(onMethod_ = {@PropertyName("last_message_timestamp")})
-    private Date lastMessageTimestamp;
+    private Instant lastMessageTimestamp;
     
     @Getter(onMethod_ = {@PropertyName("unread_count")})
     @Setter(onMethod_ = {@PropertyName("unread_count")})
@@ -61,7 +62,7 @@ public class Chat {
     @Getter(onMethod_ = {@PropertyName("created_at")})
     @Setter(onMethod_ = {@PropertyName("created_at")})
     @Builder.Default
-    private Date createdAt = new Date();
+    private Instant createdAt = Instant.now();
 
     @Exclude
     public String getLastMessageContent() {
