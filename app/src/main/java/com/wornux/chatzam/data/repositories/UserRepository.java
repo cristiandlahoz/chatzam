@@ -14,10 +14,7 @@ import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.repositories.base.BaseRepository;
 import com.wornux.chatzam.services.FirebaseManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -54,7 +51,7 @@ public class UserRepository extends BaseRepository<User> {
 
     return db.collection(collectionName)
         .document(userId)
-        .update(FCM_TOKENS_FIELD, FieldValue.arrayUnion(token));
+        .update(FCM_TOKENS_FIELD, Collections.singletonList(token));
   }
 
   public Task<List<User>> searchUsers(String query) {

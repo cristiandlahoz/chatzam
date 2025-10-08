@@ -9,7 +9,6 @@ import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.repositories.base.BaseRepository;
 import com.wornux.chatzam.services.FirebaseManager;
-import com.wornux.chatzam.utils.CryptoUtils;
 
 import java.util.*;
 import javax.inject.Inject;

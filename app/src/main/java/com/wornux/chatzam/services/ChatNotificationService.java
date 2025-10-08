@@ -44,36 +44,36 @@ public class ChatNotificationService extends FirebaseMessagingService {
   public void onMessageReceived(@NotNull RemoteMessage remoteMessage) {
     super.onMessageReceived(remoteMessage);
     if (settingsService.getPushNotificationsPreference()) {
-        showNotification(remoteMessage);
+      showNotification(remoteMessage);
+    }
+  }
+
+  private void showNotification(RemoteMessage remoteMessage) {
+    Log.d(TAG, "Message received from: " + remoteMessage.getFrom());
+
+    if (remoteMessage.getData().isEmpty()) {
+      Log.d(TAG, "Message data payload is empty");
+      return;
     }
 
-  }
-  private void showNotification(RemoteMessage remoteMessage) {
-      Log.d(TAG, "Message received from: " + remoteMessage.getFrom());
+    String chatId = remoteMessage.getData().get("chatId");
+    String messageId = remoteMessage.getData().get("messageId");
+    String senderName = remoteMessage.getData().get("senderName");
+    String senderId = remoteMessage.getData().get("senderId");
 
-      if (remoteMessage.getData().isEmpty()) {
-          Log.d(TAG, "Message data payload is empty");
-          return;
-      }
+    boolean notificationsEnabled = settingsService.getPushNotificationsPreference();
 
-      String chatId = remoteMessage.getData().get("chatId");
-      String messageId = remoteMessage.getData().get("messageId");
-      String senderName = remoteMessage.getData().get("senderName");
-      String senderId = remoteMessage.getData().get("senderId");
+    if (!notificationsEnabled) {
+      Log.d(TAG, "Notifications are disabled globally");
+      return;
+    }
 
-      boolean notificationsEnabled = settingsService.getPushNotificationsPreference();
+    if (remoteMessage.getNotification() != null) {
+      String title = remoteMessage.getNotification().getTitle();
+      String body = remoteMessage.getNotification().getBody();
 
-      if (!notificationsEnabled) {
-          Log.d(TAG, "Notifications are disabled globally");
-          return;
-      }
-
-      if (remoteMessage.getNotification() != null) {
-          String title = remoteMessage.getNotification().getTitle();
-          String body = remoteMessage.getNotification().getBody();
-
-          showNotification(title, body, chatId, messageId);
-      }
+      showNotification(title, body, chatId, messageId);
+    }
   }
 
   private void showNotification(String title, String body, String chatId, String messageId) {
@@ -87,18 +87,8 @@ public class ChatNotificationService extends FirebaseMessagingService {
         PendingIntent.getActivity(
             this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
-    Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
     NotificationCompat.Builder notificationBuilder =
-        new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.message_multiple_02_stroke_rounded)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setAutoCancel(true)
-            .setSound(defaultSoundUri)
-            .setContentIntent(pendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_MESSAGE);
+        notificationBaseConfig(title, body, pendingIntent);
 
     NotificationManager notificationManager =
         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -108,11 +98,28 @@ public class ChatNotificationService extends FirebaseMessagingService {
     channel.setDescription("Notifications for new chat messages");
     channel.enableVibration(true);
     channel.enableLights(true);
-    channel.setSound(defaultSoundUri, null);
+    if (settingsService.getMessageSoundsPreference()) {
+      Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+      notificationBuilder.setSound(defaultSoundUri);
+      channel.setSound(defaultSoundUri, null);
+    }
     notificationManager.createNotificationChannel(channel);
 
     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
     Log.d(TAG, "Notification displayed for chat: " + chatId);
+  }
+
+  private NotificationCompat.Builder notificationBaseConfig(
+      String title, String body, PendingIntent pendingIntent) {
+    return new NotificationCompat.Builder(this, CHANNEL_ID)
+        .setSmallIcon(R.drawable.message_multiple_02_stroke_rounded)
+        .setContentTitle(title)
+        .setContentText(body)
+        .setAutoCancel(true)
+        .setContentIntent(pendingIntent)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setCategory(NotificationCompat.CATEGORY_MESSAGE);
+    
   }
 }

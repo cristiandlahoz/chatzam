@@ -17,7 +17,7 @@ public class SettingsService {
   }
 
   public boolean getPushNotificationsPreference() {
-    return preferences.getBoolean(
+    return getBoolean(
         PreferenceConstants.KEY_PUSH_NOTIFICATIONS, PreferenceConstants.DEFAULT_PUSH_NOTIFICATIONS);
   }
 
@@ -32,14 +32,6 @@ public class SettingsService {
 
   public void saveMessageSoundsPreference(boolean enabled) {
     saveBoolean(PreferenceConstants.KEY_MESSAGE_SOUNDS, enabled);
-  }
-
-  public boolean getShowOnlineStatusPreference() {
-      return getBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, PreferenceConstants.DEFAULT_SHOW_ONLINE_STATUS);
-  }
-
-  public void saveShowOnlineStatusPreference(boolean enabled) {
-      saveBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, enabled);
   }
 
   private void saveBoolean(String key, boolean value) {
