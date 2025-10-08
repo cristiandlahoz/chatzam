@@ -39,10 +39,6 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
         .getMessageSounds()
         .observe(getViewLifecycleOwner(), binding.messageSoundsSwitch::setChecked);
 
-    viewModel
-        .getShowOnlineStatus()
-        .observe(getViewLifecycleOwner(), binding.onlineStatusSwitch::setChecked);
-
   }
 
   @Override
@@ -57,12 +53,6 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
         (buttonView, isChecked) -> {
           viewModel.updateMessageSounds(isChecked);
           showSnackbar(getString(R.string.sound_settings_updated));
-        });
-
-    binding.onlineStatusSwitch.setOnCheckedChangeListener(
-        (buttonView, isChecked) -> {
-          viewModel.updateShowOnlineStatus(isChecked);
-          showSnackbar(getString(R.string.privacy_settings_updated));
         });
 
     binding.logoutButton.setOnClickListener(v -> logout());

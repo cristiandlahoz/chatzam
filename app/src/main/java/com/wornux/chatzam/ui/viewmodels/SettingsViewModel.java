@@ -16,7 +16,6 @@ public class SettingsViewModel extends BaseViewModel {
 
     private final MutableLiveData<Boolean> pushNotifications = new MutableLiveData<>();
     private final MutableLiveData<Boolean> messageSounds = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> showOnlineStatus = new MutableLiveData<>();
 
     @Inject
     public SettingsViewModel(SettingsService settingsService) {
@@ -32,14 +31,9 @@ public class SettingsViewModel extends BaseViewModel {
         return messageSounds;
     }
     
-    public LiveData<Boolean> getShowOnlineStatus() {
-        return showOnlineStatus;
-    }
-    
     private void loadSettings() {
         pushNotifications.setValue(settingsService.getPushNotificationsPreference());
         messageSounds.setValue(settingsService.getMessageSoundsPreference());
-        showOnlineStatus.setValue(settingsService.getShowOnlineStatusPreference());
     }
     
     public void updatePushNotifications(boolean enabled) {
@@ -51,10 +45,5 @@ public class SettingsViewModel extends BaseViewModel {
         messageSounds.setValue(enabled);
         settingsService.saveMessageSoundsPreference(enabled);
     }
-    
-    public void updateShowOnlineStatus(boolean enabled) {
-        showOnlineStatus.setValue(enabled);
-        settingsService.saveShowOnlineStatusPreference(enabled);
-    }
-    
+
 }

@@ -43,32 +43,37 @@ public class ChatNotificationService extends FirebaseMessagingService {
   @Override
   public void onMessageReceived(@NotNull RemoteMessage remoteMessage) {
     super.onMessageReceived(remoteMessage);
-
-    Log.d(TAG, "Message received from: " + remoteMessage.getFrom());
-
-    if (remoteMessage.getData().isEmpty()) {
-      Log.d(TAG, "Message data payload is empty");
-      return;
+    if (settingsService.getPushNotificationsPreference()) {
+        showNotification(remoteMessage);
     }
 
-    String chatId = remoteMessage.getData().get("chatId");
-    String messageId = remoteMessage.getData().get("messageId");
-    String senderName = remoteMessage.getData().get("senderName");
-    String senderId = remoteMessage.getData().get("senderId");
+  }
+  private void showNotification(RemoteMessage remoteMessage) {
+      Log.d(TAG, "Message received from: " + remoteMessage.getFrom());
 
-    boolean notificationsEnabled = settingsService.getPushNotificationsPreference();
+      if (remoteMessage.getData().isEmpty()) {
+          Log.d(TAG, "Message data payload is empty");
+          return;
+      }
 
-    if (!notificationsEnabled) {
-      Log.d(TAG, "Notifications are disabled globally");
-      return;
-    }
+      String chatId = remoteMessage.getData().get("chatId");
+      String messageId = remoteMessage.getData().get("messageId");
+      String senderName = remoteMessage.getData().get("senderName");
+      String senderId = remoteMessage.getData().get("senderId");
 
-    if (remoteMessage.getNotification() != null) {
-      String title = remoteMessage.getNotification().getTitle();
-      String body = remoteMessage.getNotification().getBody();
+      boolean notificationsEnabled = settingsService.getPushNotificationsPreference();
 
-      showNotification(title, body, chatId, messageId);
-    }
+      if (!notificationsEnabled) {
+          Log.d(TAG, "Notifications are disabled globally");
+          return;
+      }
+
+      if (remoteMessage.getNotification() != null) {
+          String title = remoteMessage.getNotification().getTitle();
+          String body = remoteMessage.getNotification().getBody();
+
+          showNotification(title, body, chatId, messageId);
+      }
   }
 
   private void showNotification(String title, String body, String chatId, String messageId) {
