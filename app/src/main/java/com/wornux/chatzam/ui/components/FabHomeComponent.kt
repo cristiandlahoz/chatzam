@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ComposeView
@@ -88,8 +89,16 @@ class FabHomeComponent : Fragment() {
                             handleMenuItemClick(navController, label)
                             fabMenuExpanded = false
                         },
-                        icon = { Icon(icon, contentDescription = null) },
-                        text = { Text(text = label) }
+                        icon = { 
+                            Icon(
+                                icon, 
+                                contentDescription = null,
+                                tint = Color(0xFF03DAC5)
+                            )
+                        },
+                        text = { Text(text = label, color = Color.White) },
+                        containerColor = Color(0xFF1E1E1E),
+
                     )
                 }
             }
@@ -111,7 +120,14 @@ class FabHomeComponent : Fragment() {
                 focusRequester
             ),
             checked = fabMenuExpanded,
-            onCheckedChange = { onToggle() }
+            onCheckedChange = { onToggle() },
+            containerColor = { progress ->
+                androidx.compose.ui.graphics.lerp(
+                    Color(0xFF018786),
+                    Color(0xFF03DAC5),
+                    progress
+                )
+            }
         ) {
             val imageVector by remember {
                 derivedStateOf {
@@ -121,7 +137,8 @@ class FabHomeComponent : Fragment() {
             Icon(
                 painter = rememberVectorPainter(imageVector),
                 contentDescription = null,
-                modifier = Modifier.animateIcon({ checkedProgress })
+                modifier = Modifier.animateIcon({ checkedProgress }),
+                tint = Color.White
             )
         }
     }
