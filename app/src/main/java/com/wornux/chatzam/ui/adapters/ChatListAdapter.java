@@ -162,11 +162,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
 
         @Override
         public boolean areContentsTheSame(@NonNull Chat oldItem, @NonNull Chat newItem) {
-          return Objects.equals(oldItem.getGroupName(), newItem.getGroupName())
-              && Objects.equals(oldItem.getLastMessageContent(), newItem.getLastMessageContent())
-              && Objects.equals(
-                  oldItem.getLastMessageTimestamp(), newItem.getLastMessageTimestamp())
-              && oldItem.getUnreadCount() == newItem.getUnreadCount();
+          return oldItem.equals(newItem);
         }
       };
 }

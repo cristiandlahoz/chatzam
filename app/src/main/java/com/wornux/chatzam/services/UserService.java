@@ -1,6 +1,7 @@
 package com.wornux.chatzam.services;
 
 import android.net.Uri;
+import android.util.Log;
 import androidx.lifecycle.LiveData;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -19,129 +20,122 @@ import javax.inject.Singleton;
 @Singleton
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final StorageRepository storageRepository;
-    private final ChatRepository chatRepository;
-    private final AuthenticationManager authManager;
+  private static final String TAG = "UserService";
 
-    @Inject
-    public UserService(
-            UserRepository userRepository,
-            StorageRepository storageRepository,
-            ChatRepository chatRepository,
-            AuthenticationManager authManager) {
-        this.userRepository = userRepository;
-        this.storageRepository = storageRepository;
-        this.chatRepository = chatRepository;
-        this.authManager = authManager;
+  private final UserRepository userRepository;
+  private final StorageRepository storageRepository;
+  private final ChatRepository chatRepository;
+
+  @Inject
+  public UserService(
+      UserRepository userRepository,
+      StorageRepository storageRepository,
+      ChatRepository chatRepository) {
+    this.userRepository = userRepository;
+    this.storageRepository = storageRepository;
+    this.chatRepository = chatRepository;
+  }
+
+  public Task<Void> createUserProfile(User user) {
+    if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+      throw new IllegalArgumentException("User email is required");
+    }
+    if (user.getDisplayName() == null || user.getDisplayName().trim().isEmpty()) {
+      throw new IllegalArgumentException("User display name is required");
     }
 
-    public Task<Void> createUserProfile(User user) {
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("User email is required");
-        }
-        if (user.getDisplayName() == null || user.getDisplayName().trim().isEmpty()) {
-            throw new IllegalArgumentException("User display name is required");
-        }
+    return userRepository.createUser(user);
+  }
 
-        return userRepository.createUser(user);
+  public Task<User> getUserProfile(String userId) {
+    return userRepository.getUserById(userId);
+  }
+
+  public Task<Void> updateUserProfile(User user) {
+    return userRepository
+        .updateUser(user)
+        .continueWithTask(
+            task -> {
+              if (task.isSuccessful()) {
+                return syncParticipantDetailsInChats(user);
+              }
+              return task;
+            });
+  }
+
+  public Task<List<User>> searchUsers(String query) {
+    return userRepository.searchUsers(query);
+  }
+
+  public Task<String> uploadProfileImage(String userId, Uri imageUri) {
+    if (imageUri == null) {
+      throw new IllegalArgumentException("Image URI cannot be null");
     }
 
-    public Task<User> getUserProfile(String userId) {
-        return userRepository.getUserById(userId);
-    }
+    String fileName = "profile_" + userId + "_" + System.currentTimeMillis();
+    return storageRepository
+        .uploadImage(imageUri, fileName)
+        .continueWith(
+            task -> {
+              Uri downloadUrl = task.getResult();
+              return downloadUrl.toString();
+            });
+  }
 
-    public Task<Void> updateUserProfile(User user) {
-        return userRepository.updateUser(user)
-                .continueWithTask(task -> {
-                    if (task.isSuccessful()) {
-                        return syncParticipantDetailsInChats(user);
-                    }
-                    return task;
-                });
-    }
+  private Task<Void> syncParticipantDetailsInChats(User user) {
+    String userId = user.getUserId();
 
-    public Task<List<User>> searchUsers(String query) {
-        return userRepository.searchUsers(query);
-    }
+    UserDto userDTO =
+        UserDto.builder()
+            .userId(userId)
+            .displayName(user.getDisplayName())
+            .profileImageUrl(user.getProfileImageUrl())
+            .lastSeen(user.getLastSeen())
+            .isOnline(user.isOnline())
+            .fcmTokens(user.getFcmTokens())
+            .build();
 
-    public Task<String> uploadProfileImage(String userId, Uri imageUri) {
-        if (imageUri == null) {
-            throw new IllegalArgumentException("Image URI cannot be null");
-        }
+    return chatRepository
+        .getChatsByParticipantTask(userId)
+        .continueWithTask(
+            task -> {
+              if (!task.isSuccessful() || task.getResult() == null || task.getResult().isEmpty()) {
+                Log.i(
+                    TAG,
+                    String.format(
+                        "canonical-log-line sync_participant_details status=skipped user_id=%s chat_count=0  reason=no_chats",
+                        userId));
+                return Tasks.forResult(null);
+              }
 
-        String fileName = "profile_" + userId + "_" + System.currentTimeMillis();
-        return storageRepository
-                .uploadImage(imageUri, fileName)
-                .continueWith(
-                        task -> {
-                            Uri downloadUrl = task.getResult();
-                            return downloadUrl.toString();
-                        });
-    }
+              List<Task<Void>> updateTasks = new ArrayList<>();
+              int chatCount = task.getResult().size();
 
-    public Task<Void> updateProfileImage(String userId, String imageUrl) {
-        return userRepository.updateProfileImage(userId, imageUrl)
-                .continueWithTask(task -> {
-                    if (task.isSuccessful()) {
-                        return userRepository.getUserById(userId)
-                                .continueWithTask(userTask -> {
-                                    if (userTask.isSuccessful() && userTask.getResult() != null) {
-                                        return syncParticipantDetailsInChats(userTask.getResult());
-                                    }
-                                    return Tasks.forResult(null);
-                                });
-                    }
-                    return task;
-                });
-    }
+              for (Chat chat : task.getResult()) {
+                updateTasks.add(
+                    chatRepository.updateSingleParticipantDetail(
+                        chat.getChatId(), userId, userDTO));
+              }
 
-    public LiveData<User> getCurrentUserProfile() {
-        String currentUserId = getCurrentUserId();
-        if (currentUserId != null) {
-            return userRepository.getUserRealtime(currentUserId);
-        }
-        return null;
-    }
+              return Tasks.whenAllSuccess(updateTasks)
+                  .continueWith(
+                      completedTask -> {
+                        boolean success = completedTask.isSuccessful();
+                        String status = success ? "success" : "failed";
 
-    private String getCurrentUserId() {
-        return authManager.getCurrentUser() != null ? authManager.getCurrentUser().getUid() : null;
-    }
+                        String errorMsg = "";
+                        if (!success && completedTask.getException() != null) {
+                          errorMsg = " error=\"" + completedTask.getException().getMessage() + "\"";
+                        }
 
-    private Task<Void> syncParticipantDetailsInChats(User user) {
-        String userId = user.getUserId();
+                        Log.i(
+                            TAG,
+                            String.format(
+                                "canonical-log-line sync_participant_details status=%s user_id=%s chat_count=%d%s",
+                                status, userId, chatCount, errorMsg));
 
-        UserDto userDTO = new UserDto(
-                userId,
-                user.getDisplayName(),
-                user.getProfileImageUrl(),
-                user.getLastSeen(),
-                user.isOnline(),
-                new ArrayList<>()
-        );
-
-        return chatRepository.getChatsByParticipantTask(userId)
-                .continueWithTask(task -> {
-                    if (!task.isSuccessful() || task.getResult() == null) {
-                        return Tasks.forResult(null);
-                    }
-
-                    List<Chat> chats = task.getResult();
-                    if (chats.isEmpty()) {
-                        return Tasks.forResult(null);
-                    }
-
-                    List<Task<Void>> updateTasks = new ArrayList<>();
-                    for (Chat chat : chats) {
-                        Task<Void> updateTask = chatRepository.updateSingleParticipantDetails(
-                                chat.getChatId(),
-                                userId,
-                                userDTO
-                        );
-                        updateTasks.add(updateTask);
-                    }
-
-                    return Tasks.whenAll(updateTasks);
-                });
-    }
+                        return null;
+                      });
+            });
+  }
 }

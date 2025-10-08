@@ -40,10 +40,6 @@ public class UserProfileViewModel extends BaseViewModel {
     return profileUpdated;
   }
 
-  public LiveData<String> getProfileImageUrl() {
-    return profileImageUrl;
-  }
-
   public LiveData<Uri> getProfileImageUri() {
     return profileImageUri;
   }
@@ -160,42 +156,6 @@ public class UserProfileViewModel extends BaseViewModel {
               setLoading(false);
               setError("Failed to upload image: " + exception.getMessage());
             });
-  }
-
-  private void updateProfileImageUrl(String imageUrl) {
-    String currentUserId = getCurrentUserId();
-
-    if (currentUserId != null) {
-      userService
-          .updateProfileImage(currentUserId, imageUrl)
-          .addOnSuccessListener(
-              aVoid -> {
-                setLoading(false);
-                User current = currentProfile.getValue();
-                if (current != null) {
-                  User updated =
-                      User.builder()
-                          .userId(current.getUserId())
-                          .email(current.getEmail())
-                          .displayName(current.getDisplayName())
-                          .profileImageUrl(imageUrl)
-                          .isOnline(current.isOnline())
-                          .lastSeen(current.getLastSeen())
-                          .status(current.getStatus())
-                          .build();
-                  currentProfile.setValue(updated);
-                }
-              })
-          .addOnFailureListener(
-              exception -> {
-                setLoading(false);
-                setError("Failed to update profile image: " + exception.getMessage());
-              });
-    }
-  }
-
-  public void refreshProfile() {
-    loadCurrentUser();
   }
 
   private String getCurrentUserId() {

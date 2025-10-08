@@ -5,6 +5,9 @@ import com.google.firebase.firestore.PropertyName;
 import com.wornux.chatzam.data.enums.UserStatus;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,6 +39,11 @@ public class User {
     @Getter(onMethod_ = {@PropertyName("status")})
     @Setter(onMethod_ = {@PropertyName("status")})
     private UserStatus status;
+
+    @Getter(onMethod_ = {@PropertyName("fcm_tokens")})
+    @Setter(onMethod_ = {@PropertyName("fcm_tokens")})
+    @Builder.Default
+    private List<String> fcmTokens = new ArrayList<>();
 
     public void updateLastSeen() {
         this.lastSeen = Timestamp.now();
