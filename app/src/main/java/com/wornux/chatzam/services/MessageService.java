@@ -3,6 +3,7 @@ package com.wornux.chatzam.services;
 import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
 import com.wornux.chatzam.data.repositories.MessageRepository;
 import com.wornux.chatzam.data.repositories.StorageRepository;
@@ -38,18 +39,6 @@ public class MessageService {
         return messageRepository.getMessagesByChatId(chatId);
     }
 
-    public Task<Void> markMessageAsRead(String chatId, String messageId) {
-        return messageRepository.markAsRead(chatId, messageId);
-    }
-
-    public Task<Void> markMessageAsDelivered(String chatId, String messageId) {
-        return messageRepository.markAsDelivered(chatId, messageId);
-    }
-
-    public Task<Void> deleteMessage(String messageId) {
-        return messageRepository.deleteDocument(messageId);
-    }
-
     public Task<String> uploadMedia(Uri uri, MessageType messageType) {
         if (uri == null) {
             throw new IllegalArgumentException("Media URI cannot be null");
@@ -57,14 +46,10 @@ public class MessageService {
 
         String fileName = "media_" + System.currentTimeMillis();
 
-        Task<Uri> uploadTask;
-        if (Objects.requireNonNull(messageType) == MessageType.IMAGE) {
-            uploadTask = storageRepository.uploadImage(uri, fileName);
-        } else {
-            throw new IllegalArgumentException("Unsupported media type: " + messageType);
-        }
+        if (Objects.requireNonNull(messageType) != MessageType.IMAGE)
+            Tasks.forException(new IllegalArgumentException("Unsupported media type: " + messageType));
 
-        return uploadTask.continueWith(task -> {
+        return storageRepository.uploadImage(uri, fileName).continueWith(task -> {
             Uri downloadUrl = task.getResult();
             return downloadUrl.toString();
         });

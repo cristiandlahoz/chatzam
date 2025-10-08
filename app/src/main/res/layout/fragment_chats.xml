@@ -43,7 +43,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fabHomeFragmentContainer"
-        android:name="com.wornux.chatzam.ui.fragments.FabHomeFragment"
+        android:name="com.wornux.chatzam.ui.components.FabHomeComponent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

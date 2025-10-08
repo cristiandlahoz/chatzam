@@ -11,8 +11,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
 
-@Singleton
 @Getter
+@Singleton
 public class FirebaseManager {
 
   private final FirebaseAuth firebaseAuth;
