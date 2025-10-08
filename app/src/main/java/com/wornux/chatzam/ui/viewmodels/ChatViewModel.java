@@ -9,6 +9,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.wornux.chatzam.services.AuthenticationManager;
+import com.wornux.chatzam.services.ChatService;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.data.enums.MessageType;
 import com.wornux.chatzam.services.MessageService;

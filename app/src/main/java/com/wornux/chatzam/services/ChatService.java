@@ -2,12 +2,14 @@ package com.wornux.chatzam.services;
 
 import androidx.lifecycle.LiveData;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.wornux.chatzam.data.repositories.ChatRepository;
 import com.wornux.chatzam.data.repositories.UserRepository;
 import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.data.dto.UserDto;
+import com.wornux.chatzam.data.enums.MessageType;
 import com.wornux.chatzam.data.enums.ChatType;
 
 import java.util.*;
@@ -53,11 +55,28 @@ public class ChatService {
     }
 
     public Task<Void> updateLastMessage(String chatId, Message message) {
+        if (chatId == null) {
+            return Tasks.forException(new IllegalArgumentException("Message has no Chat ID"));
+        }
+
+        Message finalMessage = message.getMessageType() == MessageType.IMAGE ? makeCustomMessage(message) : message;
+
         Map<String, Object> updates = new HashMap<>();
-        updates.put("last_message", message);
-        updates.put("last_message_timestamp", message.getTimestamp());
+        updates.put("last_message", finalMessage);
+        updates.put("last_message_timestamp", finalMessage.getTimestamp());
 
         return chatRepository.updateLastMessage(chatId, updates);
+    }
+
+    public Message makeCustomMessage(Message message) {
+        Message lastMessageSummary = message;
+        if (message.getMessageType() == MessageType.IMAGE) {
+            lastMessageSummary = Message.builder()
+                    .content("📷 Image")
+                    .timestamp(message.getTimestamp())
+                    .build();
+        }
+        return lastMessageSummary;
     }
 
     public Task<Chat> getChatById(String chatId) {

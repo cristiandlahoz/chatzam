@@ -20,19 +20,23 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final StorageRepository storageRepository;
+    private final ChatService chatService;
 
     @Inject
     public MessageService(MessageRepository messageRepository,
-                          StorageRepository storageRepository) {
+                          StorageRepository storageRepository, ChatService chatService) {
         this.messageRepository = messageRepository;
         this.storageRepository = storageRepository;
+        this.chatService = chatService;
     }
 
     public Task<String> sendMessage(Message message) {
         if ((message.getContent() == null || message.getContent().trim().isEmpty()) && (message.getMediaUrl() == null || message.getMediaUrl().trim().isEmpty()))
             throw new IllegalArgumentException("Message must have content or media");
 
-        return messageRepository.createMessage(message.getChatId(), message);
+        return messageRepository.createMessage(message.getChatId(), message).addOnSuccessListener(v -> {
+            chatService.updateLastMessage(message.getChatId(), message);
+        });
     }
 
     public LiveData<List<Message>> getMessages(String chatId) {
