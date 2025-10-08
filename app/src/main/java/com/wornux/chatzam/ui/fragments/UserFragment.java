@@ -38,7 +38,7 @@ public class UserFragment extends BaseFragment<UserProfileViewModel> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri imageUri = result.getData().getData();
                         if (imageUri != null) {
-                            viewModel.uploadProfileImage(imageUri);
+                            viewModel.setProfileImageUri(imageUri);
                         }
                     }
                 });
@@ -65,7 +65,7 @@ public class UserFragment extends BaseFragment<UserProfileViewModel> {
             }
         });
 
-        viewModel.getProfileImageUrl().observe(getViewLifecycleOwner(), imageUrl -> {
+        viewModel.getProfileImageUri().observe(getViewLifecycleOwner(), imageUrl -> {
             if (imageUrl != null) {
                 setImage(imageUrl);
             }
@@ -109,6 +109,16 @@ public class UserFragment extends BaseFragment<UserProfileViewModel> {
     }
 
     private void setImage(String profileImageUrl) {
+        if (profileImageUrl == null) {
+            return;
+        }
+
+        Glide.with(binding.getRoot().getContext())
+                .load(profileImageUrl)
+                .placeholder(R.mipmap.ic_launcher_round)
+                .into(binding.profileImageView);
+    }
+    private void setImage(Uri profileImageUrl) {
         if (profileImageUrl == null) {
             return;
         }
