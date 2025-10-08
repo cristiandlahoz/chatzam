@@ -113,10 +113,7 @@ public class UserProfileViewModel extends BaseViewModel {
         
         setLoading(true);
         userService.uploadProfileImage(currentUserId, imageUri)
-                .addOnSuccessListener(imageUrl -> {
-                    profileImageUrl.setValue(imageUrl);
-                    updateProfileImageUrl(imageUrl);
-                })
+                .addOnSuccessListener(profileImageUrl::setValue)
                 .addOnFailureListener(exception -> {
                     setLoading(false);
                     setError("Failed to upload image: " + exception.getMessage());
