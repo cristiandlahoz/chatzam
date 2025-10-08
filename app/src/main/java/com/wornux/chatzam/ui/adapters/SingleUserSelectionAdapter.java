@@ -8,10 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.wornux.chatzam.databinding.ItemUserChatSelectionBinding;
 import com.wornux.chatzam.data.entities.User;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserSelectionAdapter.SingleUserSelectionViewHolder> {
     
@@ -47,11 +44,37 @@ public class SingleUserSelectionAdapter extends RecyclerView.Adapter<SingleUserS
         return users.size();
     }
     
-    public void updateUsers(List<User> newUsers) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new UserDiffCallback(users, newUsers));
+    public void updateUsers(List<User> allUsers, String currentUserId, List<String> existingChatIds) {
+        List<User> availableUsers = filterAvailableUsers(allUsers, currentUserId, existingChatIds);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new UserDiffCallback(this.users, availableUsers));
         users.clear();
-        users.addAll(newUsers);
+        users.addAll(availableUsers);
         diffResult.dispatchUpdatesTo(this);
+    }
+    
+    private List<User> filterAvailableUsers(List<User> allUsers, String currentUserId, List<String> existingChatIds) {
+        List<User> availableUsers = new ArrayList<>();
+        Set<String> existingChatsSet = new HashSet<>(existingChatIds);
+
+        for (User user : allUsers) {
+            // No mostrar el usuario actual en la lista de selección
+            if (user.getUserId().equals(currentUserId)) {
+                continue;
+            }
+
+            String potentialChatId = generateCanonicalId(currentUserId, user.getUserId());
+            if (!existingChatsSet.contains(potentialChatId)) {
+                availableUsers.add(user);
+            }
+        }
+        return availableUsers;
+    }
+
+    private String generateCanonicalId(String userId1, String userId2) {
+        List<String> ids = Arrays.asList(userId1, userId2);
+        Collections.sort(ids);
+        // Esta lógica debe ser idéntica a la de ChatService para crear el ID de un chat individual.
+        return ids.get(0) + ids.get(1);
     }
 
     public void setSelectedUser(User user) {

@@ -34,6 +34,28 @@
             android:textColor="@color/text_color_secondary"
             android:textSize="16sp" />
 
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:hint="@string/display_email"
+            app:boxStrokeColor="?attr/colorPrimary"
+            app:hintTextColor="@color/text_color_secondary"
+            android:textColor="@color/text_color_secondary"
+            app:startIconDrawable="@drawable/at_stroke_rounded">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/displayEmailEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:maxLength="50"
+                android:focusable="false"
+                android:clickable="false"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

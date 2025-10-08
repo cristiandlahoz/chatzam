@@ -3,6 +3,7 @@ package com.wornux.chatzam.ui.viewmodels;
 import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.services.ChatService;
 import com.wornux.chatzam.services.UserService;
@@ -21,6 +22,7 @@ public class ChatCreationViewModel extends BaseViewModel {
     private final UserService userService;
     private final ChatService chatService;
     private final MutableLiveData<List<User>> availableUsers = new MutableLiveData<>();
+    private final LiveData<List<Chat>> existingChats;
     private final MutableLiveData<User> selectedUsers = new MutableLiveData<>();
     private final AuthenticationManager authManager;
 
@@ -32,12 +34,23 @@ public class ChatCreationViewModel extends BaseViewModel {
         this.userService = userService;
         this.chatService = chatService;
         this.authManager = authManager;
+
+        String currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            existingChats = chatService.getChats(currentUserId);
+        } else {
+            existingChats = new MutableLiveData<>(Collections.emptyList());
+        }
         loadUsers();
     }
 
 
     public LiveData<List<User>> getAvailableUsers() {
         return availableUsers;
+    }
+
+    public LiveData<List<Chat>> getExistingChats() {
+        return existingChats;
     }
 
     public LiveData<User> getSelectedUsers() {

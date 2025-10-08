@@ -7,7 +7,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import androidx.lifecycle.MediatorLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.databinding.FragmentChatCreationBinding;
 import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.ui.adapters.SingleUserSelectionAdapter;
@@ -15,6 +17,10 @@ import com.wornux.chatzam.ui.base.BaseFragment;
 import com.wornux.chatzam.ui.viewmodels.ChatCreationViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 import com.wornux.chatzam.services.AuthenticationManager;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 @AndroidEntryPoint
@@ -77,9 +83,23 @@ public class ChatCreationFragment extends BaseFragment<ChatCreationViewModel> {
 
     @Override
     protected void setupObservers() {
-        viewModel.getAvailableUsers().observe(getViewLifecycleOwner(), users -> {
-            if (users != null) {
-                userSelectionAdapter.updateUsers(users);
+        MediatorLiveData<Object> mediator = new MediatorLiveData<>();
+
+        mediator.addSource(viewModel.getAvailableUsers(), value -> mediator.setValue(new Object()));
+        mediator.addSource(viewModel.getExistingChats(), value -> mediator.setValue(new Object()));
+
+        mediator.observe(getViewLifecycleOwner(), o -> {
+            List<User> users = viewModel.getAvailableUsers().getValue();
+            List<Chat> chats = viewModel.getExistingChats().getValue();
+            String currentUserId = authenticationManager.getCurrentUser().getUid();
+
+            if (users != null && chats != null && currentUserId != null) {
+                List<String> existingChatIds = chats.stream()
+                        .filter(chat -> !chat.isGroup())
+                        .map(Chat::getChatId)
+                        .collect(Collectors.toList());
+
+                userSelectionAdapter.updateUsers(users, currentUserId, existingChatIds);
             }
         });
 

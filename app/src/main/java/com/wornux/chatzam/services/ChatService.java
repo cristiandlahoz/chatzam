@@ -37,7 +37,13 @@ public class ChatService {
             throw new IllegalArgumentException("Individual chat must have exactly 2 participants");
         }
 
-        String chatId = UUID.randomUUID().toString();
+        StringBuilder canonicalId = new StringBuilder();
+        for (String id :
+                participants) {
+            canonicalId.append(id);
+        }
+
+        String chatId = canonicalId.toString();
         List<String> participantList = new ArrayList<>(participants);
 
         return createParticipantDetailsMap(participantList)

@@ -104,6 +104,7 @@ public class UserFragment extends BaseFragment<UserProfileViewModel> {
         if (binding.displayNameEditText.getText() == null ||
                 binding.displayNameEditText.getText().toString().isEmpty()) {
             binding.displayNameEditText.setText(profile.getDisplayName());
+            binding.displayEmailEditText.setText(profile.getEmail());
             setImage(profile.getProfileImageUrl());
         }
     }

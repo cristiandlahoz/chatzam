@@ -70,4 +70,5 @@
     <string name="permission_rationale">Storage permission is needed to select images</string>
     <string name="image_load_error">Failed to load image</string>
     <string name="retry">Retry</string>
+    <string name="display_email">Display Email</string>
 </resources>
