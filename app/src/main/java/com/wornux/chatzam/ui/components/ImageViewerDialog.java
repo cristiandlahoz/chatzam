@@ -1,4 +1,4 @@
-package com.wornux.chatzam.ui.fragments;
+package com.wornux.chatzam.ui.components;
 
 import android.app.Dialog;
 import android.graphics.drawable.Drawable;

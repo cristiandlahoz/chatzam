@@ -1,4 +1,4 @@
-package com.wornux.chatzam.ui.fragments
+package com.wornux.chatzam.ui.components
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -44,7 +44,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.wornux.chatzam.R
 
-class FabHomeFragment : Fragment() {
+class FabHomeComponent : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -105,7 +105,11 @@ class FabHomeFragment : Fragment() {
         onToggle: () -> Unit
     ) {
         ToggleFloatingActionButton(
-            modifier = Modifier.toggleButtonModifier(fabMenuExpanded, fabVisible, focusRequester),
+            modifier = Modifier.toggleButtonModifier(
+                fabMenuExpanded,
+                fabVisible,
+                focusRequester
+            ),
             checked = fabMenuExpanded,
             onCheckedChange = { onToggle() }
         ) {
@@ -131,7 +135,8 @@ class FabHomeFragment : Fragment() {
         this
             .semantics {
                 traversalIndex = -1f
-                stateDescription = if (fabMenuExpanded) "Expanded" else "Collapsed"
+                stateDescription =
+                    if (fabMenuExpanded) "Expanded" else "Collapsed"
                 contentDescription = "Toggle menu"
             }
             .animateFloatingActionButton(
@@ -151,7 +156,10 @@ class FabHomeFragment : Fragment() {
             Icons.Filled.Contacts to "New chat"
         )
 
-    private fun handleMenuItemClick(navController: NavController?, label: String) {
+    private fun handleMenuItemClick(
+        navController: NavController?,
+        label: String
+    ) {
         when (label) {
             "New group" -> navController?.navigate(R.id.nav_group_creation)
             "New chat" -> navController?.navigate(R.id.nav_chat_creation)
