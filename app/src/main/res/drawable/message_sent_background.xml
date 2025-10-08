@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Tail (colita) redondeada -->
+    <item
+        android:right="0dp"
+        android:bottom="0dp">
+        <rotate
+            android:fromDegrees="-45"
+            android:pivotX="100%"
+            android:pivotY="100%">
+            <shape android:shape="rectangle">
+                <solid android:color="?attr/colorPrimary" />
+                <corners android:radius="0dp" />
+                <size
+                    android:width="12dp"
+                    android:height="14dp" />
+            </shape>
+        </rotate>
+    </item>
+
+    <!-- Burbuja principal -->
+    <item
+        android:left="0dp"
+        android:right="8dp"
+        android:top="0dp"
+        android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/colorPrimary" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+</layer-list>

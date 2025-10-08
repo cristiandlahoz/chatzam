@@ -24,9 +24,12 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/dark_surface_variant"
+        android:background="@drawable/message_received_background"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
 
         <ImageView
             android:id="@+id/messageImage"
