@@ -1,6 +1,7 @@
 package com.wornux.chatzam.services;
 
 import android.content.SharedPreferences;
+import com.wornux.chatzam.utils.PreferenceConstants;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,12 +16,37 @@ public class SettingsService {
     this.preferences = preferences;
   }
 
-  public void saveBoolean(String key, boolean value) {
+  public boolean getPushNotificationsPreference() {
+    return preferences.getBoolean(
+        PreferenceConstants.KEY_PUSH_NOTIFICATIONS, PreferenceConstants.DEFAULT_PUSH_NOTIFICATIONS);
+  }
+
+  public void savePushNotificationsPreference(boolean enabled) {
+    saveBoolean(PreferenceConstants.KEY_PUSH_NOTIFICATIONS, enabled);
+  }
+
+  public boolean getMessageSoundsPreference() {
+    return getBoolean(
+        PreferenceConstants.KEY_MESSAGE_SOUNDS, PreferenceConstants.DEFAULT_MESSAGE_SOUNDS);
+  }
+
+  public void saveMessageSoundsPreference(boolean enabled) {
+    saveBoolean(PreferenceConstants.KEY_MESSAGE_SOUNDS, enabled);
+  }
+
+  public boolean getShowOnlineStatusPreference() {
+      return getBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, PreferenceConstants.DEFAULT_SHOW_ONLINE_STATUS);
+  }
+
+  public void saveShowOnlineStatusPreference(boolean enabled) {
+      saveBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, enabled);
+  }
+
+  private void saveBoolean(String key, boolean value) {
     preferences.edit().putBoolean(key, value).apply();
   }
 
-  public boolean getBoolean(String key, boolean defaultValue) {
+  private boolean getBoolean(String key, boolean defaultValue) {
     return preferences.getBoolean(key, defaultValue);
   }
-
 }

@@ -41,7 +41,6 @@
     <string name="notifications">Notifications</string>
     <string name="privacy">Privacy</string>
     <string name="show_online_status">Show Online Status</string>
-    <string name="read_receipts">Read Receipts</string>
     <string name="notification_settings_updated">Notification settings updated</string>
     <string name="sound_settings_updated">Sound settings updated</string>
     <string name="privacy_settings_updated">Privacy settings updated</string>
