@@ -1,5 +1,6 @@
 package com.wornux.chatzam.data.entities;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.PropertyName;
 import com.wornux.chatzam.data.enums.MessageType;
@@ -53,15 +54,7 @@ public class Message {
     @Getter(onMethod_ = {@PropertyName("timestamp")})
     @Setter(onMethod_ = {@PropertyName("timestamp")})
     @Builder.Default
-    private Instant timestamp = Instant.now();
-    
-    @Getter(onMethod_ = {@PropertyName("is_delivered")})
-    @Setter(onMethod_ = {@PropertyName("is_delivered")})
-    private boolean isDelivered;
-    
-    @Getter(onMethod_ = {@PropertyName("is_read")})
-    @Setter(onMethod_ = {@PropertyName("is_read")})
-    private boolean isRead;
+    private Timestamp timestamp = Timestamp.now();
     
     @Getter(onMethod_ = {@PropertyName("read_by")})
     @Setter(onMethod_ = {@PropertyName("read_by")})
@@ -71,7 +64,7 @@ public class Message {
     @Getter(onMethod_ = {@PropertyName("media_url")})
     @Setter(onMethod_ = {@PropertyName("media_url")})
     private String mediaUrl;
-
+    
     @Exclude
     public boolean hasMedia() {
         return mediaUrl != null && !mediaUrl.trim().isEmpty();

@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.wornux.chatzam.databinding.FragmentChatBinding;
 import com.wornux.chatzam.data.entities.Message;
 import com.wornux.chatzam.ui.adapters.MessageAdapter;
 import com.wornux.chatzam.ui.base.BaseFragment;
+import com.wornux.chatzam.ui.components.ImageViewerDialog;
 import com.wornux.chatzam.ui.viewmodels.ChatViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -84,22 +86,12 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
     binding.messagesRecyclerView.setAdapter(messageAdapter);
 
     messageAdapter.setOnMessageClickListener(
-        new MessageAdapter.OnMessageClickListener() {
-          @Override
-          public void onMessageClick(Message message) {
-            if (!viewModel.isMessageFromCurrentUser(message) && !message.isRead()) {
-              viewModel.markMessageAsRead(message.getMessageId());
-            }
-          }
-
-          @Override
-          public void onImageClick(Message message) {
-            if (message.hasMedia()) {
-              ImageViewerDialog dialog = ImageViewerDialog.newInstance(message.getMediaUrl());
-              dialog.show(getParentFragmentManager(), "ImageViewerDialog");
-            }
-          }
-        });
+            message -> {
+              if (message.hasMedia()) {
+                ImageViewerDialog dialog = ImageViewerDialog.newInstance(message.getMediaUrl());
+                dialog.show(getParentFragmentManager(), "ImageViewerDialog");
+              }
+            });
   }
 
   @Override
@@ -217,7 +209,7 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
         ? Manifest.permission.READ_MEDIA_IMAGES
         : Manifest.permission.READ_EXTERNAL_STORAGE;
 
-    if (ContextCompat.checkSelfPermission(requireContext(), permission) 
+    if (ContextCompat.checkSelfPermission(requireContext(), permission)
         == PackageManager.PERMISSION_GRANTED) {
       openLegacyImagePicker();
     } else {
@@ -226,8 +218,8 @@ public class ChatFragment extends BaseFragment<ChatViewModel> {
   }
 
   private void openLegacyImagePicker() {
-    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-    intent.setType("image/*");
+    Intent intent = new Intent(Intent.ACTION_PICK);
+    intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
     legacyPickerLauncher.launch(intent);
   }
 

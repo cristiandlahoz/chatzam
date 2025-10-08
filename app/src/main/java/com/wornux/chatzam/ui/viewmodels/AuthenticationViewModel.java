@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.data.enums.UserStatus;
+import com.wornux.chatzam.services.FCMTokenService;
 import com.wornux.chatzam.services.UserService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -15,6 +16,7 @@ import javax.inject.Inject;
 public class AuthenticationViewModel extends BaseViewModel {
     
     private final AuthenticationManager authManager;
+    private final FCMTokenService tokenService;
     private final UserService userService;
     
     private final MutableLiveData<FirebaseUser> _loginResult = new MutableLiveData<>();
@@ -22,9 +24,11 @@ public class AuthenticationViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> _isLoginMode = new MutableLiveData<>(true);
     
     @Inject
-    public AuthenticationViewModel(AuthenticationManager authManager, 
+    public AuthenticationViewModel(AuthenticationManager authManager,
+                                 FCMTokenService tokenService,
                                  UserService userService) {
         this.authManager = authManager;
+        this.tokenService = tokenService;
         this.userService = userService;
     }
     
@@ -52,6 +56,7 @@ public class AuthenticationViewModel extends BaseViewModel {
                 .addOnSuccessListener(authResult -> {
                     setLoading(false);
                     _loginResult.setValue(authResult.getUser());
+                    tokenService.registerToken();
                 })
                 .addOnFailureListener(exception -> {
                     setLoading(false);
@@ -94,13 +99,14 @@ public class AuthenticationViewModel extends BaseViewModel {
                 .addOnSuccessListener(v -> {
                     setLoading(false);
                     _registrationResult.setValue(firebaseUser);
+                    tokenService.registerToken();
                 })
                 .addOnFailureListener(exception -> {
                     setLoading(false);
                     setError("Failed to create user profile: " + exception.getMessage());
                 });
     }
-    
+
     private boolean isValidInput(String email, String password) {
         if (email == null || email.trim().isEmpty()) {
             setError("Email is required");

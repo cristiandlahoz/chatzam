@@ -55,26 +55,4 @@ public class MessageRepository extends BaseRepository<Message> {
         return messagesLiveData;
     }
     
-    public Task<Void> markAsRead(String chatId, String messageId) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("is_read", true);
-        updates.put("is_delivered", true);
-        
-        return db.collection(CHATS_COLLECTION)
-                .document(chatId)
-                .collection(MESSAGES_SUBCOLLECTION)
-                .document(messageId)
-                .update(updates);
-    }
-    
-    public Task<Void> markAsDelivered(String chatId, String messageId) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("is_delivered", true);
-        
-        return db.collection(CHATS_COLLECTION)
-                .document(chatId)
-                .collection(MESSAGES_SUBCOLLECTION)
-                .document(messageId)
-                .update(updates);
-    }
 }

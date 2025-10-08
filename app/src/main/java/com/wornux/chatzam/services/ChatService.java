@@ -2,14 +2,14 @@ package com.wornux.chatzam.services;
 
 import androidx.lifecycle.LiveData;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.wornux.chatzam.data.repositories.ChatRepository;
 import com.wornux.chatzam.data.repositories.UserRepository;
 import com.wornux.chatzam.data.entities.Chat;
 import com.wornux.chatzam.data.entities.Message;
-import com.wornux.chatzam.data.entities.UserDTO;
+import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.enums.ChatType;
 
-import java.time.Instant;
 import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -93,7 +93,7 @@ public class ChatService {
                             .groupName(groupName)
                             .createdBy(createdBy)
                             .participantDetails(task.getResult())
-                            .createdAt(Instant.now())
+                            .createdAt(Timestamp.now())
                             .unreadCount(0)
                             .build();
 
@@ -146,12 +146,12 @@ public class ChatService {
         return removeMemberFromGroup(chatId, userId);
     }
 
-    private Task<Map<String, UserDTO>> createParticipantDetailsMap(List<String> participantIds) {
+    private Task<Map<String, UserDto>> createParticipantDetailsMap(List<String> participantIds) {
         return userRepository.getUserDTOsByIds(participantIds)
                 .continueWith(task -> {
-                    Map<String, UserDTO> participantDetails = new HashMap<>();
+                    Map<String, UserDto> participantDetails = new HashMap<>();
                     if (task.isSuccessful() && task.getResult() != null) {
-                        for (UserDTO user : task.getResult()) {
+                        for (UserDto user : task.getResult()) {
                             participantDetails.put(user.getUserId(), user);
                         }
                     }

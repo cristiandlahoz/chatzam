@@ -51,6 +51,11 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
         groupUserSelectionAdapter.setOnUserSelectionListener(new GroupUserSelectionAdapter.OnUserSelectionListener() {
             @Override
             public void onUserSelected(User user) {
+                if (viewModel.getSelectedUsers().getValue() != null && 
+                    viewModel.getSelectedUsers().getValue().size() >= 9) {
+                    showSnackbar("Maximum 10 participants allowed (including you)");
+                    return;
+                }
                 viewModel.addUserToSelection(user);
                 selectedUsersAdapter.addUser(user);
             }

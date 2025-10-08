@@ -6,9 +6,10 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.Query;
 import com.wornux.chatzam.data.entities.Chat;
-import com.wornux.chatzam.data.entities.UserDTO;
+import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.repositories.base.BaseRepository;
 import com.wornux.chatzam.services.FirebaseManager;
+import com.wornux.chatzam.utils.CryptoUtils;
 
 import java.util.*;
 import javax.inject.Inject;
@@ -85,7 +86,7 @@ public class ChatRepository extends BaseRepository<Chat> {
         return updateDocument(chatId, updates);
     }
 
-    public Task<Void> updateSingleParticipantDetails(String chatId, String userId, UserDTO userDTO) {
+    public Task<Void> updateSingleParticipantDetails(String chatId, String userId, UserDto userDTO) {
         Map<String, Object> updates = new HashMap<>();
         updates.put(userId, userDTO);
         return updateDocument(chatId, updates);
@@ -101,5 +102,28 @@ public class ChatRepository extends BaseRepository<Chat> {
                     }
                     return new ArrayList<>();
                 });
+    }
+    
+    public Task<String> getOrCreateEncryptionKey(String chatId) {
+        return getChatById(chatId).continueWithTask(task -> {
+            Chat chat = task.getResult();
+            
+            if (chat != null && chat.getEncryptionKey() != null && !chat.getEncryptionKey().isEmpty()) {
+                return com.google.android.gms.tasks.Tasks.forResult(chat.getEncryptionKey());
+            }
+            
+            String newKey = CryptoUtils.generateEncryptionKey();
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("encryption_key", newKey);
+            
+            return updateDocument(chatId, updates).continueWith(updateTask -> newKey);
+        });
+    }
+    
+    public Task<String> getEncryptionKey(String chatId) {
+        return getChatById(chatId).continueWith(task -> {
+            Chat chat = task.getResult();
+            return (chat != null) ? chat.getEncryptionKey() : null;
+        });
     }
 }

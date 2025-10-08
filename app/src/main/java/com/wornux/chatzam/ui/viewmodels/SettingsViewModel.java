@@ -17,8 +17,7 @@ public class SettingsViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> pushNotifications = new MutableLiveData<>();
     private final MutableLiveData<Boolean> messageSounds = new MutableLiveData<>();
     private final MutableLiveData<Boolean> showOnlineStatus = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> readReceipts = new MutableLiveData<>();
-    
+
     @Inject
     public SettingsViewModel(SettingsService settingsService) {
         this.settingsService = settingsService;
@@ -37,46 +36,25 @@ public class SettingsViewModel extends BaseViewModel {
         return showOnlineStatus;
     }
     
-    public LiveData<Boolean> getReadReceipts() {
-        return readReceipts;
-    }
-    
     private void loadSettings() {
-        pushNotifications.setValue(settingsService.getBoolean(
-            PreferenceConstants.KEY_PUSH_NOTIFICATIONS, 
-            PreferenceConstants.DEFAULT_PUSH_NOTIFICATIONS));
-        
-        messageSounds.setValue(settingsService.getBoolean(
-            PreferenceConstants.KEY_MESSAGE_SOUNDS, 
-            PreferenceConstants.DEFAULT_MESSAGE_SOUNDS));
-        
-        showOnlineStatus.setValue(settingsService.getBoolean(
-            PreferenceConstants.KEY_SHOW_ONLINE_STATUS, 
-            PreferenceConstants.DEFAULT_SHOW_ONLINE_STATUS));
-        
-        readReceipts.setValue(settingsService.getBoolean(
-            PreferenceConstants.KEY_READ_RECEIPTS, 
-            PreferenceConstants.DEFAULT_READ_RECEIPTS));
+        pushNotifications.setValue(settingsService.getPushNotificationsPreference());
+        messageSounds.setValue(settingsService.getMessageSoundsPreference());
+        showOnlineStatus.setValue(settingsService.getShowOnlineStatusPreference());
     }
     
     public void updatePushNotifications(boolean enabled) {
         pushNotifications.setValue(enabled);
-        settingsService.saveBoolean(PreferenceConstants.KEY_PUSH_NOTIFICATIONS, enabled);
+        settingsService.savePushNotificationsPreference(enabled);
     }
     
     public void updateMessageSounds(boolean enabled) {
         messageSounds.setValue(enabled);
-        settingsService.saveBoolean(PreferenceConstants.KEY_MESSAGE_SOUNDS, enabled);
+        settingsService.saveMessageSoundsPreference(enabled);
     }
     
     public void updateShowOnlineStatus(boolean enabled) {
         showOnlineStatus.setValue(enabled);
-        settingsService.saveBoolean(PreferenceConstants.KEY_SHOW_ONLINE_STATUS, enabled);
+        settingsService.saveShowOnlineStatusPreference(enabled);
     }
     
-    public void updateReadReceipts(boolean enabled) {
-        readReceipts.setValue(enabled);
-        settingsService.saveBoolean(PreferenceConstants.KEY_READ_RECEIPTS, enabled);
-    }
-
 }

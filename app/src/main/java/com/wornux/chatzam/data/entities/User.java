@@ -1,11 +1,9 @@
 package com.wornux.chatzam.data.entities;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.PropertyName;
 import com.wornux.chatzam.data.enums.UserStatus;
 import lombok.*;
-
-import java.time.Instant;
-import java.util.Date;
 
 @Builder
 @NoArgsConstructor
@@ -33,14 +31,14 @@ public class User {
     
     @Getter(onMethod_ = {@PropertyName("last_seen")})
     @Setter(onMethod_ = {@PropertyName("last_seen")})
-    private Instant lastSeen;
+    private Timestamp lastSeen;
     
     @Getter(onMethod_ = {@PropertyName("status")})
     @Setter(onMethod_ = {@PropertyName("status")})
     private UserStatus status;
 
     public void updateLastSeen() {
-        this.lastSeen = Instant.now();
+        this.lastSeen = Timestamp.now();
     }
 
     public void setOnlineStatus(boolean isOnline) {

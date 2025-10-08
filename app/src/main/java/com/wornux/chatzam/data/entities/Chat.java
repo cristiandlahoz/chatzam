@@ -1,7 +1,9 @@
 package com.wornux.chatzam.data.entities;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.PropertyName;
+import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.enums.ChatType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.Instant;
 import java.util.*;
 
 @SuperBuilder
@@ -29,7 +30,7 @@ public sealed class Chat permits GroupChat {
     
     @Getter(onMethod_ = {@PropertyName("participant_details")})
     @Setter(onMethod_ = {@PropertyName("participant_details")})
-    private Map<String, UserDTO> participantDetails;
+    private Map<String, UserDto> participantDetails;
     
     @Getter(onMethod_ = {@PropertyName("chat_type")})
     @Setter(onMethod_ = {@PropertyName("chat_type")})
@@ -41,7 +42,7 @@ public sealed class Chat permits GroupChat {
     
     @Getter(onMethod_ = {@PropertyName("last_message_timestamp")})
     @Setter(onMethod_ = {@PropertyName("last_message_timestamp")})
-    private Instant lastMessageTimestamp;
+    private Timestamp lastMessageTimestamp;
     
     @Getter(onMethod_ = {@PropertyName("unread_count")})
     @Setter(onMethod_ = {@PropertyName("unread_count")})
@@ -62,7 +63,11 @@ public sealed class Chat permits GroupChat {
     @Getter(onMethod_ = {@PropertyName("created_at")})
     @Setter(onMethod_ = {@PropertyName("created_at")})
     @Builder.Default
-    private Instant createdAt = Instant.now();
+    private Timestamp createdAt = Timestamp.now();
+    
+    @Getter(onMethod_ = {@PropertyName("encryption_key")})
+    @Setter(onMethod_ = {@PropertyName("encryption_key")})
+    private String encryptionKey;
 
     @Exclude
     public String getLastMessageContent() {
@@ -82,7 +87,7 @@ public sealed class Chat permits GroupChat {
         
         String otherUserId = getOtherParticipant(currentUserId);
         if (otherUserId != null && participantDetails != null) {
-            UserDTO otherUser = participantDetails.get(otherUserId);
+            UserDto otherUser = participantDetails.get(otherUserId);
             if (otherUser != null && otherUser.getDisplayName() != null) {
                 return otherUser.getDisplayName();
             }

@@ -5,8 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.wornux.chatzam.R;
@@ -45,9 +43,6 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
         .getShowOnlineStatus()
         .observe(getViewLifecycleOwner(), binding.onlineStatusSwitch::setChecked);
 
-    viewModel
-        .getReadReceipts()
-        .observe(getViewLifecycleOwner(), binding.readReceiptsSwitch::setChecked);
   }
 
   @Override
@@ -67,12 +62,6 @@ public class SettingsFragment extends BaseFragment<SettingsViewModel> {
     binding.onlineStatusSwitch.setOnCheckedChangeListener(
         (buttonView, isChecked) -> {
           viewModel.updateShowOnlineStatus(isChecked);
-          showSnackbar(getString(R.string.privacy_settings_updated));
-        });
-
-    binding.readReceiptsSwitch.setOnCheckedChangeListener(
-        (buttonView, isChecked) -> {
-          viewModel.updateReadReceipts(isChecked);
           showSnackbar(getString(R.string.privacy_settings_updated));
         });
 

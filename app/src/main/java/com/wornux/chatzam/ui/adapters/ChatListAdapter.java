@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.wornux.chatzam.R;
-import com.wornux.chatzam.data.entities.UserDTO;
+import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.databinding.ItemChatBinding;
 import com.wornux.chatzam.data.entities.Chat;
 import lombok.Setter;
@@ -88,7 +88,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
       } else {
         String otherUserId = chat.getOtherParticipant(currentUserId);
         if (otherUserId != null && chat.getParticipantDetails() != null) {
-          UserDTO otherUser =
+          UserDto otherUser =
               chat.getParticipantDetails().get(otherUserId);
           if (otherUser != null && otherUser.getProfileImageUrl() != null 
               && !otherUser.getProfileImageUrl().isEmpty()) {
@@ -117,7 +117,7 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
     private void setupTimestamp(Chat chat) {
       if (chat.getLastMessageTimestamp() != null) {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        binding.timestampText.setText(timeFormat.format(chat.getLastMessageTimestamp()));
+        binding.timestampText.setText(timeFormat.format(chat.getLastMessageTimestamp().toDate()));
         binding.timestampText.setVisibility(View.VISIBLE);
       } else {
         binding.timestampText.setVisibility(View.GONE);
@@ -164,7 +164,6 @@ public class ChatListAdapter extends ListAdapter<Chat, ChatListAdapter.ChatViewH
         public boolean areContentsTheSame(@NonNull Chat oldItem, @NonNull Chat newItem) {
           return Objects.equals(oldItem.getGroupName(), newItem.getGroupName())
               && Objects.equals(oldItem.getLastMessageContent(), newItem.getLastMessageContent())
-//                  && Objects.equals(oldItem.getDisplayName(currentUserId), newItem.getDisplayName(currentUserId))
               && Objects.equals(
                   oldItem.getLastMessageTimestamp(), newItem.getLastMessageTimestamp())
               && oldItem.getUnreadCount() == newItem.getUnreadCount();

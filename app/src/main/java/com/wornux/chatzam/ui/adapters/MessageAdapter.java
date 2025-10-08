@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
@@ -29,8 +30,6 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
     private String currentUserId;
 
     public interface OnMessageClickListener {
-        void onMessageClick(Message message);
-
         void onImageClick(Message message);
     }
 
@@ -149,24 +148,16 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
             } else {
                 getMessageImageView().setVisibility(View.GONE);
                 getMessageTextView().setVisibility(View.VISIBLE);
-                ((android.widget.TextView) getMessageTextView()).setText(message.getContent());
+                ((TextView) getMessageTextView()).setText(message.getContent());
                 getMessageImageView().setOnClickListener(null);
             }
 
             if (message.getTimestamp() != null) {
-                ((android.widget.TextView) getTimestampTextView()).setText(timeFormat.format(message.getTimestamp()));
+                ((TextView) getTimestampTextView()).setText(timeFormat.format(message.getTimestamp().toDate()));
             }
 
-            setupClickListeners(message, listener);
         }
 
-        private void setupClickListeners(Message message, OnMessageClickListener listener) {
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onMessageClick(message);
-                }
-            });
-        }
     }
 
     private static final DiffUtil.ItemCallback<Message> DIFF_CALLBACK =
@@ -179,9 +170,7 @@ public class MessageAdapter extends ListAdapter<Message, RecyclerView.ViewHolder
                 @Override
                 public boolean areContentsTheSame(@NonNull Message oldItem, @NonNull Message newItem) {
                     return Objects.equals(oldItem.getContent(), newItem.getContent())
-                            && Objects.equals(oldItem.getTimestamp(), newItem.getTimestamp())
-                            && oldItem.isRead() == newItem.isRead()
-                            && oldItem.isDelivered() == newItem.isDelivered();
+                            && Objects.equals(oldItem.getTimestamp(), newItem.getTimestamp());
                 }
             };
 

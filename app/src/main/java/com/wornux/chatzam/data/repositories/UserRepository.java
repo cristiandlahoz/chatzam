@@ -8,7 +8,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.wornux.chatzam.data.entities.User;
-import com.wornux.chatzam.data.entities.UserDTO;
+import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.repositories.base.BaseRepository;
 import com.wornux.chatzam.services.FirebaseManager;
 
@@ -86,7 +86,7 @@ public class UserRepository extends BaseRepository<User> {
         return userLiveData;
     }
 
-    public Task<List<UserDTO>> getUserDTOsByIds(List<String> userIds) {
+    public Task<List<UserDto>> getUserDTOsByIds(List<String> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return Tasks.forResult(new ArrayList<>());
         }
@@ -97,12 +97,12 @@ public class UserRepository extends BaseRepository<User> {
                 .whereIn(FieldPath.documentId(), limitedUserIds)
                 .get()
                 .continueWith(task -> {
-                    List<UserDTO> userDTOs = new ArrayList<>();
+                    List<UserDto> userDtos = new ArrayList<>();
                     if (task.isSuccessful() && task.getResult() != null) {
                         for (DocumentSnapshot doc : task.getResult().getDocuments()) {
                             User user = doc.toObject(User.class);
                             if (user != null) {
-                                userDTOs.add(UserDTO.builder()
+                                userDtos.add(UserDto.builder()
                                         .userId(user.getUserId())
                                         .displayName(user.getDisplayName())
                                         .profileImageUrl(user.getProfileImageUrl())
@@ -112,7 +112,7 @@ public class UserRepository extends BaseRepository<User> {
                             }
                         }
                     }
-                    return userDTOs;
+                    return userDtos;
                 });
     }
 

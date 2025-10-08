@@ -8,7 +8,7 @@ import com.wornux.chatzam.data.repositories.UserRepository;
 import com.wornux.chatzam.data.repositories.StorageRepository;
 import com.wornux.chatzam.data.repositories.ChatRepository;
 import com.wornux.chatzam.data.entities.User;
-import com.wornux.chatzam.data.entities.UserDTO;
+import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.entities.Chat;
 
 import java.util.ArrayList;
@@ -111,12 +111,13 @@ public class UserService {
     private Task<Void> syncParticipantDetailsInChats(User user) {
         String userId = user.getUserId();
 
-        UserDTO userDTO = new UserDTO(
+        UserDto userDTO = new UserDto(
                 userId,
                 user.getDisplayName(),
                 user.getProfileImageUrl(),
                 user.getLastSeen(),
-                user.isOnline()
+                user.isOnline(),
+                new ArrayList<>()
         );
 
         return chatRepository.getChatsByParticipantTask(userId)
