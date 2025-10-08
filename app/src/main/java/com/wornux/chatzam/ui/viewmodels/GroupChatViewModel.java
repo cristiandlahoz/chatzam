@@ -1,10 +1,12 @@
 package com.wornux.chatzam.ui.viewmodels;
 
+import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import com.wornux.chatzam.services.AuthenticationManager;
 import com.wornux.chatzam.data.entities.User;
+import com.wornux.chatzam.data.repositories.StorageRepository;
 import com.wornux.chatzam.services.ChatService;
 import com.wornux.chatzam.services.UserService;
 import com.wornux.chatzam.ui.base.BaseViewModel;
@@ -22,19 +24,23 @@ public class GroupChatViewModel extends BaseViewModel {
     private final ChatService chatService;
     private final UserService userService;
     private final AuthenticationManager authManager;
+    private final StorageRepository storageRepository;
     
     private final MutableLiveData<String> searchQuery = new MutableLiveData<>("");
     private final MutableLiveData<List<User>> availableUsers = new MutableLiveData<>();
     private final MutableLiveData<List<User>> selectedUsers = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> groupCreated = new MutableLiveData<>();
+    private final MutableLiveData<Uri> groupImageUri = new MutableLiveData<>();
     
     @Inject
     public GroupChatViewModel(ChatService chatService, 
                              UserService userService,
-                             AuthenticationManager authManager) {
+                             AuthenticationManager authManager,
+                             StorageRepository storageRepository) {
         this.chatService = chatService;
         this.userService = userService;
         this.authManager = authManager;
+        this.storageRepository = storageRepository;
         
         loadAvailableUsers();
     }
@@ -54,6 +60,14 @@ public class GroupChatViewModel extends BaseViewModel {
     public LiveData<Boolean> canCreateGroup() {
         return Transformations.map(selectedUsers, users -> 
             users != null && users.size() >= 2);
+    }
+    
+    public LiveData<Uri> getGroupImageUri() {
+        return groupImageUri;
+    }
+    
+    public void setGroupImageUri(Uri imageUri) {
+        groupImageUri.setValue(imageUri);
     }
     
     public void searchUsers(String query) {
@@ -123,6 +137,7 @@ public class GroupChatViewModel extends BaseViewModel {
     public void createGroup(String groupName) {
         String currentUserId = getCurrentUserId();
         List<User> selected = selectedUsers.getValue();
+        Uri imageUri = groupImageUri.getValue();
         
         if (currentUserId == null) {
             setError("User not logged in");
@@ -147,10 +162,38 @@ public class GroupChatViewModel extends BaseViewModel {
         }
         
         setLoading(true);
-        chatService.createGroupChat(groupName.trim(), participantIds, currentUserId)
+        
+        if (imageUri != null) {
+            storageRepository.uploadImage(imageUri, "group_" + System.currentTimeMillis())
+                    .addOnSuccessListener(downloadUrl -> {
+                        createGroupWithImage(groupName.trim(), participantIds, currentUserId, downloadUrl.toString());
+                    })
+                    .addOnFailureListener(exception -> {
+                        setLoading(false);
+                        setError("Failed to upload group image: " + exception.getMessage());
+                    });
+        } else {
+            createGroupWithImage(groupName.trim(), participantIds, currentUserId, null);
+        }
+    }
+    
+    private void createGroupWithImage(String groupName, Set<String> participantIds, String currentUserId, String groupImageUrl) {
+        chatService.createGroupChat(groupName, participantIds, currentUserId)
                 .addOnSuccessListener(chatId -> {
-                    setLoading(false);
-                    groupCreated.setValue(true);
+                    if (groupImageUrl != null) {
+                        chatService.updateGroupInfo(chatId, groupName, groupImageUrl)
+                                .addOnSuccessListener(aVoid -> {
+                                    setLoading(false);
+                                    groupCreated.setValue(true);
+                                })
+                                .addOnFailureListener(exception -> {
+                                    setLoading(false);
+                                    setError("Group created but failed to set image: " + exception.getMessage());
+                                });
+                    } else {
+                        setLoading(false);
+                        groupCreated.setValue(true);
+                    }
                 })
                 .addOnFailureListener(exception -> {
                     setLoading(false);

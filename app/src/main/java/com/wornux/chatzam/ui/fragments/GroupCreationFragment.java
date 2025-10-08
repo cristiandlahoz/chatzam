@@ -1,14 +1,22 @@
 package com.wornux.chatzam.ui.fragments;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.bumptech.glide.Glide;
+import com.wornux.chatzam.R;
 import com.wornux.chatzam.databinding.FragmentGroupCreationBinding;
 import com.wornux.chatzam.data.entities.User;
 import com.wornux.chatzam.ui.adapters.SelectedUsersAdapter;
@@ -23,6 +31,23 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
     private FragmentGroupCreationBinding binding;
     private GroupUserSelectionAdapter groupUserSelectionAdapter;
     private SelectedUsersAdapter selectedUsersAdapter;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        if (imageUri != null) {
+                            viewModel.setGroupImageUri(imageUri);
+                        }
+                    }
+                });
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -124,15 +149,19 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
                 showError(error);
             }
         });
+        
+        viewModel.getGroupImageUri().observe(getViewLifecycleOwner(), imageUri -> {
+            if (imageUri != null) {
+                setGroupImage(imageUri);
+            }
+        });
     }
     
     @Override
     protected void setupClickListeners() {
         binding.createGroupButton.setOnClickListener(v -> createGroup());
         
-        binding.groupImageView.setOnClickListener(v -> {
-            showSnackbar("Image selection coming soon!");
-        });
+        binding.groupImageView.setOnClickListener(v -> openImagePicker());
     }
 
     @Override
@@ -150,6 +179,22 @@ public class GroupCreationFragment extends BaseFragment<GroupChatViewModel> {
         }
         
         viewModel.createGroup(groupName);
+    }
+    
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imagePickerLauncher.launch(intent);
+    }
+    
+    private void setGroupImage(Uri imageUri) {
+        if (imageUri == null) {
+            return;
+        }
+        
+        Glide.with(binding.getRoot().getContext())
+                .load(imageUri)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(binding.groupImageView);
     }
     
     @Override
