@@ -104,32 +104,4 @@ public class ChatRepository extends BaseRepository<Chat> {
     return updateDocument(chatId, updates);
   }
 
-  public Task<String> getOrCreateEncryptionKey(String chatId) {
-    return getChatById(chatId)
-        .continueWithTask(
-            task -> {
-              Chat chat = task.getResult();
-
-              if (chat != null
-                  && chat.getEncryptionKey() != null
-                  && !chat.getEncryptionKey().isEmpty()) {
-                return com.google.android.gms.tasks.Tasks.forResult(chat.getEncryptionKey());
-              }
-
-              String newKey = CryptoUtils.generateEncryptionKey();
-              Map<String, Object> updates = new HashMap<>();
-              updates.put("encryption_key", newKey);
-
-              return updateDocument(chatId, updates).continueWith(updateTask -> newKey);
-            });
-  }
-
-  public Task<String> getEncryptionKey(String chatId) {
-    return getChatById(chatId)
-        .continueWith(
-            task -> {
-              Chat chat = task.getResult();
-              return (chat != null) ? chat.getEncryptionKey() : null;
-            });
-  }
 }

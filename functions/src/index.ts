@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import {Chat, Message, UserDTO} from "./types/firestore-types";
+import {Chat, Message} from "./types/firestore-types";
 import {sendNotificationsToRecipients} from "./services/notification-service";
 import {storeFailedNotification, processRetries} from "./services/retry-service";
 import {logInfo, logError, logWarning} from "./utils/logger";
@@ -8,7 +8,7 @@ import {logInfo, logError, logWarning} from "./utils/logger";
 admin.initializeApp();
 
 export const onMessageCreated = functions
-  .region("us-central1")
+  .region("us-east1")
   .firestore
   .document("chats/{chatId}/messages/{messageId}")
   .onCreate(async (snapshot, context) => {
@@ -37,45 +37,47 @@ export const onMessageCreated = functions
 
       const chat = chatDoc.data() as Chat;
 
-      if (!chat.participants || chat.participants.length === 0) {
-        logWarning("Chat has no participants", {chatId, messageId});
+      if (!chat.participant_details) {
+        logWarning("Chat has no participant_details", {chatId, messageId});
         return;
       }
 
-      const recipientIds = chat.participants.filter((id) => id !== message.sender_id);
+      const participantEntries = Object.entries(chat.participant_details);
 
-      if (recipientIds.length === 0) {
-        logInfo("No recipients to notify (sender only)", {chatId, messageId});
+      if (participantEntries.length === 0) {
+        logWarning("Chat participant_details is empty", {chatId, messageId});
         return;
       }
 
-      if (recipientIds.length > 9) {
-        logWarning("Chat has more than 9 recipients, limiting notifications", {
-          chatId,
-          recipientCount: recipientIds.length,
-        });
+      const recipientTokens: string[] = [];
+      const recipientIds: string[] = [];
+      let senderName = message.sender_name;
+
+      for (const [participantId, participantData] of participantEntries) {
+        if (participantId === message.sender_id) {
+          senderName = participantData.display_name || message.sender_name;
+          continue;
+        }
+
+        if (participantData.fcm_tokens && participantData.fcm_tokens.length > 0) {
+          recipientIds.push(participantId);
+          recipientTokens.push(...participantData.fcm_tokens);
+        }
       }
 
-      const userDocs = await admin.firestore()
-        .collection("users")
-        .where(admin.firestore.FieldPath.documentId(), "in", recipientIds.slice(0, 10))
-        .get();
-
-      const recipients: UserDTO[] = userDocs.docs
-        .map((doc) => doc.data() as UserDTO)
-        .filter((user) => user.fcm_tokens && user.fcm_tokens.length > 0);
-
-      if (recipients.length === 0) {
-        logWarning("No recipients with FCM tokens", {chatId, messageId});
+      if (recipientTokens.length === 0) {
+        logInfo("No recipients with FCM tokens", {chatId, messageId});
         return;
       }
 
-      const encryptionKey = chat.encryption_key || "";
-      if (!encryptionKey && message.encrypted_content) {
-        logWarning("Message is encrypted but chat has no encryption key", {chatId, messageId});
-      }
+      logInfo("Extracted FCM tokens from participant_details", {
+        chatId,
+        messageId,
+        recipientCount: recipientIds.length,
+        tokenCount: recipientTokens.length,
+      });
 
-      const result = await sendNotificationsToRecipients(message, recipients, encryptionKey);
+      const result = await sendNotificationsToRecipients(message, chat, recipientTokens, senderName);
 
       if (result.success.length > 0) {
         await snapshot.ref.update({
@@ -90,19 +92,30 @@ export const onMessageCreated = functions
         });
       }
 
-      if (Object.keys(result.failed).length > 0) {
+      if (result.failed.length > 0) {
+        const failedByUser: {[userId: string]: string[]} = {};
+        for (const [participantId, participantData] of participantEntries) {
+          if (participantId === message.sender_id) continue;
+          const userFailedTokens = participantData.fcm_tokens?.filter((token) =>
+            result.failed.includes(token)
+          ) || [];
+          if (userFailedTokens.length > 0) {
+            failedByUser[participantId] = userFailedTokens;
+          }
+        }
+
         await storeFailedNotification(
           messageId,
           chatId,
           recipientIds,
-          result.failed,
+          failedByUser,
           "Initial send partially failed"
         );
 
         logWarning("Some notifications failed, stored for retry", {
           messageId,
           chatId,
-          failedUserCount: Object.keys(result.failed).length,
+          failedTokenCount: result.failed.length,
         });
       }
 
@@ -110,7 +123,7 @@ export const onMessageCreated = functions
         messageId,
         chatId,
         successCount: result.success.length,
-        failedCount: Object.keys(result.failed).length,
+        failedCount: result.failed.length,
       });
     } catch (error) {
       logError("Failed to process message notification", error, {
@@ -121,7 +134,7 @@ export const onMessageCreated = functions
   });
 
 export const processNotificationRetries = functions
-  .region("us-central1")
+  .region("us-east1")
   .pubsub
   .schedule("every 1 minutes")
   .onRun(async () => {

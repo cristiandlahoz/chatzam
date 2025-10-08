@@ -1,54 +1,43 @@
 import * as admin from "firebase-admin";
-import {Message, MessageType, UserDTO} from "../types/firestore-types";
-import {decryptMessageContent} from "./encryption-service";
-import {truncateText} from "../utils/crypto-utils";
-import {logInfo, logError, logWarning} from "../utils/logger";
+import {Message, MessageType, Chat} from "../types/firestore-types";
+import {truncateText} from "../utils/string-utils";
+import {logInfo, logError} from "../utils/logger";
 
 export async function sendNotificationsToRecipients(
   message: Message,
-  recipients: UserDTO[],
-  encryptionKey: string
-): Promise<{success: string[], failed: {[userId: string]: string[]}}> {
+  chat: Chat,
+  tokens: string[],
+  senderName: string
+): Promise<{success: string[], failed: string[]}> {
   const successfulTokens: string[] = [];
-  const failedTokens: {[userId: string]: string[]} = {};
+  const failedTokens: string[] = [];
 
-  const notificationBody = await buildNotificationBody(message, encryptionKey);
+  const notificationBody = buildNotificationBody(message);
 
-  const sendPromises = recipients.map(async (recipient) => {
-    if (!recipient.fcm_tokens || recipient.fcm_tokens.length === 0) {
-      logWarning("Recipient has no FCM tokens", {userId: recipient.user_id});
-      return;
-    }
+  const sendPromises = tokens.map(async (token) => {
+    try {
+      const payload = buildFCMPayload(message, chat, notificationBody, senderName);
+      await admin.messaging().send({
+        token: token,
+        ...payload,
+      });
 
-    for (const token of recipient.fcm_tokens) {
-      try {
-        const payload = buildFCMPayload(message, notificationBody);
-        await admin.messaging().send({
-          token: token,
-          ...payload,
-        });
+      successfulTokens.push(token);
+      logInfo("Notification sent successfully", {
+        messageId: message.message_id,
+        token: token.substring(0, 20) + "...",
+      });
+    } catch (error) {
+      failedTokens.push(token);
 
-        successfulTokens.push(token);
-        logInfo("Notification sent successfully", {
-          userId: recipient.user_id,
-          messageId: message.message_id,
-        });
-      } catch (error) {
-        if (!failedTokens[recipient.user_id]) {
-          failedTokens[recipient.user_id] = [];
-        }
-        failedTokens[recipient.user_id].push(token);
-
-        if (isInvalidToken(error)) {
-          await removeInvalidToken(recipient.user_id, token);
-        }
-
-        logError("Failed to send notification", error, {
-          userId: recipient.user_id,
-          messageId: message.message_id,
-          token: token.substring(0, 20) + "...",
-        });
+      if (isInvalidToken(error)) {
+        await removeInvalidTokenFromParticipants(chat.chat_id, token);
       }
+
+      logError("Failed to send notification", error, {
+        messageId: message.message_id,
+        token: token.substring(0, 20) + "...",
+      });
     }
   });
 
@@ -60,43 +49,35 @@ export async function sendNotificationsToRecipients(
   };
 }
 
-async function buildNotificationBody(message: Message, encryptionKey: string): Promise<string> {
+function buildNotificationBody(message: Message): string {
   if (message.message_type === MessageType.TEXT) {
-    if (message.encrypted_content) {
-      const decrypted = await decryptMessageContent(message.encrypted_content, encryptionKey);
-      if (decrypted) {
-        return truncateText(decrypted, 100);
-      }
-      return "🔒 Sent an encrypted message";
-    }
-    return truncateText(message.content, 100);
+    return truncateText(message.content || "", 100);
   }
 
   switch (message.message_type) {
   case MessageType.IMAGE:
     return "📷 Sent an image";
-  case MessageType.VIDEO:
-    return "🎥 Sent a video";
-  case MessageType.AUDIO:
-    return "🎵 Sent an audio message";
-  case MessageType.DOCUMENT:
-    return "📄 Sent a document";
   default:
     return "Sent a message";
   }
 }
 
-function buildFCMPayload(message: Message, notificationBody: string): Omit<admin.messaging.Message, "token"> {
+function buildFCMPayload(
+  message: Message,
+  chat: Chat,
+  notificationBody: string,
+  senderName: string
+): Omit<admin.messaging.Message, "token"> {
   return {
     notification: {
-      title: message.sender_name,
+      title: senderName,
       body: notificationBody,
     },
     data: {
       chatId: message.chat_id,
       messageId: message.message_id,
       senderId: message.sender_id,
-      senderName: message.sender_name,
+      senderName: senderName,
       messageType: message.message_type,
       timestamp: message.timestamp.toMillis().toString(),
       clickAction: "OPEN_CHAT",
@@ -122,14 +103,35 @@ function isInvalidToken(error: unknown): boolean {
   return false;
 }
 
-async function removeInvalidToken(userId: string, invalidToken: string): Promise<void> {
+async function removeInvalidTokenFromParticipants(chatId: string, invalidToken: string): Promise<void> {
   try {
-    const userRef = admin.firestore().collection("users").doc(userId);
-    await userRef.update({
-      fcm_tokens: admin.firestore.FieldValue.arrayRemove(invalidToken),
-    });
-    logInfo("Removed invalid FCM token", {userId, token: invalidToken.substring(0, 20) + "..."});
+    const chatRef = admin.firestore().collection("chats").doc(chatId);
+    const chatDoc = await chatRef.get();
+
+    if (!chatDoc.exists) {
+      return;
+    }
+
+    const chat = chatDoc.data() as Chat;
+    if (!chat.participant_details) {
+      return;
+    }
+
+    for (const [participantId, participantData] of Object.entries(chat.participant_details)) {
+      if (participantData.fcm_tokens?.includes(invalidToken)) {
+        const updatedTokens = participantData.fcm_tokens.filter((t) => t !== invalidToken);
+        await chatRef.update({
+          [`participant_details.${participantId}.fcm_tokens`]: updatedTokens,
+        });
+        logInfo("Removed invalid FCM token from participant_details", {
+          chatId,
+          participantId,
+          token: invalidToken.substring(0, 20) + "...",
+        });
+        break;
+      }
+    }
   } catch (error) {
-    logError("Failed to remove invalid token", error, {userId});
+    logError("Failed to remove invalid token from participant_details", error, {chatId});
   }
 }

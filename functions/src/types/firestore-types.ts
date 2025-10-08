@@ -2,10 +2,7 @@ import {Timestamp} from "firebase-admin/firestore";
 
 export enum MessageType {
   TEXT = "TEXT",
-  IMAGE = "IMAGE",
-  VIDEO = "VIDEO",
-  AUDIO = "AUDIO",
-  DOCUMENT = "DOCUMENT"
+  IMAGE = "IMAGE"
 }
 
 export enum ChatType {
@@ -20,7 +17,6 @@ export interface Message {
   receiver_id?: string;
   chat_id: string;
   content: string;
-  encrypted_content?: string;
   message_type: MessageType;
   timestamp: Timestamp;
   is_delivered: boolean;
@@ -42,7 +38,6 @@ export interface Chat {
   group_image_url?: string;
   created_by: string;
   created_at: Timestamp;
-  encryption_key: string;
 }
 
 export interface UserDTO {

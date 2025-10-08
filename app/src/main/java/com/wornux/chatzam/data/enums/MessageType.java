@@ -1,5 +1,5 @@
 package com.wornux.chatzam.data.enums;
 
 public enum MessageType {
-    TEXT, IMAGE, VIDEO, AUDIO, DOCUMENT
+    TEXT, IMAGE
 }

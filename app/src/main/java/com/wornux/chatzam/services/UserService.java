@@ -13,7 +13,9 @@ import com.wornux.chatzam.data.dto.UserDto;
 import com.wornux.chatzam.data.entities.Chat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -34,6 +36,23 @@ public class UserService {
     this.userRepository = userRepository;
     this.storageRepository = storageRepository;
     this.chatRepository = chatRepository;
+  }
+
+  public Task<Void> updateFmcTokens(String userId, String token) {
+    return userRepository
+        .updateFmcTOkens(userId, token)
+        .continueWithTask(task -> {
+          if (task.isSuccessful()) {
+            return getUserProfile(userId)
+                .continueWithTask(userTask -> {
+                  if (userTask.isSuccessful() && userTask.getResult() != null) {
+                    return syncParticipantDetailsInChats(userTask.getResult());
+                  }
+                  return Tasks.forResult(null);
+                });
+          }
+          return task;
+        });
   }
 
   public Task<Void> createUserProfile(User user) {
@@ -83,6 +102,11 @@ public class UserService {
   }
 
   private Task<Void> syncParticipantDetailsInChats(User user) {
+    if (user == null || user.getUserId() == null) {
+      Log.w(TAG, "Cannot sync participant details: user is null");
+      return Tasks.forResult(null);
+    }
+
     String userId = user.getUserId();
 
     UserDto userDTO =
